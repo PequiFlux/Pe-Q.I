@@ -1,0 +1,13 @@
+{
+  "$id": "schemas/ValidationMatrix.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["validation_matrix", "global_blocks", "policy_profile_version", "validated_at"],
+  "properties": {
+    "validation_matrix": { "type": "array" },
+    "global_blocks": { "type": "array" },
+    "policy_profile_version": { "type": "string" },
+    "validated_at": { "type": "string", "format": "date-time" }
+  }
+}
+

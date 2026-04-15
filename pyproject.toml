@@ -1,0 +1,21 @@
+[project]
+name = "pequiflux-yard-copilot"
+version = "0.1.0"
+description = "Modular monolith scaffold for the PequiFlux Yard Copilot."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.12,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4,<9.0",
+]
+ui = [
+    "streamlit>=1.44,<2.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
