@@ -1,0 +1,22 @@
+{
+  "$id": "schemas/InterpretedContext.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "parsed_ticket",
+    "exception_assessment",
+    "truth_resolution",
+    "provenance",
+    "needs_human_review",
+    "review_reasons"
+  ],
+  "properties": {
+    "parsed_ticket": { "type": "object" },
+    "exception_assessment": { "type": "object" },
+    "truth_resolution": { "type": "object" },
+    "provenance": { "type": "array" },
+    "needs_human_review": { "type": "boolean" },
+    "review_reasons": { "type": "array" }
+  }
+}
+

@@ -1,0 +1,35 @@
+{
+  "$id": "schemas/DecisionRequest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "scenario_id",
+    "variant",
+    "queue_csv_ref",
+    "ticket_ref",
+    "ticket_content_type",
+    "operator_note",
+    "weather_state",
+    "resource_state",
+    "policy_profile_version",
+    "run_mode"
+  ],
+  "properties": {
+    "request_id": { "type": "string" },
+    "scenario_id": { "type": "string" },
+    "variant": { "type": "string", "enum": ["fifo", "heuristic", "full"] },
+    "queue_csv_ref": { "type": "string" },
+    "ticket_ref": { "type": "string" },
+    "ticket_content_type": {
+      "type": "string",
+      "enum": ["application/pdf", "image/png", "image/jpeg"]
+    },
+    "operator_note": { "type": "string" },
+    "weather_state": { "type": "object" },
+    "resource_state": { "type": "array" },
+    "policy_profile_version": { "type": "string" },
+    "run_mode": { "type": "string", "enum": ["interactive", "benchmark"] }
+  }
+}
+

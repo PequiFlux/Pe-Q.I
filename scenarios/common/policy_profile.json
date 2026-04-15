@@ -1,0 +1,20 @@
+{
+  "version": "v1-demo",
+  "min_operational_capacity_pct": 20,
+  "comfort_capacity_pct": 50,
+  "weights": {
+    "fifo_position": 40,
+    "contract_priority": 30,
+    "resource_fit": 15,
+    "capacity_headroom": 10,
+    "wait_sla_pressure": 5
+  },
+  "tie_breakers": [
+    "higher_score",
+    "lower_queue_position",
+    "earlier_arrival_ts",
+    "lexicographic_truck_id",
+    "lexicographic_destination_id"
+  ]
+}
+

@@ -1,0 +1,27 @@
+{
+  "$id": "schemas/FrontEndPayload.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "scenario_id",
+    "variant",
+    "decision_status",
+    "reason_summary",
+    "driver_message",
+    "operator_actions",
+    "queue_diff",
+    "gemma_visible_summary"
+  ],
+  "properties": {
+    "request_id": { "type": "string" },
+    "scenario_id": { "type": "string" },
+    "variant": { "type": "string" },
+    "decision_status": { "type": "string" },
+    "reason_summary": { "type": "string" },
+    "driver_message": { "type": "object" },
+    "operator_actions": { "type": "array" },
+    "queue_diff": { "type": "array" },
+    "gemma_visible_summary": { "type": "object" }
+  }
+}
