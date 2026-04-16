@@ -21,6 +21,210 @@ Referências:
 - [`app/domain/models.py`](../app/domain/models.py)
 - [`scenarios/schemas/DecisionRequest.schema.json`](../scenarios/schemas/DecisionRequest.schema.json)
 
+### Detalhes de entrada (`DecisionRequest`)
+
+- `queue_csv_ref`: caminho do arquivo `queue.csv` do cenário.
+- `ticket_ref`: caminho/código da evidência documental (PDF, imagem ou texto).
+- `ticket_content_type`: exatamente `application/pdf`, `image/png`, `image/jpeg` ou `text/plain`.
+- `operator_note`: texto auxiliar do operador (obrigatório).
+- `weather_state`: objeto sintético do cenário com precipitação e severidade.
+- `resource_state`: lista de recursos com `resource_id`, `status`, `capacity_pct`, `exposure` e `allowed_vehicle_types`.
+- `variant`: `fifo`, `heuristic` ou `full`.
+- `run_mode`: `interactive` ou `benchmark`.
+- `policy_profile_version`: versão da política aplicada (ex.: `v1-demo`).
+- `request_id` e `scenario_id`: IDs rastreáveis para auditoria.
+
+Regras práticas:
+
+- `ticket_ref` e `ticket_content_type` devem estar presentes sempre que `variant != "fifo"`.
+- `operator_note` não pode ser vazio e é sanitizado (`strip` e compressão de espaços).
+- valores fora de enumeração (tipos/campos permitidos) devem falhar com erro formal, não virar defaults.
+
+### Camada 1 — ticket bruto (documento de entrada)
+
+No ticket bruto (PDF/imagem, na entrada multimodal), o documento precisa conter evidência suficiente para inferir:
+
+- identificação do ticket;
+- identificação do caminhão, quando houver;
+- tipo de veículo;
+- status documental (claro, bloqueado, incompleto, desconhecido);
+- bloqueios documentais explícitos;
+- condição da carga (seca/úmida);
+- indicador de prioridade contratual;
+- restrições de destino, quando houver.
+
+Isso é necessário para cobrir os cenários de submissão com carga úmida, bloqueio documental e prioridade contratual.
+
+### Camada 2 — objeto estruturado (`ParsedTicket`)
+
+O contrato esperado do parser é:
+
+- `ticket_id`
+- `truck_id`
+- `vehicle_type`
+- `document_status`
+- `document_block_flags`
+- `load_condition`
+- `contract_priority_flag`
+- `destination_constraints`
+- `parse_confidence`
+- `ambiguities`
+- `evidence_refs`
+
+Campos críticos obrigatórios para cálculo de decisão: `document_status`, `load_condition`, `vehicle_type` e `parse_confidence`.
+
+`parse_confidence`, `ambiguities` e `evidence_refs` são metadados do parser, não precisam existir no ticket bruto.
+
+### O que o ticket deve conter para viabilizar a decisão
+
+Em termos práticos, o ticket para demo precisa ficar legível com:
+
+- qual é o ticket;
+- qual caminhão ele representa;
+- qual o tipo do veículo;
+- se a documentação está liberada, bloqueada ou incompleta;
+- se há carimbo/flag de bloqueio;
+- se a carga está seca ou úmida;
+- se há prioridade contratual;
+- se existe alguma restrição de destino.
+
+Observações contratuais:
+
+- em cada cenário com ticket, o parse deve resultar em JSON de `ParsedTicket` válido;
+- se o material crítico ficar ambíguo/ilegível (`unknown`, `incomplete` ou baixa confiança), o fluxo não pode decidir automaticamente e deve gerar `REVIEW_REQUIRED`;
+- `document_status` diferente de `clear` ou `document_block_flags` não vazio bloqueia despacho automático do caminhão.
+
+### Nível de entrada do documento
+
+- o arquivo precisa existir localmente no path informado;
+- a whitelist aceita `application/pdf`, `image/png`, `image/jpeg` e `text/plain`;
+- o contrato de parser usa `request_id`, `document_ref`, `content_type` e `candidate_truck_ids` opcional.
+
+Observação prática:
+
+- templates sintéticos robustos para os 10 cenários devem incluir, no mínimo, estes campos visíveis no documento: `TCK-xxx`, `TRK-xxx`, `vehicle_type`, `document_status`, `document_block_flags` quando houver, `load_condition`, `contract_priority_flag` e `destination_constraints`.
+
+### O que o operador pode escrever (`operator_note`)
+
+- texto curto em linguagem natural com contexto operacional adicional;
+- no máximo `2000` caracteres (após normalização);
+- pode incluir indicações de revisão, por exemplo: `revisão`, `conferir` / `conferir manual`;
+- pode registrar exceção observada em campo não capturada no ticket;
+- não pode substituir regra dura (`hard constraints`) nem reverter estado local, nem liberar decisão insegura.
+
+Quando houver conflito entre `operator_note` e fonte de maior hierarquia (estado local/documento), a saída esperada é revisão explícita ou bloqueio, nunca decisão automática.
+
+### Estrutura recomendada do artefato de entrada por cenário
+
+O desenho do pack deve ficar com **ticket/note semiestruturados** (ponto de entrada humano), mas com **fila, clima e recurso estritamente estruturados** (porque alimentam validação determinística, ranking e benchmark).
+
+```text
+DecisionRequest (entrada principal)
+├─ scenario_id
+├─ queue_csv_ref
+├─ ticket_ref
+├─ ticket_content_type
+├─ operator_note
+├─ weather_state
+├─ resource_state
+└─ expected_decision.json (meta de avaliação, não entrada operacional)
+```
+
+#### Exemplo 1 — ticket bruto (ou texto extraído)
+
+Formato recomendado (texto ou imagem com os campos legíveis):
+
+```txt
+TCK-003 | TRK-007
+vehicle_type: bitrem
+document_status: clear
+document_block_flags: []
+load_condition: wet
+contract_priority_flag: false
+destination_constraints: DST-COV-01
+```
+
+Observação:
+- pode haver ruído adicional, mas os campos acima precisam estar legíveis.
+- `document_block_flags` pode ser vazio (`[]`) ou conter flags explícitas (`["seal_broken"]`).
+
+#### Exemplo 2 — operador (`operator_note.txt`)
+
+```txt
+Começou a chover e a moega aberta foi bloqueada. Priorizar rota coberta se houver elegível.
+```
+
+- factual e curta.
+- sem instruções de override.
+- sem narrativa extensa.
+
+#### Exemplo 3 — fila (`queue.csv`)
+
+```csv
+truck_id,arrival_ts,vehicle_type,status,declared_destination
+TRK-001,2026-04-04T08:01:00,bitrem,waiting,DST-OPEN-01
+TRK-002,2026-04-04T08:06:00,truck,waiting,DST-COV-01
+TRK-003,2026-04-04T08:09:00,bitrem,waiting,DST-OPEN-01
+```
+
+Regras canônicas:
+- snapshot FIFO estável por `arrival_ts`;
+- `truck_id`, `arrival_ts`, `status` são indispensáveis no normalizador;
+- `arrival_ts` deve ser parseável em ISO-8601;
+- não pode haver `truck_id` duplicado no mesmo cenário.
+
+#### Exemplo 4 — clima (`weather_state.json`)
+
+```json
+{
+  "precipitation": "rain",
+  "severity": "medium",
+  "timestamp": "2026-04-04T10:18:00"
+}
+```
+
+#### Exemplo 5 — estado de recurso (`resource_state.json`)
+
+```json
+[
+  {
+    "resource_id": "DST-OPEN-01",
+    "status": "blocked",
+    "capacity_pct": 0,
+    "exposure": "open",
+    "resource_type": "hopper",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  },
+  {
+    "resource_id": "DST-COV-01",
+    "status": "available",
+    "capacity_pct": 100,
+    "exposure": "covered",
+    "resource_type": "hopper",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  }
+]
+```
+
+#### Exemplo 6 — baseline de aceitação do cenário (`expected_decision.json`)
+
+```json
+{
+  "expected_status": "PREVIEW_READY",
+  "acceptable_trucks": ["TRK-005"],
+  "acceptable_destinations": ["DST-COV-01"],
+  "required_constraints": ["HC-01"],
+  "fifo_break_expected": true
+}
+```
+
+Esse arquivo não entra no fluxo de decisão, mas é obrigatório para validar se a resposta do cenário foi aceitável no benchmark.
+
+Regra de integridade:
+- IDs sintéticos estáveis e coerentes entre arquivos (`TRK-xxx`, `DST-xxx`, `TCK-xxx`);
+- `truck_id` do ticket deve bater com o da fila;
+- `resource_id` citado em estado do recurso deve bater com os identificadores usados na decisão/expectativa.
+
 ### `InterpretedContext`
 
 Consolida:
@@ -96,4 +300,3 @@ Referências:
 - output estruturado ou erro formal;
 - nenhuma função central altera estado autoritativo por efeito colateral;
 - dado ausente ou inválido nunca vira default silencioso.
-

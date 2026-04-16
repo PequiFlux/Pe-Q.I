@@ -23,7 +23,7 @@
     "ticket_ref": { "type": "string" },
     "ticket_content_type": {
       "type": "string",
-      "enum": ["application/pdf", "image/png", "image/jpeg"]
+      "enum": ["application/pdf", "image/png", "image/jpeg", "text/plain"]
     },
     "operator_note": { "type": "string" },
     "weather_state": { "type": "object" },
@@ -32,4 +32,3 @@
     "run_mode": { "type": "string", "enum": ["interactive", "benchmark"] }
   }
 }
-
