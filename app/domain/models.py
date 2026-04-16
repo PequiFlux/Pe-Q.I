@@ -17,7 +17,7 @@ from app.domain.enums import (
 
 DecisionVariant = Literal["fifo", "heuristic", "full"]
 RunMode = Literal["interactive", "benchmark"]
-TicketContentType = Literal["application/pdf", "image/png", "image/jpeg"]
+TicketContentType = Literal["application/pdf", "image/png", "image/jpeg", "text/plain"]
 
 
 def utc_now() -> datetime:
@@ -290,4 +290,3 @@ class PolicyProfile(StrictModel):
     comfort_capacity_pct: int
     weights: PolicyWeights
     tie_breakers: list[str]
-

@@ -6,7 +6,7 @@ from pathlib import Path
 from app.domain.errors import PequiFluxError
 from app.domain.models import DocumentBundle, TicketContentType
 
-ALLOWED_CONTENT_TYPES: set[str] = {"application/pdf", "image/png", "image/jpeg"}
+ALLOWED_CONTENT_TYPES: set[str] = {"application/pdf", "image/png", "image/jpeg", "text/plain"}
 
 
 def build_document_bundle(
@@ -36,4 +36,3 @@ def build_document_bundle(
         extracted_text=extracted_text,
         candidate_truck_ids=candidate_truck_ids,
     )
-

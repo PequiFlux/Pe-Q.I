@@ -31,6 +31,124 @@ scenarios/
    └─ S10_FIFO_BREAK_JUSTIFIED/
 ```
 
+## Estrutura de dados por cenário
+
+Cada cenário no diretório `scenarios/cases/<SCENARIO>/` deve conter os artefatos de entrada abaixo e a meta de aceitação separada:
+
+```text
+scenarios/cases/<SCENARIO>/
+├─ ticket.(pdf|png|jpg|jpeg|txt)
+├─ queue.csv
+├─ operator_note.txt
+├─ weather_state.json
+├─ resource_state.json
+└─ expected_decision.json
+```
+
+Regra de desenho: **ticket e nota** podem ser semiestruturados; **queue/weather/resource** devem ser estruturados e canônicos.
+
+### `ticket.*`
+
+Objetivo: fornecer evidência suficiente para o parser inferir: `ticket_id`, `truck_id`, `vehicle_type`, `document_status`, `document_block_flags`, `load_condition`, `contract_priority_flag`, `destination_constraints`.
+
+Exemplos:
+
+```txt
+TCK-003 | TRK-007
+vehicle_type: bitrem
+document_status: clear
+document_block_flags: []
+load_condition: wet
+contract_priority_flag: false
+destination_constraints: DST-COV-01
+```
+
+`document_status`, `load_condition`, `vehicle_type` e a coerência da `truck_id` com a fila serão usados pela camada determinística.
+
+### `operator_note.txt`
+
+Nota curta e factual, útil como contexto de exceção, não como fonte de verdade principal.
+
+```txt
+Começou a chover e a moega aberta foi bloqueada. Priorizar rota coberta se houver elegível.
+```
+
+### `queue.csv`
+
+Snapshot FIFO estável e determinístico.
+
+```csv
+truck_id,arrival_ts,vehicle_type,status,declared_destination
+TRK-001,2026-04-04T08:01:00,bitrem,waiting,DST-OPEN-01
+TRK-002,2026-04-04T08:06:00,truck,waiting,DST-COV-01
+TRK-003,2026-04-04T08:09:00,bitrem,waiting,DST-OPEN-01
+```
+
+Regras:
+- mínimo de campos do pack: `truck_id`, `arrival_ts`, `vehicle_type`, `status`, `declared_destination`;
+- no normalizador, indispensáveis: `truck_id`, `arrival_ts`, `status`;
+- `arrival_ts` precisa ser ISO-8601 parseável;
+- IDs de caminhão únicos por cenário.
+
+### `weather_state.json`
+
+Campos mínimos: `precipitation`, `severity`, `timestamp`.
+
+```json
+{
+  "precipitation": "rain",
+  "severity": "medium",
+  "timestamp": "2026-04-04T10:18:00"
+}
+```
+
+### `resource_state.json`
+
+Campos mínimos: `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_vehicle_types`.
+
+```json
+[
+  {
+    "resource_id": "DST-OPEN-01",
+    "status": "blocked",
+    "capacity_pct": 0,
+    "exposure": "open",
+    "resource_type": "hopper",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  },
+  {
+    "resource_id": "DST-COV-01",
+    "status": "available",
+    "capacity_pct": 100,
+    "exposure": "covered",
+    "resource_type": "hopper",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  }
+]
+```
+
+### `expected_decision.json`
+
+Não entra no fluxo de decisão, mas dita aceitabilidade de saída no benchmark.
+
+```json
+{
+  "expected_status": "PREVIEW_READY",
+  "acceptable_trucks": ["TRK-005"],
+  "acceptable_destinations": ["DST-COV-01"],
+  "required_constraints": ["HC-01"],
+  "fifo_break_expected": true
+}
+```
+
+Campos mínimos recomendados: `expected_status`, `acceptable_trucks`, `acceptable_destinations`, `required_constraints`, `fifo_break_expected`.
+
+### Regra de integridade entre arquivos
+
+- IDs sintéticos e estáveis: `TRK-001`, `DST-COV-01`, `TCK-003`;
+- `truck_id` no ticket coincide com linha da fila;
+- `resource_id` em `resource_state` e na decisão/expected devem ser compatíveis.
+
 ## Cenários obrigatórios
 
 - `S01_BASELINE`: prova que o sistema preserva FIFO em regime nominal
@@ -72,4 +190,3 @@ Em `bench/reports/<run_id>/`:
 - `metrics.json`
 - gráficos de latência e comparação
 - amostras de payload auditável
-
