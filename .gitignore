@@ -8,3 +8,4 @@ bench/reports/
 logs/
 var/
 
+.env

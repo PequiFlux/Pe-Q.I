@@ -1,62 +1,52 @@
-from __future__ import annotations
-
-from typing import Any, Protocol, TypeVar
-
-from app.domain.errors import PequiFluxError, SchemaViolationError
-from app.domain.models import DecisionPreview, DocumentBundle, ParsedTicket
-from app.gemma.prompts import build_parse_ticket_prompt, build_reason_summary_prompt
-
-ModelT = TypeVar("ModelT")
-
-
-class StructuredGemmaRuntime(Protocol):
-    def generate_structured(
-        self,
-        *,
-        prompt: str,
-        response_model: type[ModelT],
-        metadata: dict[str, Any],
-    ) -> ModelT:
-        ...
-
-    def summarize(self, *, prompt: str, metadata: dict[str, Any]) -> str:
-        ...
-
+"""Adapter para comunicação com o modelo Gemma da Google, especializado em interpretação de tickets e notas operacionais."""
+import google.generativeai as genai
+import PIL.Image
+import json
+from .prompts import SYSTEM_INSTRUCTION, TICKET_EXTRACTION_PROMPT
+from .schemas import InterpretedContext
 
 class GemmaAdapter:
-    """Schema-bound integration point for the configured Gemma runtime."""
-
-    def __init__(self, runtime: StructuredGemmaRuntime | None = None) -> None:
-        self.runtime = runtime
-
-    def parse_ticket_document(self, bundle: DocumentBundle) -> ParsedTicket:
-        if self.runtime is None:
-            raise PequiFluxError(
-                "MODEL_RUNTIME_UNAVAILABLE",
-                "Gemma runtime is not configured; the system fails closed.",
-            )
-
-        result = self.runtime.generate_structured(
-            prompt=build_parse_ticket_prompt(bundle),
-            response_model=ParsedTicket,
-            metadata={
-                "request_id": bundle.request_id,
-                "document_ref": bundle.document_ref,
-                "content_type": bundle.content_type,
-            },
-        )
-        if not isinstance(result, ParsedTicket):
-            raise SchemaViolationError("Gemma runtime did not return a ParsedTicket instance.")
-        return result
-
-    def summarize_decision(self, preview: DecisionPreview) -> str:
-        if self.runtime is None:
-            raise PequiFluxError(
-                "MODEL_RUNTIME_UNAVAILABLE",
-                "Gemma runtime is not configured; the system fails closed.",
-            )
-        return self.runtime.summarize(
-            prompt=build_reason_summary_prompt(preview),
-            metadata={"decision_id": preview.decision_id, "variant": preview.variant},
+    def __init__(self, api_key: str):
+        # 1. Autenticação e Configuração do Modelo
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=SYSTEM_INSTRUCTION
         )
 
+    def parse_ticket_document(self, file_path: str, operator_note: str, weather_state: str) -> InterpretedContext:
+        # 1. Verificar a extensão do ficheiro
+        if file_path.lower().endswith('.pdf'):
+            # Para PDF, fazemos o upload direto para a API do Google
+            doc_file = genai.upload_file(path=file_path, mime_type="application/pdf")
+            content_to_send = [TICKET_EXTRACTION_PROMPT.format(
+                operator_note=operator_note,
+                weather_state=weather_state
+            ), doc_file]
+        else:
+            # Para imagens, mantemos o uso do PIL
+            img = PIL.Image.open(file_path)
+            content_to_send = [TICKET_EXTRACTION_PROMPT.format(
+                operator_note=operator_note,
+                weather_state=weather_state
+            ), img]
+
+        # 2. Enviar para a IA
+        response = self.model.generate_content(content_to_send)
+    
+
+        # 5. Higienização e Validação (O "Pulo do Gato")
+        # Removemos os backticks (```json) que a IA às vezes coloca por 'educação'
+        raw_text = response.text.strip().replace("```json", "").replace("```", "")
+        
+        try:
+            data = json.loads(raw_text)
+            
+            # Transformamos o JSON bruto na sua Ficha Oficial validada pelo Pydantic
+            # Se faltar um campo obrigatório, o Pydantic avisará aqui!
+            return InterpretedContext(**data)
+            
+        except Exception as e:
+            # Se a IA 'alucinar' e não mandar um JSON válido, o sistema identifica o erro
+            print(f"Erro na interpretação da portaria: {e}")
+            raise ValueError("Falha crítica no contrato de dados do Gemma.")
