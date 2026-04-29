@@ -1,15 +1,25 @@
-class GemmaError(Exception):
-    """Classe base para erros no módulo Gemma."""
-    pass
+from __future__ import annotations
+
+from app.domain.errors import PequiFluxError
+
+
+class GemmaError(PequiFluxError):
+    """Base formal error for Gemma integration failures."""
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(code, message)
+
 
 class GemmaParseError(GemmaError):
-    """Erro quando a IA devolve um JSON inválido ou campos faltando."""
-    pass
+    def __init__(self, message: str = "Gemma returned invalid structured output.") -> None:
+        super().__init__("GEMMA_PARSE_ERROR", message)
+
 
 class GemmaAPIError(GemmaError):
-    """Erro de comunicação com o servidor do Google (timeout ou chave inválida)."""
-    pass
+    def __init__(self, message: str = "Gemma runtime API failed.") -> None:
+        super().__init__("GEMMA_API_ERROR", message)
+
 
 class GemmaSafetyError(GemmaError):
-    """Erro disparado quando o filtro de segurança da IA bloqueia a resposta."""
-    pass
+    def __init__(self, message: str = "Gemma safety policy blocked the response.") -> None:
+        super().__init__("GEMMA_SAFETY_ERROR", message)

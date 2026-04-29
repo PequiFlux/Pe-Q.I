@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "No fallback warmup path exists. Configure the Gemma runtime explicitly before use."
+if [[ "${PEQUIFLUX_IN_CONTAINER:-0}" == "1" ]]; then
+  python -m app.cli.prewarm_gemma
+  exit 0
+fi
 
+docker compose run --rm demo ./scripts/prewarm_models.sh

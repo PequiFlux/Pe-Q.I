@@ -1,14 +1,18 @@
 from .adapter import GemmaAdapter
+from .exceptions import GemmaAPIError, GemmaError, GemmaParseError, GemmaSafetyError
+from .runtime_factory import build_gemma_adapter, build_gemma_runtime
 from .schemas import InterpretedContext, ParsedTicket
-from .fallback import get_fallback_context
-from .exceptions import GemmaError, GemmaParseError
+from .fallback import forbid_fallback
 
-# Isso define o que será exportado quando alguém der 'from app.gemma import *'
 __all__ = [
     "GemmaAdapter",
+    "GemmaAPIError",
+    "GemmaError",
+    "GemmaParseError",
+    "GemmaSafetyError",
     "InterpretedContext",
     "ParsedTicket",
-    "get_fallback_context",
-    "GemmaError",
-    "GemmaParseError"
+    "build_gemma_adapter",
+    "build_gemma_runtime",
+    "forbid_fallback",
 ]

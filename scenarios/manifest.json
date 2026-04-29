@@ -1,6 +1,437 @@
 {
   "version": "0.1",
   "policy_profile_ref": "scenarios/common/policy_profile.json",
-  "cases": []
+  "destinations_ref": "scenarios/common/destinations.json",
+  "cases": [
+    {
+      "scenario_id": "S01_BASELINE",
+      "description": "Nominal yard state; FIFO should be preserved.",
+      "files": {
+        "ticket": "scenarios/cases/S01_BASELINE/ticket.txt",
+        "queue": "scenarios/cases/S01_BASELINE/queue.csv",
+        "operator_note": "scenarios/cases/S01_BASELINE/operator_note.txt",
+        "weather_state": "scenarios/cases/S01_BASELINE/weather_state.json",
+        "resource_state": "scenarios/cases/S01_BASELINE/resource_state.json",
+        "expected_decision": "scenarios/cases/S01_BASELINE/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S01-0001",
+        "scenario_id": "S01_BASELINE",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S01_BASELINE/queue.csv",
+        "ticket_ref": "scenarios/cases/S01_BASELINE/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Operacao nominal. Sem excecoes reportadas.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S02_RAIN_OPEN",
+      "description": "Rain blocks open destination; next compatible covered pair should be selected.",
+      "files": {
+        "ticket": "scenarios/cases/S02_RAIN_OPEN/ticket.txt",
+        "queue": "scenarios/cases/S02_RAIN_OPEN/queue.csv",
+        "operator_note": "scenarios/cases/S02_RAIN_OPEN/operator_note.txt",
+        "weather_state": "scenarios/cases/S02_RAIN_OPEN/weather_state.json",
+        "resource_state": "scenarios/cases/S02_RAIN_OPEN/resource_state.json",
+        "expected_decision": "scenarios/cases/S02_RAIN_OPEN/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S02-0001",
+        "scenario_id": "S02_RAIN_OPEN",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S02_RAIN_OPEN/queue.csv",
+        "ticket_ref": "scenarios/cases/S02_RAIN_OPEN/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Comecou chuva. Moega aberta nao deve receber carga agora.",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:05:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-OPEN-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          },
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:05:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S03_WET_LOAD",
+      "description": "Documented wet load restricts the destination.",
+      "files": {
+        "ticket": "scenarios/cases/S03_WET_LOAD/ticket.txt",
+        "queue": "scenarios/cases/S03_WET_LOAD/queue.csv",
+        "operator_note": "scenarios/cases/S03_WET_LOAD/operator_note.txt",
+        "weather_state": "scenarios/cases/S03_WET_LOAD/weather_state.json",
+        "resource_state": "scenarios/cases/S03_WET_LOAD/resource_state.json",
+        "expected_decision": "scenarios/cases/S03_WET_LOAD/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S03-0001",
+        "scenario_id": "S03_WET_LOAD",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S03_WET_LOAD/queue.csv",
+        "ticket_ref": "scenarios/cases/S03_WET_LOAD/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Motorista informou umidade na carga; conferir destino compativel.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:10:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-DRY-01",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "dry_load_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          },
+          {
+            "resource_id": "DST-WET-01",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "wet_load_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:10:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S04_CONVEYOR_DOWN",
+      "description": "Local resource state blocks a down destination.",
+      "files": {
+        "ticket": "scenarios/cases/S04_CONVEYOR_DOWN/ticket.txt",
+        "queue": "scenarios/cases/S04_CONVEYOR_DOWN/queue.csv",
+        "operator_note": "scenarios/cases/S04_CONVEYOR_DOWN/operator_note.txt",
+        "weather_state": "scenarios/cases/S04_CONVEYOR_DOWN/weather_state.json",
+        "resource_state": "scenarios/cases/S04_CONVEYOR_DOWN/resource_state.json",
+        "expected_decision": "scenarios/cases/S04_CONVEYOR_DOWN/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S04-0001",
+        "scenario_id": "S04_CONVEYOR_DOWN",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S04_CONVEYOR_DOWN/queue.csv",
+        "ticket_ref": "scenarios/cases/S04_CONVEYOR_DOWN/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Correia da moega coberta em manutencao. Usar alternativa liberada.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:15:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "down",
+            "capacity_pct": 0,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          },
+          {
+            "resource_id": "DST-ALT-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "alternate_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:15:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S05_CONTRACT_PRIORITY",
+      "description": "Published contract priority can justify a FIFO break when constraints are clear.",
+      "files": {
+        "ticket": "scenarios/cases/S05_CONTRACT_PRIORITY/ticket.txt",
+        "queue": "scenarios/cases/S05_CONTRACT_PRIORITY/queue.csv",
+        "operator_note": "scenarios/cases/S05_CONTRACT_PRIORITY/operator_note.txt",
+        "weather_state": "scenarios/cases/S05_CONTRACT_PRIORITY/weather_state.json",
+        "resource_state": "scenarios/cases/S05_CONTRACT_PRIORITY/resource_state.json",
+        "expected_decision": "scenarios/cases/S05_CONTRACT_PRIORITY/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S05-0001",
+        "scenario_id": "S05_CONTRACT_PRIORITY",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S05_CONTRACT_PRIORITY/queue.csv",
+        "ticket_ref": "scenarios/cases/S05_CONTRACT_PRIORITY/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Contrato prioritario publicado para TRK-003.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:20:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:20:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S06_DOCUMENT_BLOCK",
+      "description": "Document block makes the affected truck ineligible for automatic dispatch.",
+      "files": {
+        "ticket": "scenarios/cases/S06_DOCUMENT_BLOCK/ticket.txt",
+        "queue": "scenarios/cases/S06_DOCUMENT_BLOCK/queue.csv",
+        "operator_note": "scenarios/cases/S06_DOCUMENT_BLOCK/operator_note.txt",
+        "weather_state": "scenarios/cases/S06_DOCUMENT_BLOCK/weather_state.json",
+        "resource_state": "scenarios/cases/S06_DOCUMENT_BLOCK/resource_state.json",
+        "expected_decision": "scenarios/cases/S06_DOCUMENT_BLOCK/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S06-0001",
+        "scenario_id": "S06_DOCUMENT_BLOCK",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S06_DOCUMENT_BLOCK/queue.csv",
+        "ticket_ref": "scenarios/cases/S06_DOCUMENT_BLOCK/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Documento do primeiro caminhao precisa de conferencia antes da chamada.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:25:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:25:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S07_VEHICLE_INCOMPAT",
+      "description": "Vehicle type compatibility is binary and can force a FIFO break.",
+      "files": {
+        "ticket": "scenarios/cases/S07_VEHICLE_INCOMPAT/ticket.txt",
+        "queue": "scenarios/cases/S07_VEHICLE_INCOMPAT/queue.csv",
+        "operator_note": "scenarios/cases/S07_VEHICLE_INCOMPAT/operator_note.txt",
+        "weather_state": "scenarios/cases/S07_VEHICLE_INCOMPAT/weather_state.json",
+        "resource_state": "scenarios/cases/S07_VEHICLE_INCOMPAT/resource_state.json",
+        "expected_decision": "scenarios/cases/S07_VEHICLE_INCOMPAT/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S07-0001",
+        "scenario_id": "S07_VEHICLE_INCOMPAT",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S07_VEHICLE_INCOMPAT/queue.csv",
+        "ticket_ref": "scenarios/cases/S07_VEHICLE_INCOMPAT/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Moega estreita liberada apenas para truck.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:30:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-NARROW-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "narrow_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:30:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S08_REDUCED_CAPACITY",
+      "description": "Reduced capacity above the hard minimum remains eligible.",
+      "files": {
+        "ticket": "scenarios/cases/S08_REDUCED_CAPACITY/ticket.txt",
+        "queue": "scenarios/cases/S08_REDUCED_CAPACITY/queue.csv",
+        "operator_note": "scenarios/cases/S08_REDUCED_CAPACITY/operator_note.txt",
+        "weather_state": "scenarios/cases/S08_REDUCED_CAPACITY/weather_state.json",
+        "resource_state": "scenarios/cases/S08_REDUCED_CAPACITY/resource_state.json",
+        "expected_decision": "scenarios/cases/S08_REDUCED_CAPACITY/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S08-0001",
+        "scenario_id": "S08_REDUCED_CAPACITY",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S08_REDUCED_CAPACITY/queue.csv",
+        "ticket_ref": "scenarios/cases/S08_REDUCED_CAPACITY/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Destino com capacidade reduzida, mas acima do minimo operacional.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:35:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-LOWCAP-01",
+            "status": "available",
+            "capacity_pct": 30,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:35:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S09_HUMAN_OVERRIDE",
+      "description": "Governance scenario for approved and rejected override attempts.",
+      "files": {
+        "ticket": "scenarios/cases/S09_HUMAN_OVERRIDE/ticket.txt",
+        "queue": "scenarios/cases/S09_HUMAN_OVERRIDE/queue.csv",
+        "operator_note": "scenarios/cases/S09_HUMAN_OVERRIDE/operator_note.txt",
+        "weather_state": "scenarios/cases/S09_HUMAN_OVERRIDE/weather_state.json",
+        "resource_state": "scenarios/cases/S09_HUMAN_OVERRIDE/resource_state.json",
+        "expected_decision": "scenarios/cases/S09_HUMAN_OVERRIDE/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S09-0001",
+        "scenario_id": "S09_HUMAN_OVERRIDE",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S09_HUMAN_OVERRIDE/queue.csv",
+        "ticket_ref": "scenarios/cases/S09_HUMAN_OVERRIDE/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Supervisor quer testar override para um par elegivel e registrar motivo.",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:40:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-OPEN-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          },
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:40:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
+      "description": "Primary narrative scenario combining rain and compatibility to justify FIFO break.",
+      "files": {
+        "ticket": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "queue": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "operator_note": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/operator_note.txt",
+        "weather_state": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/weather_state.json",
+        "resource_state": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/resource_state.json",
+        "expected_decision": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S10-0001",
+        "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "ticket_ref": "scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Chuva bloqueou destino aberto; coberta aceita apenas truck neste momento.",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "high",
+          "timestamp": "2026-04-04T10:45:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-OPEN-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": ["truck", "bitrem"]
+          },
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck"]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T10:45:00+00:00"
+      }
+    }
+  ]
 }
-

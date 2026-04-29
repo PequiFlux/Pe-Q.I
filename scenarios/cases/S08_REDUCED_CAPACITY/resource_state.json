@@ -1,0 +1,10 @@
+[
+  {
+    "resource_id": "DST-LOWCAP-01",
+    "status": "available",
+    "capacity_pct": 30,
+    "resource_type": "covered_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  }
+]

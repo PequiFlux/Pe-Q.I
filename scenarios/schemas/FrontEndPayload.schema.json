@@ -11,7 +11,10 @@
     "driver_message",
     "operator_actions",
     "queue_diff",
-    "gemma_visible_summary"
+    "gemma_visible_summary",
+    "latency_ms",
+    "benchmark_tags",
+    "confidence_notes"
   ],
   "properties": {
     "request_id": { "type": "string" },
@@ -22,6 +25,18 @@
     "driver_message": { "type": "object" },
     "operator_actions": { "type": "array" },
     "queue_diff": { "type": "array" },
-    "gemma_visible_summary": { "type": "object" }
+    "gemma_visible_summary": { "type": "object" },
+    "latency_ms": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "benchmark_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
   }
 }

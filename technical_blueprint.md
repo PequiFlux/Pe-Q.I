@@ -13,10 +13,10 @@ Quando um ponto operacional, técnico ou de hardware não está definido explici
 
 | ID | ASSUNÇÃO | Impacto |
 |---|---|---|
-| A-01 | Haverá hardware local capaz de executar Gemma 4 **E4B** ou **E2B** com latência interativa aceitável após warmup. Se isso falhar, o benchmark principal usa o menor modelo local viável e o sistema entra em F1/F2 conforme política de fallback. | Afeta latência, escolha do modelo e vídeo-demo. |
+| A-01 | Haverá hardware local capaz de executar Gemma 4 **E4B** ou **E2B** com latência interativa aceitável após warmup. Se isso falhar, o benchmark principal usa o menor modelo local viável e o sistema entra em BLOCKED/REVIEW_REQUIRED conforme política de fail-closed. | Afeta latência, escolha do modelo e vídeo-demo. |
 | A-02 | Stack-base do monólito: **Python 3.11**, **Streamlit** para UI única, **Pydantic 2** para contratos, **SQLite** para persistência local, **pytest** para testes. | Afeta estrutura do repositório e scripts de bootstrap. |
 | A-03 | O runtime local do Gemma 4 fica atrás de um adaptador, sem acoplamento a um backend único. O backend concreto pode ser trocado desde que preserve multimodalidade local, output estruturado e function calling. | Evita dependência não comprovada de um único runtime. |
-| A-04 | Limiar de confiança para campos documentais críticos: `>= 0.75` para confiar diretamente; `0.60–0.74` exige corroboração ou marca ambiguidade; `< 0.60` em campo material gera `REVIEW_REQUIRED`. | Afeta parsing, política de verdade e modo degradado. |
+| A-04 | Limiar de confiança para campos documentais críticos: `>= 0.75` para confiar diretamente; `0.60–0.74` exige corroboração ou marca ambiguidade; `< 0.60` em campo material gera `REVIEW_REQUIRED`. | Afeta parsing, política de verdade e modo de falha fechada. |
 | A-05 | Perfil de ranking genérico publicado no repositório: `FIFO=40`, `CONTRACT_PRIORITY=30`, `RESOURCE_FIT=15`, `CAPACITY_HEADROOM=10`, `WAIT_SLA=5`; `MIN_OPERATIONAL_CAPACITY_PCT=20`; `COMFORT_CAPACITY_PCT=50`. | Afeta cenários S05, S08 e S10. |
 | A-06 | No Scenario Pack sintético, `weather_state.json` e `resource_state.json` são considerados snapshots autoritativos e frescos do cenário. | Simplifica benchmark e elimina ambiguidade temporal artificial. |
 | A-07 | O pack sintético trabalhará com filas pequenas e filmáveis: até 10 caminhões e até 4 destinos por cenário. | Mantém demo clara e validação local barata. |
@@ -67,7 +67,7 @@ Este recorte maximiza densidade demonstrável por unidade de escopo. Ele permite
 2. interpretação útil com Gemma 4;
 3. governança determinística da decisão;
 4. auditabilidade da quebra de FIFO;
-5. robustez com fallback;
+5. robustez com fail-closed;
 6. reprodutibilidade em repositório público.
 
 A submissão perde força se tentar cobrir ERP, balança, mensageria, múltiplas unidades, telemetria ou o PequiFlux completo. Isso dilui a centralidade do Gemma 4, aumenta risco de engenharia, complica sanitização e enfraquece benchmark.
@@ -152,7 +152,7 @@ o sistema deve devolver:
 | Audit payload imutável | Sim |
 | UI única filmável | Sim |
 | Benchmark com 3 variantes | Sim |
-| Fallback controlado | Sim |
+| Fail-closed explicito | Sim |
 
 ### 2.6 Fora de escopo
 
@@ -174,7 +174,7 @@ o sistema deve devolver:
 | Auditabilidade | 100% das quebras de FIFO e overrides com trilha reconstruível |
 | Operabilidade | UI permite aprovar, bloquear ou sobrescrever |
 | Reprodutibilidade | Terceiro executa bootstrap, demo e benchmark a partir do repositório |
-| Robustez | Falha induzida gera F1 ou F2; nunca travamento opaco |
+| Robustez | Falha induzida gera BLOCKED ou REVIEW_REQUIRED; nunca travamento opaco |
 
 ### 2.8 Definição de pronto da submissão
 
@@ -244,7 +244,7 @@ As regras abaixo são publicadas como política versionada. Elas podem justifica
 | RNF-05 | Reprodutibilidade em ambiente limpo | Bootstrap + run em `<= 20 min` após obtenção/caching dos pesos |
 | RNF-06 | Disponibilidade da demo no pack obrigatório | `10/10` cenários executam sequencialmente |
 | RNF-07 | Operação local-first | Após setup/cache, o pack roda sem internet |
-| RNF-08 | Falha do modelo não paralisa o fluxo | 100% das falhas induzidas produzem `F1` ou `F2` |
+| RNF-08 | Falha do modelo não paralisa o fluxo | 100% das falhas induzidas produzem `BLOCKED` ou `REVIEW_REQUIRED` |
 | RNF-09 | Logs estruturados | 100% dos fluxos geram log JSONL com campos mínimos |
 | RNF-10 | Audit completeness | `100%` dos payloads finais contêm os campos obrigatórios |
 
@@ -262,7 +262,7 @@ As regras abaixo são publicadas como política versionada. Elas podem justifica
 Essa distinção precisa ser consistente em todo o sistema.
 
 - **`BLOCKED`**: o sistema tem evidência suficiente para concluir que **não existe despacho automático seguro/permitido no momento**. Exemplo: documento bloqueado, recurso indisponível, fila vazia, nenhum par elegível sob fatos claros.
-- **`REVIEW_REQUIRED`**: o sistema **não tem verdade suficiente** para automatizar. Exemplo: documento ilegível em campo material, conflito grave entre documento e estado local, tentativa de override para par inelegível, falha persistente do modelo sem fallback seguro.
+- **`REVIEW_REQUIRED`**: o sistema **não tem verdade suficiente** para automatizar. Exemplo: documento ilegível em campo material, conflito grave entre documento e estado local, tentativa de override para par inelegível, falha persistente do modelo sem estado seguro de revisao.
 
 ---
 
@@ -293,7 +293,7 @@ repo/
 │  │  ├─ prompts.py
 │  │  ├─ schemas.py
 │  │  ├─ tool_gateway.py
-│  │  └─ fallback.py
+│  │  └─ fallback.py        # guarda que proibe fallback operacional
 │  ├─ adapters/
 │  │  ├─ csv_adapter.py
 │  │  ├─ document_adapter.py
@@ -352,7 +352,7 @@ repo/
 | Módulo | Responsabilidade |
 |---|---|
 | `ui` | Coletar entradas, renderizar recomendação, permitir ação humana, exibir trilha de auditoria |
-| `orchestration` | Coordenar o fluxo ponta a ponta, controlar estados, chamar módulos e fallback |
+| `orchestration` | Coordenar o fluxo ponta a ponta, controlar estados, chamar módulos e encerrar em `BLOCKED` ou `REVIEW_REQUIRED` quando faltar verdade operacional |
 | `gemma` | Empacotar prompts, validar outputs estruturados, controlar tool calling, isolar runtime |
 | `adapters` | Ler CSV, ticket/documento, nota e estados, produzindo insumos internos canônicos |
 | `domain` | Modelos de domínio, enums, hard constraints, ranking, policy profile, códigos de erro |
@@ -449,8 +449,8 @@ RECEIVED
 Estados alternativos:
 
 ```text
-RECEIVED -> DEGRADED_F1
-RECEIVED -> REVIEW_REQUIRED_F2
+RECEIVED -> BLOCKED
+RECEIVED -> REVIEW_REQUIRED
 ANY -> BLOCKED
 ANY -> ERROR_TERMINAL (somente para falha de sistema, nunca para resultado operacional silencioso)
 ```
@@ -544,7 +544,7 @@ Tabelas mínimas:
 
 | Tabela | Campos principais | Função |
 |---|---|---|
-| `decision_records` | `decision_id`, `request_id`, `scenario_id`, `variant`, `decision_status`, `recommended_truck_id`, `recommended_destination_id`, `fallback_mode`, `created_at` | Registro principal da decisão |
+| `decision_records` | `decision_id`, `request_id`, `scenario_id`, `variant`, `decision_status`, `recommended_truck_id`, `recommended_destination_id`, `created_at` | Registro principal da decisão |
 | `audit_records` | `decision_id`, `audit_json`, `hash_sha256`, `created_at` | Payload auditável imutável |
 | `operator_actions` | `action_id`, `decision_id`, `action_type`, `reason`, `before_json`, `after_json`, `actor_id`, `created_at` | Trilha de aprovação, bloqueio e override |
 | `benchmark_runs` | `run_id`, `variant`, `scenario_id`, `metrics_json`, `success_flag`, `created_at` | Resultados experimentais |
@@ -572,7 +572,6 @@ Cada linha deve conter, no mínimo:
   "tool_name": "validate_hard_constraints",
   "latency_ms": 41,
   "model_id": "gemma4-e4b",
-  "fallback_mode": "F0",
   "decision_status": "PREVIEW_READY",
   "error_code": null
 }
@@ -593,7 +592,7 @@ Sem depender de APM externo, o sistema deve expor e gravar pelo menos:
 | Indicador | Origem | Uso |
 |---|---|---|
 | `tool_call_error_total` | `tool_gateway` | provar robustez do schema e da state machine |
-| `fallback_total` | `orchestrator` | medir degradação |
+| `review_or_block_total` | `orchestrator` | medir degradação |
 | `invalid_recommendation_total` | `decision_builder` | alvo operacional = 0 |
 | `latency_model_ms` | `gemma.adapter` | monitorar custo do Gemma |
 | `latency_rules_ms` | `validate_hard_constraints` | provar previsibilidade do motor |
@@ -655,7 +654,7 @@ De acordo com o recorte descrito no dossiê, a escolha operacional é:
 | Papel | Modelo | Justificativa |
 |---|---|---|
 | Primário | **Gemma 4 E4B** | melhor equilíbrio entre capacidade multimodal, function calling e custo local |
-| Fallback de modelo | **Gemma 4 E2B** | menor custo e maior tolerância em hardware restrito |
+| Fail-closed de modelo | **Gemma 4 E2B** | menor custo e maior tolerância em hardware restrito |
 | Ablação opcional | **Gemma 4 26B A4B** | útil apenas se houver hardware sobrando; não deve ser dependência do vídeo |
 | Não padrão | **Gemma 4 31B** | pouco aderente ao objetivo local-first da demo |
 
@@ -789,35 +788,34 @@ Categorias mínimas:
 Política:
 
 - falha de nome ou schema: devolver erro estruturado ao modelo e permitir **uma única tentativa de reparo**;
-- segunda falha: abandonar cadeia agentic para o caso e entrar em `F1` ou `F2`;
-- `TIMEOUT` ou `DOMAIN_VALIDATION_ERROR`: fallback imediato, sem loop;
+- segunda falha: abandonar cadeia agentic para o caso e entrar em `BLOCKED` ou `REVIEW_REQUIRED`;
+- `TIMEOUT` ou `DOMAIN_VALIDATION_ERROR`: falha fechada imediata, sem loop;
 - falha repetida nunca gera “tentativa infinita”.
 
-### 5.11 Quando o sistema entra em fallback
+### 5.11 Política fail-closed
 
-#### F0 — normal
-Gemma interpreta, tool calling validado, regras determinísticas decidem.
+Não existe caminho operacional degradado. Se uma entrada, serviço, tool call ou saída do Gemma for materialmente inválida, o sistema não substitui o componente por heurística automática e não continua com comportamento reduzido.
 
-#### F1 — degradado com parser/classifier heurístico
+#### Caminho normal
+
+Gemma interpreta, tool calling validado, regras determinísticas decidem e a UI apresenta `PREVIEW_READY`, `BLOCKED` ou `REVIEW_REQUIRED` com trilha auditável.
+
+#### `BLOCKED`
+
+Ativado quando há verdade suficiente para impedir despacho automático sem escolher um par operacional. Exemplos:
+
+- fila vazia;
+- nenhum destino elegível;
+- documento explicitamente bloqueado;
+- recurso indisponível;
+- tentativa de override para par inelegível.
+
+Em `BLOCKED`, não há parser alternativo, modelo substituto, retry silencioso ou mudança de lógica decisória.
+
+#### `REVIEW_REQUIRED`
 Ativado quando:
 
-- timeout do Gemma;
-- erro repetido de tool call;
-- runtime local indisponível;
-- parsing multimodal falha, mas há caminho heurístico suficiente para inferir contexto mínimo.
-
-Em F1:
-
-- o parser documental usa extração local simplificada;
-- a classificação usa regra + keyword;
-- as hard constraints continuam as mesmas;
-- a explicação pode degradar para template;
-- o sistema ainda pode devolver `PREVIEW_READY` ou `BLOCKED` se houver verdade suficiente.
-
-#### F2 — `REVIEW_REQUIRED`
-Ativado quando:
-
-- campo documental material permanece incerto após fallback;
+- campo documental material permanece incerto após fail-closed;
 - conflito material entre fontes não pode ser resolvido;
 - tentativa de override viola hard constraint;
 - audit payload não pode ser concluído com integridade;
@@ -830,7 +828,7 @@ O sistema **deve** retornar `REVIEW_REQUIRED` nos casos abaixo:
 1. `parse_confidence < 0.60` em campo que afeta HC-02, HC-04 ou HC-05;
 2. documento diz uma coisa, estado local autoritativo diz outra e a divergência afeta elegibilidade;
 3. a nota do operador aponta risco relevante, mas o estado local necessário para resolver o conflito está ausente;
-4. a cadeia de tools falha de forma persistente e o fallback heurístico não produz verdade suficiente;
+4. a cadeia de tools falha de forma persistente;
 5. o operador tenta override para um par inelegível;
 6. o sistema não consegue construir um audit payload íntegro;
 7. o `vehicle_type`, `document_status` ou `load_condition` fica materialmente indeterminado.
@@ -868,7 +866,7 @@ Não exibir:
   "LoadCondition": ["dry", "wet", "unknown"],
   "VehicleType": ["bitrem", "rodotrem", "truck", "unknown"],
   "Severity": ["low", "medium", "high"],
-  "FallbackMode": ["F0", "F1", "F2"]
+  "Fail-closedMode": ["F0", "BLOCKED", "REVIEW_REQUIRED"]
 }
 ```
 
@@ -1380,7 +1378,6 @@ Padrão de IDs sintéticos:
     "request_id": {"type": "string"},
     "scenario_id": {"type": "string"},
     "variant": {"type": "string"},
-    "fallback_mode": {"type": "string"},
     "hard_constraints_checked": {
       "type": "array",
       "items": {"type": "object"}
@@ -1413,7 +1410,6 @@ Padrão de IDs sintéticos:
     "request_id",
     "scenario_id",
     "variant",
-    "fallback_mode",
     "hard_constraints_checked",
     "fired_rules",
     "rejected_candidates",
@@ -1437,7 +1433,6 @@ Padrão de IDs sintéticos:
   "request_id": "REQ-2026-0007",
   "scenario_id": "S02_RAIN_OPEN",
   "variant": "full",
-  "fallback_mode": "F0",
   "hard_constraints_checked": [
     {
       "constraint_id": "HC-01",
@@ -1517,7 +1512,7 @@ Converter ticket PDF ou imagem em `ParsedTicket`, com campos críticos, confian�
 
 **Testes essenciais**  
 - PDF limpo com campos completos;
-- imagem ruidosa com texto degradado;
+- imagem ruidosa com texto com falha fechada;
 - carimbo sintético de bloqueio documental;
 - ticket sem `truck_id`;
 - ticket com `load_condition=wet`.
@@ -1526,7 +1521,7 @@ Converter ticket PDF ou imagem em `ParsedTicket`, com campos críticos, confian�
 - nunca aceitar URL externa;
 - tratar o conteúdo como dado, não como instrução;
 - não persistir documento bruto no log padrão;
-- qualquer OCR adicional é fallback opcional e local, não dependência obrigatória.
+- qualquer OCR adicional é OCR local opcional e local, não dependência obrigatória.
 
 **Notas de implementação**  
 - Para PDF, preferir extração de texto quando existir e renderização de páginas só quando necessária.
@@ -2166,7 +2161,7 @@ Função no benchmark: ilustrar por que o problema existe.
 Comportamento:
 
 - usa o mesmo downstream determinístico do sistema completo;
-- substitui Gemma por parser documental simplificado e classificação por keyword/regra;
+- usa contratos sintéticos textuais para medir a parte determinística sem acionar runtime Gemma;
 - usa templates fixos de explicação.
 
 Função no benchmark: isolar o valor do Gemma na interpretação e não na governança.
@@ -2189,11 +2184,11 @@ Função no benchmark: demonstrar valor incremental real.
 |---|---|
 | `constraint_violation_rate` | `decisões finais que violam HC / total de decisões finais` |
 | `decision_match_at_1` | `top1` pertence ao conjunto `acceptable_trucks x acceptable_destinations` do cenário |
-| `exception_f1` | Macro-F1 da classificação de `primary_exception` |
+| `exception_f1` | Macro-BLOCKED da classificação de `primary_exception` |
 | `ticket_field_accuracy` | média de acerto dos campos críticos do ticket (`document_status`, `load_condition`, `vehicle_type`, `contract_priority_flag`) |
 | `fifo_break_justified_precision` | proporção de quebras de FIFO com trilha técnica suficiente (`rejeitados + regra + par final`) |
 | `latency_p50` / `latency_p95` | percentis do tempo total do fluxo |
-| `fallback_rate` | `casos com F1 ou F2 / total de casos` |
+| `review_or_block_rate` | `casos com BLOCKED ou REVIEW_REQUIRED / total de casos` |
 | `audit_completeness` | `payloads auditáveis completos / total de decisões` |
 
 ### 7.8 Como calcular cada métrica
@@ -2263,7 +2258,7 @@ O writeup precisa conter, no mínimo:
 - matriz por cenário;
 - screenshot do audit payload;
 - screenshot da UI;
-- nota explícita de limites e fallback.
+- nota explícita de limites e fail-closed.
 
 ---
 
@@ -2277,40 +2272,31 @@ O sistema deve falhar de forma **controlada, auditável e conservadora**. O erro
 
 | Caso | Detecção | Resposta do sistema | Estado final esperado |
 |---|---|---|---|
-| Tool call inválida | schema/name/order inválidos | 1 reparo; se falhar, F1/F2 | `PREVIEW_READY` em F1 se seguro; senão `REVIEW_REQUIRED` |
-| Timeout do Gemma | timeout > limite | fallback heurístico | F1 ou F2 |
-| Documento ilegível | `UNREADABLE_DOCUMENT` | heurístico local; se campo material permanecer incerto, revisão | F1 ou F2 |
+| Tool call inválida | schema/name/order inválidos | 1 reparo; se falhar, encerrar sem decisão automática | `BLOCKED` ou `REVIEW_REQUIRED` |
+| Timeout do Gemma | timeout > limite | falha fechada explicita | BLOCKED ou REVIEW_REQUIRED |
+| Documento ilegível | `UNREADABLE_DOCUMENT` | revisão quando campo material depender do documento | `REVIEW_REQUIRED` |
 | Baixa confiança no parsing | `parse_confidence < threshold` | aplicar política A-04 | `REVIEW_REQUIRED` se material |
 | Conflito entre documento e estado local | `material_conflicts != []` | prevalece fonte superior; se ainda insuficiente, revisão | `BLOCKED` ou `REVIEW_REQUIRED` |
 | Fila vazia | `EMPTY_QUEUE` | sem despacho automático | `BLOCKED` |
 | Nenhum destino elegível | matriz sem pares elegíveis | bloquear ou revisar conforme suficiência da evidência | `BLOCKED` ou `REVIEW_REQUIRED` |
 | Múltiplos candidatos equivalentes | empate de score | tie-break estável | `PREVIEW_READY` |
 | Necessidade de revisão humana | reasons explícitas | exibir revisão, não sugestão operacional conclusiva | `REVIEW_REQUIRED` |
-| Falha parcial do modelo | parse ou classify falha, mas regras funcionam | F1 | `PREVIEW_READY`, `BLOCKED` ou `REVIEW_REQUIRED` |
+| Falha parcial do modelo | parse ou classify falha | encerrar sem substituição automática | `REVIEW_REQUIRED` |
 | Override para par inelegível | validação falha | rejeitar override | `REVIEW_REQUIRED` ou manutenção do preview anterior |
 
-### 8.3 Fallback detalhado
+### 8.3 Fail-closed detalhado
 
-#### F1 — degradado com heurística
+Objetivo: preservar segurança quando o problema não pode ser automatizado com verdade suficiente.
 
-Objetivo: preservar decisão segura quando o problema ainda é resolvível sem o modelo.
+Invariantes:
 
-Substituições:
+- não há modelo substituto;
+- não há parser alternativo automático;
+- não há retry silencioso que altere lógica decisória;
+- não há despacho com campo material indeterminado;
+- `BLOCKED` e `REVIEW_REQUIRED` precisam explicar a causa.
 
-- `parse_ticket_document` usa fallback local simplificado;
-- `classify_exception` usa regras + keywords;
-- `reason_summary` usa template;
-- tool calling é desligado para aquele caso.
-
-O que permanece igual:
-
-- hard constraints;
-- ranking;
-- auditoria;
-- UI;
-- ação humana.
-
-#### F2 — revisão obrigatória
+#### REVIEW_REQUIRED — revisão obrigatória
 
 Objetivo: impedir que a automação extrapole a verdade disponível.
 
@@ -2328,7 +2314,7 @@ Condições típicas:
 |---|---|---|
 | Projeto parecer dashboard genérico | juiz não vê papel do Gemma | destacar parsing multimodal, tool calling e benchmark por ablação |
 | Escopo expandir | backlog fora do recorte | congelar OOS e ADRs na semana 1 |
-| Parsing multimodal fraco | campos críticos saem `unknown` | curar tickets sintéticos e manter fallback |
+| Parsing multimodal fraco | campos críticos saem `unknown` | curar tickets sintéticos e manter fail-closed |
 | Latência excessiva | `p95` acima da meta | E4B/E2B, prompts curtos, warmup, thinking off |
 | Tool selection errada | muitos `SCHEMA_ERROR` | whitelist curta e state machine explícita |
 | Benchmark pouco convincente | variantes próximas demais | fortalecer cenários em que documento/texto afetam decisão |
@@ -2477,7 +2463,7 @@ Regras práticas:
 
 Em modo normal:
 
-- persistir hashes de input, latências, status, fallback, códigos de erro e outputs estruturados finais;
+- persistir hashes de input, latências, status, fail-closed, códigos de erro e outputs estruturados finais;
 - não persistir prompt cru;
 - não persistir chain-of-thought;
 - não persistir documento bruto.
@@ -2556,7 +2542,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 | 1:45–2:05 | Determinismo | matriz de hard constraints e ranking | decisão não depende da vontade do modelo |
 | 2:05–2:25 | Quebra de FIFO | diff da fila antes/depois + rejeitados | tese central da submissão |
 | 2:25–2:40 | Benchmark | tabela simples `fifo vs heuristic vs full` | valor incremental real |
-| 2:40–2:55 | Falha e fallback | induzir erro/timeout e mostrar F1/F2 | robustez |
+| 2:40–2:55 | Falha e fail-closed | induzir erro/timeout e mostrar BLOCKED/REVIEW_REQUIRED | robustez |
 | 2:55–3:00 | Fechamento | repo, relatório, takeaway | reprodutibilidade |
 
 ### 10.2 Estrutura recomendada do writeup da Kaggle
@@ -2566,7 +2552,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 3. arquitetura: Gemma interpreta, regras decidem, humano governa;
 4. uso específico do Gemma 4;
 5. Scenario Pack, benchmark e variantes;
-6. falhas, fallback e limites;
+6. falhas, fail-closed e limites;
 7. repositório público e reprodutibilidade;
 8. próximos passos estritamente dentro do recorte.
 
@@ -2590,7 +2576,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 | Hard constraints são determinísticas | `app/domain/constraints.py` | `constraint_violation_rate=0` no `full` | matriz de constraints | seção de arquitetura |
 | Quebra de FIFO é justificável | `app/audit/` + policy profile | `fifo_break_justified_precision=1.0` | diff da fila | seção de resultados |
 | Sistema é local-first | scripts + runtime local | benchmark offline após cache | demo sem API externa | seção de reprodutibilidade |
-| Fallback existe | `app/gemma/fallback.py` | falha induzida coberta | cena de erro e degrade | seção de limites |
+| Fail-closed existe | `app/gemma/fallback.py` | falha induzida coberta | cena de erro e bloqueio | seção de limites |
 | Repo é sanitizado | checklist + synthetic pack | n/a | captura do repo | seção de segurança |
 
 ### 10.5 Recomendações explícitas para a gravação
@@ -2599,7 +2585,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 - mostrar o ticket cru por alguns segundos antes da interpretação;
 - mostrar que o modelo não manda no sistema: a tela de constraints deve vir depois do parsing;
 - o diff da fila precisa ser legível em 1920x1080;
-- a cena de fallback deve ser curta e controlada;
+- a cena de fail-closed deve ser curta e controlada;
 - a tabela de benchmark deve caber em um único frame.
 
 ---
@@ -2688,7 +2674,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 |---|---|---|
 | Semana 1 | congelar escopo, schemas, ADRs, policy profile, Scenario Pack v0, wireframe da UI | schemas versionados, 10 cenários definidos, política de verdade fechada, wireframe aprovado |
 | Semana 2 | implementar fluxo e2e mínimo, parser multimodal, classificação, rules engine, tool gateway | um cenário roda ponta a ponta por CLI; HC-01..HC-07 implementadas; adapter Gemma retorna schema válido |
-| Semana 3 | fechar UI, auditoria, logs, benchmark, override, fallback | os 10 cenários rodam em lote; UI exibe preview e trilha; falhas induzidas cobertas |
+| Semana 3 | fechar UI, auditoria, logs, benchmark, override, fail-closed | os 10 cenários rodam em lote; UI exibe preview e trilha; falhas induzidas cobertas |
 | Semana 4 | hardening, rerun final, gravação, writeup, sanitização, submissão | benchmark final exportado; vídeo pronto; repo sanitizado; checklist pré-publicação concluído |
 
 ### 12.2 Ordem de implementação recomendada
@@ -2703,7 +2689,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 8. tool gateway;
 9. UI;
 10. benchmark;
-11. fallback;
+11. fail-closed;
 12. vídeo e writeup.
 
 ### 12.3 Caminho crítico
@@ -2741,7 +2727,6 @@ O front-end deve consumir **um payload único**, suficiente para:
     "scenario_id": {"type": "string"},
     "variant": {"type": "string"},
     "decision_status": {"type": "string"},
-    "fallback_mode": {"type": "string"},
     "recommended_truck": {
       "type": ["object", "null"],
       "properties": {
@@ -2804,7 +2789,7 @@ O front-end deve consumir **um payload único**, suficiente para:
         }
       }
     },
-    "audit_trail": {"type": "object"},
+    "audit_record": {"type": "object"},
     "latency_ms": {"type": "object"},
     "benchmark_tags": {
       "type": "array",
@@ -2820,7 +2805,6 @@ O front-end deve consumir **um payload único**, suficiente para:
     "scenario_id",
     "variant",
     "decision_status",
-    "fallback_mode",
     "recommended_truck",
     "recommended_destination",
     "considered_constraints",
@@ -2830,7 +2814,7 @@ O front-end deve consumir **um payload único**, suficiente para:
     "operator_actions",
     "queue_diff",
     "gemma_visible_summary",
-    "audit_trail",
+    "audit_record",
     "latency_ms",
     "benchmark_tags",
     "confidence_notes"
@@ -2847,7 +2831,6 @@ O front-end deve consumir **um payload único**, suficiente para:
   "scenario_id": "S02_RAIN_OPEN",
   "variant": "full",
   "decision_status": "PREVIEW_READY",
-  "fallback_mode": "F0",
   "recommended_truck": {
     "truck_id": "TRK-005",
     "queue_position_before": 4,
@@ -2917,7 +2900,7 @@ O front-end deve consumir **um payload único**, suficiente para:
       "generate_audit_payload"
     ]
   },
-  "audit_trail": {
+  "audit_record": {
     "decision_id": "DEC-2026-010",
     "fired_rules": [
       "HC-01",
@@ -2966,7 +2949,7 @@ O front-end deve consumir **um payload único**, suficiente para:
 | `operator_actions` | ações humanas habilitadas naquele estado |
 | `queue_diff` | antes/depois da fila, essencial para a narrativa |
 | `gemma_visible_summary` | torna a centralidade do modelo visível sem virar chat |
-| `audit_trail` | trilha formal reconstruível |
+| `audit_record` | trilha formal reconstruível |
 | `latency_ms` | prova de viabilidade local |
 | `benchmark_tags` | agregação e filtragem experimental |
 | `confidence_notes` | observabilidade resumida, sem chain-of-thought |
@@ -2977,7 +2960,7 @@ O front-end deve consumir **um payload único**, suficiente para:
 
 A tela principal deve caber em `1920x1080` e mostrar, sem scroll:
 
-1. **cabeçalho do cenário**: `scenario_id`, variante, fallback mode;
+1. **cabeçalho do cenário**: `scenario_id`, variante, politica fail-closed;
 2. **preview do ticket**: thumbnail do PDF/imagem ou indicador de documento;
 3. **card de recomendação**:
    - caminhão;
@@ -2993,7 +2976,7 @@ A tela principal deve caber em `1920x1080` e mostrar, sem scroll:
 1. **diff da fila**: tabela `antes/depois`, com rejeitados e motivo;
 2. **audit trail**: painel colapsável com JSON formatado;
 3. **benchmark snapshot**: tabela pequena das três variantes para o cenário atual;
-4. **diagnóstico**: latência, fallback, modelo usado.
+4. **diagnóstico**: latência, fail-closed, modelo usado.
 
 #### Como tornar a centralidade do Gemma visível sem poluir
 
@@ -3057,7 +3040,7 @@ O que **não** deve ser simplificado:
 - os 10 cenários obrigatórios;
 - hard constraints;
 - trilha auditável;
-- fallback;
+- fail-closed;
 - comparação contra FIFO e baseline heurístico.
 
 ### 14.5 Perguntas ainda abertas
