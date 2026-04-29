@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from app.domain.enums import DocumentStatus, LoadCondition
+from app.domain.enums import DocumentStatus, LoadCondition, OperatorAction
 from app.domain.errors import PequiFluxError
 from app.domain.models import (
     ConstraintFailure,
+    OperatorDecision,
     ParsedTicket,
     PolicyProfile,
     QueueSnapshot,
@@ -21,6 +22,48 @@ def _fail(constraint_id: str, source: str, detail: str) -> ConstraintFailure:
         source=source,
         detail=detail,
     )
+
+
+def _ticket_applies_to_row(parsed_ticket: ParsedTicket | None, truck_id: str) -> bool:
+    if parsed_ticket is None:
+        return False
+    if parsed_ticket.truck_id is None:
+        return True
+    return parsed_ticket.truck_id == truck_id
+
+
+def validate_override_action(
+    *,
+    validation: ValidationResult,
+    operator_action: OperatorDecision,
+) -> None:
+    if operator_action.action_type != OperatorAction.OVERRIDE:
+        return
+    if not operator_action.reason.strip():
+        raise PequiFluxError("OVERRIDE_REASON_REQUIRED", "Override requires an explicit reason.")
+    if not operator_action.requested_truck_id or not operator_action.requested_destination_id:
+        raise PequiFluxError(
+            "OVERRIDE_TARGET_REQUIRED",
+            "Override requires requested truck and destination ids.",
+        )
+
+    entry = next(
+        (
+            item
+            for item in validation.validation_matrix
+            if item.truck_id == operator_action.requested_truck_id
+            and item.destination_id == operator_action.requested_destination_id
+        ),
+        None,
+    )
+    if entry is None:
+        raise PequiFluxError("UNKNOWN_OVERRIDE_PAIR", "Override pair is not in the validation matrix.")
+    if not entry.eligible:
+        failed = ", ".join(failure.constraint_id for failure in entry.failed_constraints)
+        raise PequiFluxError(
+            "HC_07_OVERRIDE_CANNOT_BYPASS_HARD_CONSTRAINTS",
+            f"Override pair is ineligible under hard constraints: {failed}",
+        )
 
 
 def validate_hard_constraints(
@@ -57,6 +100,7 @@ def validate_hard_constraints(
 
             if (
                 parsed_ticket
+                and _ticket_applies_to_row(parsed_ticket, row.truck_id)
                 and parsed_ticket.load_condition == LoadCondition.WET
                 and parsed_ticket.destination_constraints
                 and destination_id not in parsed_ticket.destination_constraints
@@ -74,7 +118,7 @@ def validate_hard_constraints(
                     _fail("HC-03", "resource_state", "Destination is down or blocked.")
                 )
 
-            if parsed_ticket and (
+            if _ticket_applies_to_row(parsed_ticket, row.truck_id) and (
                 parsed_ticket.document_status != DocumentStatus.CLEAR
                 or parsed_ticket.document_block_flags
             ):
@@ -121,4 +165,3 @@ def validate_hard_constraints(
         global_blocks=global_blocks,
         policy_profile_version=policy_profile.version,
     )
-

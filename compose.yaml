@@ -1,0 +1,114 @@
+services:
+  gemma:
+    image: "${OLLAMA_IMAGE:-alpine/ollama:latest}"
+    volumes:
+      - gemma-models:/root/.ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-24h}"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  gemma-init:
+    image: "${OLLAMA_IMAGE:-alpine/ollama:latest}"
+    depends_on:
+      gemma:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://gemma:11434
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+    entrypoint: ["sh", "-lc"]
+    command: ["ollama pull \"$${GEMMA_MODEL}\""]
+    profiles: ["gemma-setup"]
+
+  demo:
+    build:
+      context: .
+      target: runtime
+    image: pequiflux-yard-copilot:local
+    depends_on:
+      gemma:
+        condition: service_healthy
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: ollama
+      GEMMA_BASE_URL: http://gemma:11434
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+    command: ["python", "-m", "app.cli.run_scenario", "--scenario", "${SCENARIO:-S10_FIFO_BREAK_JUSTIFIED}"]
+    volumes:
+      - app-cache:/app/cache
+
+  gemma-prewarm:
+    build:
+      context: .
+      target: runtime
+    image: pequiflux-yard-copilot:local
+    depends_on:
+      gemma:
+        condition: service_healthy
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: ollama
+      GEMMA_BASE_URL: http://gemma:11434
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+    command: ["python", "-m", "app.cli.prewarm_gemma"]
+    volumes:
+      - app-cache:/app/cache
+    profiles: ["gemma-setup"]
+
+  benchmark:
+    build:
+      context: .
+      target: runtime
+    image: pequiflux-yard-copilot:local
+    depends_on:
+      gemma:
+        condition: service_healthy
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: ollama
+      GEMMA_BASE_URL: http://gemma:11434
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+    command: ["python", "-m", "app.cli.run_benchmark", "--manifest", "scenarios/manifest.json"]
+    volumes:
+      - ./bench/reports:/app/bench/reports
+      - app-cache:/app/cache
+
+  test:
+    build:
+      context: .
+      target: test
+    image: pequiflux-yard-copilot:test
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: text
+    profiles: ["ci"]
+
+  ui:
+    build:
+      context: .
+      target: ui
+    image: pequiflux-yard-copilot:ui
+    depends_on:
+      gemma:
+        condition: service_healthy
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: ollama
+      GEMMA_BASE_URL: http://gemma:11434
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+    ports:
+      - "8501:8501"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - app-cache:/app/cache
+    profiles: ["ui"]
+
+volumes:
+  gemma-models:
+  app-cache:

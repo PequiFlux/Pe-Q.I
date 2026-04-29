@@ -65,7 +65,23 @@ def build_decision_preview(
         for failure in entry.failed_constraints
         if entry.truck_id == top.truck_id
     ]
-    reason_summary = top.reason_details[0] if top.reason_details else "Deterministic ranking selected the top eligible pair."
+    if top.fifo_break:
+        break_reasons = [
+            detail
+            for detail in top.reason_details
+            if "FIFO" not in detail
+        ]
+        reason_summary = (
+            "FIFO break justified by " + "; ".join(break_reasons)
+            if break_reasons
+            else "FIFO break justified by deterministic ranking among eligible pairs."
+        )
+    else:
+        reason_summary = (
+            top.reason_details[0]
+            if top.reason_details
+            else "Deterministic ranking selected the top eligible pair."
+        )
     return DecisionPreview(
         decision_id=_decision_id(request_id),
         request_id=request_id,
@@ -143,6 +159,15 @@ def build_frontend_payload(
     driver_message,
     interpreted_context: InterpretedContext,
 ) -> FrontEndPayload:
+    parsed_ticket = interpreted_context.parsed_ticket
+    confidence_notes = [
+        f"parse_confidence={parsed_ticket.parse_confidence:.2f}",
+        f"document_status={parsed_ticket.document_status}",
+        f"load_condition={parsed_ticket.load_condition}",
+    ]
+    if interpreted_context.needs_human_review:
+        confidence_notes.extend(interpreted_context.review_reasons)
+
     return FrontEndPayload(
         request_id=preview.request_id,
         scenario_id=preview.scenario_id,
@@ -167,6 +192,12 @@ def build_frontend_payload(
             exception_label=interpreted_context.exception_assessment.primary_exception,
             notes=interpreted_context.review_reasons,
         ),
+        latency_ms=audit.latencies_ms if audit else {},
+        benchmark_tags=[
+            f"scenario:{preview.scenario_id}",
+            f"variant:{preview.variant}",
+            f"status:{preview.decision_status}",
+        ],
+        confidence_notes=confidence_notes,
         audit_record=audit,
     )
-

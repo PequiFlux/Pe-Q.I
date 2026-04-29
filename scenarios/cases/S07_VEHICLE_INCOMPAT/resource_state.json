@@ -1,0 +1,10 @@
+[
+  {
+    "resource_id": "DST-NARROW-01",
+    "status": "available",
+    "capacity_pct": 80,
+    "resource_type": "narrow_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": ["truck"]
+  }
+]
