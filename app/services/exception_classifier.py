@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.domain.enums import DocumentStatus, LoadCondition, Severity
 from app.domain.models import ExceptionAssessment, ParsedTicket, QueueSnapshot, ResourceState, WeatherState
+from app.gemma.adapter import GemmaAdapter
 
 
 def classify_exception(
@@ -12,6 +13,7 @@ def classify_exception(
     weather_state: WeatherState,
     resource_state: list[ResourceState],
     queue_snapshot: QueueSnapshot,
+    gemma_adapter: GemmaAdapter | None = None,
 ) -> ExceptionAssessment:
     note = operator_note.lower()
 
@@ -44,6 +46,16 @@ def classify_exception(
             affected_resources=list(parsed_ticket.destination_constraints),
         )
 
+    if _requires_contextual_classification(note, parsed_ticket) and gemma_adapter is not None:
+        return gemma_adapter.classify_exception(
+            request_id=request_id,
+            parsed_ticket=parsed_ticket,
+            operator_note=operator_note,
+            weather_state=weather_state,
+            resource_state=resource_state,
+            queue_snapshot=queue_snapshot,
+        )
+
     if "revis" in note or "confer" in note:
         return ExceptionAssessment(
             primary_exception="MANUAL_REVIEW_HINT",
@@ -60,3 +72,10 @@ def classify_exception(
         needs_human_review=False,
     )
 
+
+def _requires_contextual_classification(note: str, parsed_ticket: ParsedTicket | None) -> bool:
+    ambiguous_terms = {"ambig", "duvid", "incert", "verificar", "avaliar", "anomalia"}
+    return bool(
+        any(term in note for term in ambiguous_terms)
+        or (parsed_ticket and parsed_ticket.ambiguities)
+    )

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.domain.errors import PequiFluxError
-from app.domain.models import ParsedTicket
+from app.domain.models import ExceptionAssessment, ParsedTicket
 
 _TEXT_MARKER = "Extracted text, if available:"
 
@@ -17,7 +17,14 @@ class TextTicketRuntime:
         prompt: str,
         response_model: type,
         metadata: dict[str, Any],
-    ) -> ParsedTicket:
+    ) -> ParsedTicket | ExceptionAssessment:
+        if response_model is ExceptionAssessment:
+            return ExceptionAssessment(
+                primary_exception="MANUAL_REVIEW_HINT",
+                severity="medium",
+                ambiguities=["Text runtime classified ambiguous exception fixture."],
+                needs_human_review=True,
+            )
         if response_model is not ParsedTicket:
             raise PequiFluxError("UNSUPPORTED_SCHEMA", "TextTicketRuntime only emits ParsedTicket.")
         if metadata.get("content_type") != "text/plain":

@@ -113,6 +113,7 @@ class DecisionOrchestrator:
                 weather_state=request.weather_state,
                 resource_state=request.resource_state,
                 queue_snapshot=normalized_queue,
+                gemma_adapter=self.gemma_adapter if request.variant == "full" else None,
             )
             interpreted_context = resolve_truth(
                 queue_snapshot=normalized_queue,

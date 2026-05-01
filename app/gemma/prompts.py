@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from app.domain.models import DecisionPreview, DocumentBundle
+import json
+
+from app.domain.models import (
+    DecisionPreview,
+    DocumentBundle,
+    ParsedTicket,
+    QueueSnapshot,
+    ResourceState,
+    WeatherState,
+)
 
 
 def build_parse_ticket_prompt(bundle: DocumentBundle) -> str:
@@ -30,3 +39,30 @@ def build_reason_summary_prompt(preview: DecisionPreview) -> str:
         f"Status: {preview.decision_status}. "
         f"Reason details: {'; '.join(preview.reason_details)}"
     )
+
+
+def build_exception_classification_prompt(
+    *,
+    request_id: str,
+    parsed_ticket: ParsedTicket | None,
+    operator_note: str,
+    weather_state: WeatherState,
+    resource_state: list[ResourceState],
+    queue_snapshot: QueueSnapshot,
+) -> str:
+    return (
+        "Classify the dominant operational exception into the repository ExceptionAssessment schema. "
+        "Do not make dispatch decisions, do not alter hard constraints, and do not invent state. "
+        "Use local structured state as higher authority than free-text notes. "
+        "Prefer needs_human_review=true when evidence is ambiguous. "
+        f"Request id: {request_id}. "
+        f"Parsed ticket: {_json(parsed_ticket.model_dump(mode='json') if parsed_ticket else None)}. "
+        f"Operator note: {operator_note}. "
+        f"Weather state: {_json(weather_state.model_dump(mode='json'))}. "
+        f"Resource state: {_json([item.model_dump(mode='json') for item in resource_state])}. "
+        f"Queue snapshot: {_json(queue_snapshot.model_dump(mode='json'))}."
+    )
+
+
+def _json(value: object) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
