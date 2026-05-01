@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 from time import perf_counter
+from typing import Any
 
 from app.adapters.csv_adapter import load_queue_rows, normalize_queue_snapshot
 from app.adapters.note_adapter import sanitize_operator_note
@@ -64,10 +67,7 @@ class DecisionOrchestrator:
             state_machine.transition_to(FlowState.NORMALIZED)
             timers["normalize_queue_snapshot"] = int((perf_counter() - queue_t0) * 1000)
 
-            source_hashes = {
-                "queue_csv_ref": str(Path(request.queue_csv_ref)),
-                "ticket_ref": str(Path(request.ticket_ref)),
-            }
+            source_hashes = _build_source_hashes(request)
 
             candidate_truck_ids = [row.truck_id for row in normalized_queue.waiting_rows]
             parsed_ticket: ParsedTicket | None = None
@@ -272,3 +272,33 @@ class DecisionOrchestrator:
                 "decision_summary": summary,
             }
         )
+
+
+def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:
+    return {
+        "queue_csv_ref": _hash_file(request.queue_csv_ref),
+        "ticket_ref": _hash_file(request.ticket_ref),
+        "operator_note": _hash_text(request.operator_note),
+        "weather_state": _hash_json(request.weather_state.model_dump(mode="json")),
+        "resource_state": _hash_json([item.model_dump(mode="json") for item in request.resource_state]),
+    }
+
+
+def _hash_file(path_ref: str) -> str:
+    path = Path(path_ref)
+    if not path.exists():
+        raise PequiFluxError("SOURCE_FILE_NOT_FOUND", f"Source file not found: {path_ref}")
+    return _sha256(path.read_bytes())
+
+
+def _hash_text(value: str) -> str:
+    return _sha256(value.encode("utf-8"))
+
+
+def _hash_json(value: Any) -> str:
+    canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return _sha256(canonical.encode("utf-8"))
+
+
+def _sha256(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
