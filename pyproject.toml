@@ -5,6 +5,7 @@ description = "Modular monolith scaffold for the PequiFlux Yard Copilot."
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.12,<3.0",
+    "PyMuPDF>=1.24,<2.0",
 ]
 
 [project.optional-dependencies]
@@ -18,4 +19,3 @@ ui = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-

@@ -5,6 +5,7 @@ import pytest
 from app.domain.errors import PequiFluxError, SchemaViolationError
 from app.domain.models import DocumentBundle, ParsedTicket
 from app.gemma.adapter import GemmaAdapter
+from app.gemma.text_runtime import TextTicketRuntime
 
 
 def _bundle() -> DocumentBundle:
@@ -69,3 +70,8 @@ def test_gemma_adapter_rejects_invalid_schema_output() -> None:
 def test_gemma_adapter_wraps_runtime_failures_as_formal_errors() -> None:
     with pytest.raises(PequiFluxError, match="MODEL_RUNTIME_ERROR"):
         GemmaAdapter(runtime=FailingRuntime()).parse_ticket_document(_bundle())
+
+
+def test_text_runtime_is_limited_to_text_plain_fixtures() -> None:
+    with pytest.raises(PequiFluxError, match="TEXT_RUNTIME_REQUIRES_TEXT_TICKET"):
+        GemmaAdapter(runtime=TextTicketRuntime()).parse_ticket_document(_bundle())

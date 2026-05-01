@@ -93,6 +93,7 @@ class DocumentBundle(StrictModel):
     content_type: TicketContentType
     sha256: str
     extracted_text: str | None = None
+    rendered_pages: list[str] = Field(default_factory=list)
     candidate_truck_ids: list[str] = Field(default_factory=list)
 
 

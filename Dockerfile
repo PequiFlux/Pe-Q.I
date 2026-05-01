@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1.7
 
 ARG PYTHON_VERSION=3.11
+ARG PYTHON_BASE_IMAGE=python:${PYTHON_VERSION}-slim
 
-FROM python:${PYTHON_VERSION}-slim AS wheels
+FROM ${PYTHON_BASE_IMAGE} AS wheels
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
@@ -13,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install --upgrade pip wheel && \
     python -m pip wheel --wheel-dir /wheels -r requirements-all.txt
 
-FROM python:${PYTHON_VERSION}-slim AS runtime
+FROM ${PYTHON_BASE_IMAGE} AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -39,6 +40,7 @@ RUN python -m pip install --no-index --find-links=/wheels -r requirements-all.tx
 
 COPY --chown=pequiflux:pequiflux app app
 COPY --chown=pequiflux:pequiflux bench bench
+COPY --chown=pequiflux:pequiflux data data
 COPY --chown=pequiflux:pequiflux docs docs
 COPY --chown=pequiflux:pequiflux scenarios scenarios
 COPY --chown=pequiflux:pequiflux scripts scripts

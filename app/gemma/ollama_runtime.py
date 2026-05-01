@@ -56,9 +56,9 @@ class OllamaGemmaRuntime:
             "format": "json",
             "options": {"temperature": 0},
         }
-        image = _image_payload(metadata)
-        if image is not None:
-            payload["images"] = [image]
+        images = _image_payloads(metadata)
+        if images:
+            payload["images"] = images
 
         raw = self._post_json("/api/generate", payload)
         text = str(raw.get("response") or "").strip()
@@ -127,14 +127,25 @@ def _structured_prompt(prompt: str, response_model: type[BaseModel]) -> str:
     )
 
 
-def _image_payload(metadata: dict[str, Any]) -> str | None:
+def _image_payloads(metadata: dict[str, Any]) -> list[str]:
     content_type = str(metadata.get("content_type") or "")
-    if content_type not in {"image/png", "image/jpeg"}:
-        return None
-    document_ref = metadata.get("document_ref")
-    if not document_ref:
-        raise PequiFluxError("DOCUMENT_REF_REQUIRED", "Image document_ref is required.")
-    path = Path(str(document_ref))
+    if content_type in {"image/png", "image/jpeg"}:
+        document_ref = metadata.get("document_ref")
+        if not document_ref:
+            raise PequiFluxError("DOCUMENT_REF_REQUIRED", "Image document_ref is required.")
+        return [_encode_image_path(Path(str(document_ref)))]
+    if content_type == "application/pdf":
+        rendered_pages = metadata.get("rendered_pages")
+        if not isinstance(rendered_pages, list) or not rendered_pages:
+            raise PequiFluxError(
+                "PDF_RENDERED_PAGES_REQUIRED",
+                "PDF tickets must be rendered before calling the multimodal Gemma runtime.",
+            )
+        return [_encode_image_path(Path(str(page))) for page in rendered_pages]
+    return []
+
+
+def _encode_image_path(path: Path) -> str:
     if not path.exists():
-        raise PequiFluxError("DOCUMENT_NOT_FOUND", f"Document not found: {document_ref}")
+        raise PequiFluxError("DOCUMENT_NOT_FOUND", f"Document not found: {path}")
     return base64.b64encode(path.read_bytes()).decode("ascii")

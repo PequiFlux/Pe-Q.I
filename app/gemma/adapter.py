@@ -47,6 +47,7 @@ class GemmaAdapter:
                     "document_ref": bundle.document_ref,
                     "content_type": bundle.content_type,
                     "sha256": bundle.sha256,
+                    "rendered_pages": list(bundle.rendered_pages),
                 },
             )
         except PequiFluxError:

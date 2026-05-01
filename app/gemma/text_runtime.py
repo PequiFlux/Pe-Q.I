@@ -20,6 +20,11 @@ class TextTicketRuntime:
     ) -> ParsedTicket:
         if response_model is not ParsedTicket:
             raise PequiFluxError("UNSUPPORTED_SCHEMA", "TextTicketRuntime only emits ParsedTicket.")
+        if metadata.get("content_type") != "text/plain":
+            raise PequiFluxError(
+                "TEXT_RUNTIME_REQUIRES_TEXT_TICKET",
+                "TextTicketRuntime is only valid for text/plain CI fixtures.",
+            )
 
         text = _extract_ticket_text(prompt)
         fields = _parse_fields(text)
