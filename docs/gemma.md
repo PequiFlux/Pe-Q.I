@@ -29,6 +29,23 @@ Requisitos:
 - erros categorizáveis
 - integração com tool calling contido
 
+## Runtime Docker
+
+O Compose sobe um serviço local `gemma` com Ollama e injeta o runtime na aplicação:
+
+- `PEQUIFLUX_GEMMA_RUNTIME=ollama`
+- `GEMMA_BASE_URL=http://gemma:11434`
+- `GEMMA_MODEL=gemma4:latest` por padrão
+- `OLLAMA_IMAGE=alpine/ollama:latest` por padrão, para runtime CPU-only menor
+
+O modelo precisa estar cacheado no volume `gemma-models` antes da demo real:
+
+```bash
+GEMMA_MODEL=gemma4:latest docker compose --profile gemma-setup run --rm gemma-init
+```
+
+Se o runtime não responder ou o modelo não existir, o sistema falha fechado e retorna erro/revisão em vez de trocar automaticamente para parser heurístico.
+
 ## Prompting e saída
 
 - prompting contract-first
@@ -76,4 +93,3 @@ Não mostrar:
 - tokens
 - chain-of-thought
 - mensagens internas longas
-

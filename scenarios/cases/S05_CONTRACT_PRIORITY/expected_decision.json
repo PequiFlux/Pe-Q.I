@@ -1,0 +1,9 @@
+{
+  "expected_status": "PREVIEW_READY",
+  "acceptable_trucks": ["TRK-003"],
+  "acceptable_destinations": ["DST-COV-01"],
+  "required_constraints": [],
+  "required_policy_rules": ["PR-02"],
+  "fifo_break_expected": true,
+  "expected_primary_exception": "NO_EXCEPTION"
+}

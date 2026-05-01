@@ -4,6 +4,7 @@ from math import isclose
 
 from app.domain.errors import PequiFluxError
 from app.domain.models import (
+    DecisionVariant,
     ExceptionAssessment,
     PolicyProfile,
     QueueSnapshot,
@@ -20,6 +21,7 @@ def rank_candidates(
     policy_profile: PolicyProfile,
     queue_snapshot: QueueSnapshot,
     exception_assessment: ExceptionAssessment,
+    variant: DecisionVariant = "full",
 ) -> RankedCandidates:
     if not validation_matrix.validation_matrix:
         raise PequiFluxError("EMPTY_VALIDATION_MATRIX", "No validation entries were generated.")
@@ -41,17 +43,19 @@ def rank_candidates(
         fired_rules.append("PR-01")
         reason_details.append("FIFO ordering preserved when possible.")
 
-        if row.contract_priority_flag:
+        if variant in {"heuristic", "full"} and row.contract_priority_flag:
             score += policy_profile.weights.contract_priority
             fired_rules.append("PR-02")
             reason_details.append("Contract priority published in the queue snapshot.")
 
-        if entry.destination_id in exception_assessment.affected_resources:
+        if variant == "full" and entry.destination_id in exception_assessment.affected_resources:
             score += policy_profile.weights.resource_fit
             fired_rules.append("PR-03")
             reason_details.append("Destination matches the active exception context.")
 
-        wait_pressure = min(row.wait_minutes / 120, 1.0) * policy_profile.weights.wait_sla_pressure
+        wait_pressure = 0.0
+        if variant in {"heuristic", "full"}:
+            wait_pressure = min(row.wait_minutes / 120, 1.0) * policy_profile.weights.wait_sla_pressure
         if not isclose(wait_pressure, 0.0):
             score += wait_pressure
             fired_rules.append("PR-04")
@@ -84,4 +88,3 @@ def rank_candidates(
         )
     )
     return RankedCandidates(candidates=candidates)
-

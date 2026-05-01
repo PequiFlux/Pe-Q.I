@@ -1,32 +1,24 @@
-from app.gemma import GemmaAdapter # Importando o adapter que criamos para o modelo Gemma
-import os # Para lidar com caminhos de arquivos de forma mais segura
-from dotenv import load_dotenv # Para carregar as variáveis de ambiente do arquivo .env
+from __future__ import annotations
 
-# 1. Configuração 
-load_dotenv() # Carrega as variáveis de ambiente do arquivo .env
-CHAVE_API = os.getenv("GEMINI_API_KEY")
-adapter = GemmaAdapter(api_key=CHAVE_API)
+from app.adapters.document_adapter import build_document_bundle
+from app.domain.models import ParsedTicket
+from app.gemma import GemmaAdapter
 
-# 2. Dados de Entrada (Simulando o que viria da Portaria)
-imagem = os.path.join("data", "tickets", "ticket_teste.pdf")
-nota_operador = "O motorista relatou que pegou chuva na estrada."
-clima_api = "Precipitação: Moderada"
 
-print("--- Iniciando Interpretação da Portaria ---")
+class DemoRuntime:
+    def generate_structured(self, **kwargs):
+        return ParsedTicket(ticket_id="TCK-DEMO", truck_id="TRK-DEMO", parse_confidence=0.9)
 
-try:
-    # 3. Chamando a sua IA
-    resultado = adapter.parse_ticket_document(
-        file_path=imagem,
-        operator_note=nota_operador,
-        weather_state=clima_api
+    def summarize(self, **kwargs) -> str:
+        return "Demo summary."
+
+
+if __name__ == "__main__":
+    bundle = build_document_bundle(
+        request_id="REQ-DEMO",
+        document_ref="data/tickets/ticket_teste.pdf",
+        content_type="application/pdf",
+        candidate_truck_ids=["TRK-DEMO"],
     )
-
-    # 4. Verificando o resultado
-    print(f"ID do Ticket: {resultado.parsed_ticket.ticket_id}")
-    print(f"Condição da Carga: {resultado.parsed_ticket.load_condition}")
-    print(f"Precisa de Revisão? {'SIM' if resultado.is_review_required else 'NÃO'}")
-    print(f"Resumo da IA: {resultado.provenance_summary}")
-
-except Exception as e:
-    print(f"O teste falhou, mas o sistema capturou o erro: {e}")
+    result = GemmaAdapter(runtime=DemoRuntime()).parse_ticket_document(bundle)
+    print(result.model_dump())

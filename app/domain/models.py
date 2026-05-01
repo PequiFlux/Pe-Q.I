@@ -105,7 +105,7 @@ class ParsedTicket(StrictModel):
     load_condition: LoadCondition = LoadCondition.UNKNOWN
     contract_priority_flag: bool = False
     destination_constraints: list[str] = Field(default_factory=list)
-    parse_confidence: float = 0.0
+    parse_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     ambiguities: list[str] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
 
@@ -273,6 +273,9 @@ class FrontEndPayload(StrictModel):
     operator_actions: list[OperatorAction] = Field(default_factory=list)
     queue_diff: list[QueueDiffEntry] = Field(default_factory=list)
     gemma_visible_summary: GemmaVisibleSummary
+    latency_ms: dict[str, int] = Field(default_factory=dict)
+    benchmark_tags: list[str] = Field(default_factory=list)
+    confidence_notes: list[str] = Field(default_factory=list)
     audit_record: AuditRecord | None = None
 
 

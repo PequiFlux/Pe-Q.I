@@ -1,0 +1,12 @@
+ticket_id: TCK-S03-001
+truck_id: TRK-001
+vehicle_type: bitrem
+document_status: clear
+document_block_flags: []
+load_condition: wet
+contract_priority_flag: false
+destination_constraints: [DST-WET-01]
+parse_confidence: 0.91
+evidence_refs:
+- "load_condition: wet"
+- "destination_constraints: DST-WET-01"

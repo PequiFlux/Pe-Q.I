@@ -1,0 +1,10 @@
+[
+  {
+    "resource_id": "DST-COV-01",
+    "status": "available",
+    "capacity_pct": 85,
+    "resource_type": "covered_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": ["truck", "bitrem"]
+  }
+]

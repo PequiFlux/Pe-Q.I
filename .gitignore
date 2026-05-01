@@ -9,3 +9,8 @@ logs/
 var/
 
 .env
+.env.*
+.gstack/
+.codex
+.codex/
+AGENTS.md
