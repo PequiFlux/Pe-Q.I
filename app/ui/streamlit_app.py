@@ -11,9 +11,12 @@ from typing import Any
 import streamlit as st
 from pydantic import ValidationError
 
+from app.domain.errors import PequiFluxError
 from app.domain.models import DecisionRequest, FrontEndPayload
 from app.gemma.runtime_factory import build_gemma_adapter
 from app.orchestration.orchestrator import DecisionOrchestrator
+from app.services.operator_governance import finalize_operator_decision
+from app.storage.sqlite_store import SQLiteStore
 
 
 MANIFEST_PATH = Path("scenarios/manifest.json")
@@ -476,20 +479,24 @@ def _render_operator_action(payload: FrontEndPayload) -> None:
         )
         requested_destination = st.selectbox("Destino solicitado", destination_options)
     if st.button("Registrar acao", type="primary"):
-        error = _validate_action(payload, action, reason, requested_truck, requested_destination)
-        if error:
-            st.error(error)
+        try:
+            finalized, updated_audit = finalize_operator_decision(
+                payload=payload,
+                action_type=action,
+                reason=reason,
+                actor_id="OP-DEMO-01",
+                requested_truck_id=requested_truck,
+                requested_destination_id=requested_destination,
+                sqlite_store=_ui_sqlite_store(),
+            )
+        except PequiFluxError as exc:
+            st.error(exc.message)
         else:
-            st.success("Acao registrada no estado da interface.")
-            st.session_state["operator_action"] = {
-                "action": action,
-                "reason": reason,
-                "actor_id": "OP-DEMO-01",
-                "requested_truck": requested_truck,
-                "requested_destination": requested_destination,
-            }
-    if "operator_action" in st.session_state:
-        st.json(st.session_state["operator_action"])
+            st.success("Acao humana finalizada e persistida.")
+            st.session_state["operator_finalization"] = finalized.model_dump(mode="json")
+            st.session_state["operator_audit_update"] = updated_audit.operator_action
+    if "operator_finalization" in st.session_state:
+        st.json(st.session_state["operator_finalization"])
     st.markdown("</article>", unsafe_allow_html=True)
 
 
@@ -547,30 +554,8 @@ def _render_error(error: str) -> None:
     )
 
 
-def _validate_action(
-    payload: FrontEndPayload,
-    action: str,
-    reason: str,
-    requested_truck: str | None,
-    requested_destination: str | None,
-) -> str | None:
-    if not reason.strip():
-        return "Motivo obrigatorio."
-    if not action.endswith("override"):
-        return None
-    if not requested_truck or not requested_destination:
-        return "Override exige caminhao e destino."
-    if payload.audit_record is None:
-        return "Override indisponivel sem matriz de validacao."
-    for entry in payload.audit_record.hard_constraints_checked:
-        if entry["truck_id"] == requested_truck and entry["destination_id"] == requested_destination:
-            if entry["eligible"]:
-                return None
-            failed = ", ".join(
-                failure["constraint_id"] for failure in entry.get("failed_constraints", [])
-            )
-            return f"Override bloqueado por hard constraints: {failed}"
-    return "Par solicitado nao existe na matriz de validacao."
+def _ui_sqlite_store() -> SQLiteStore:
+    return SQLiteStore(path=os.getenv("PEQUIFLUX_SQLITE_PATH", "var/db/pequiflux_ui.db"))
 
 
 def _queue_preview(queue_csv: str) -> str:

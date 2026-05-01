@@ -26,6 +26,13 @@ CREATE TABLE IF NOT EXISTS operator_actions (
     created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS decision_finalizations (
+    decision_id TEXT PRIMARY KEY,
+    final_status TEXT NOT NULL,
+    operator_action_json TEXT NOT NULL,
+    finalized_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS benchmark_runs (
     run_id TEXT PRIMARY KEY,
     variant TEXT NOT NULL,
@@ -41,4 +48,3 @@ CREATE TABLE IF NOT EXISTS artifact_index (
     content_type TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-

@@ -4,7 +4,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-from app.domain.models import AuditRecord, DecisionPreview, OperatorDecision
+from app.domain.models import AuditRecord, DecisionFinalized, DecisionPreview, OperatorDecision
 
 
 class SQLiteStore:
@@ -57,7 +57,7 @@ class SQLiteStore:
         with sqlite3.connect(self.path) as connection:
             connection.execute(
                 """
-                INSERT INTO operator_actions (
+                INSERT OR REPLACE INTO operator_actions (
                     action_id, decision_id, action_type, reason, actor_id, created_at, before_json, after_json
                 ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
                 """,
@@ -73,3 +73,27 @@ class SQLiteStore:
             )
             connection.commit()
 
+    def save_decision_finalized(self, finalized: DecisionFinalized) -> None:
+        with sqlite3.connect(self.path) as connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO decision_finalizations (
+                    decision_id, final_status, operator_action_json, finalized_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                (
+                    finalized.decision_id,
+                    finalized.final_status,
+                    finalized.operator_action.model_dump_json(),
+                    finalized.finalized_at.isoformat(),
+                ),
+            )
+            connection.execute(
+                """
+                UPDATE decision_records
+                SET decision_status = ?
+                WHERE decision_id = ?
+                """,
+                (finalized.final_status, finalized.decision_id),
+            )
+            connection.commit()
