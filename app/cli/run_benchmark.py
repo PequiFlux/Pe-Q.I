@@ -10,6 +10,8 @@ from app.cli.run_scenario import _validate_payload
 from app.domain.models import DecisionRequest
 from app.gemma.runtime_factory import build_gemma_adapter
 from app.orchestration.orchestrator import DecisionOrchestrator
+from app.services.structured_ticket_parser import parse_structured_ticket_document
+from bench.metrics import compute_variant_metrics
 
 
 def main() -> None:
@@ -33,16 +35,37 @@ def main() -> None:
     for case in manifest["cases"]:
         base_request = DecisionRequest.model_validate(case["request"])
         expected = json.loads(Path(case["files"]["expected_decision"]).read_text(encoding="utf-8"))
+        expected_ticket = parse_structured_ticket_document(
+            request_id=base_request.request_id,
+            document_ref=base_request.ticket_ref,
+            content_type=base_request.ticket_content_type,
+            candidate_truck_ids=[],
+        )
         for variant in variants:
             request = base_request.model_copy(update={"variant": variant})
             payload = orchestrator.run_decision(request)
             match_at_1 = _matches_expected(payload, expected)
             constraint_violation = _has_constraint_violation(payload)
+            fifo_break = bool(
+                payload.recommended_truck
+                and payload.recommended_truck.queue_position_before != 1
+            )
+            observed_ticket = payload.benchmark_observed.get("parsed_ticket", {})
+            observed_primary_exception = str(
+                payload.benchmark_observed.get("primary_exception", "UNKNOWN")
+            )
+            ticket_field_accuracy = (
+                0.0
+                if variant == "fifo"
+                else _ticket_field_accuracy(observed_ticket, expected_ticket.model_dump(mode="json"))
+            )
+            audit_complete = _audit_complete(payload)
+            fifo_break_justified = fifo_break and expected["fifo_break_expected"]
 
             try:
                 if not args.no_validate and variant == "full":
                     _validate_payload(payload, expected)
-                if constraint_violation:
+                if variant == "full" and constraint_violation:
                     raise SystemExit("Recommended pair violates a hard constraint.")
                 passed = True
                 error = None
@@ -59,6 +82,13 @@ def main() -> None:
                     "error": error,
                     "decision_match_at_1": match_at_1,
                     "constraint_violation": constraint_violation,
+                    "ticket_field_accuracy": ticket_field_accuracy,
+                    "observed_primary_exception": observed_primary_exception,
+                    "expected_primary_exception": expected["expected_primary_exception"],
+                    "exception_match": (
+                        observed_primary_exception == expected["expected_primary_exception"]
+                    ),
+                    "audit_complete": audit_complete,
                     "decision_status": payload.decision_status,
                     "recommended_truck": (
                         payload.recommended_truck.truck_id if payload.recommended_truck else None
@@ -68,10 +98,9 @@ def main() -> None:
                         if payload.recommended_destination
                         else None
                     ),
-                    "fifo_break": bool(
-                        payload.recommended_truck
-                        and payload.recommended_truck.queue_position_before != 1
-                    ),
+                    "fifo_break": fifo_break,
+                    "fifo_break_expected": expected["fifo_break_expected"],
+                    "fifo_break_justified": fifo_break_justified,
                     "rejected_count": (
                         len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
                     ),
@@ -83,23 +112,7 @@ def main() -> None:
     variant_metrics = {}
     for variant in variants:
         rows = [item for item in per_scenario if item["variant"] == variant]
-        variant_metrics[variant] = {
-            "scenario_count": len(rows),
-            "passed_count": sum(1 for item in rows if item["passed"]),
-            "failed_count": sum(1 for item in rows if not item["passed"]),
-            "decision_match_at_1": round(
-                sum(1 for item in rows if item["decision_match_at_1"]) / len(rows), 3
-            )
-            if rows
-            else 0.0,
-            "constraint_violation_rate": round(
-                sum(1 for item in rows if item["constraint_violation"]) / len(rows), 3
-            )
-            if rows
-            else 0.0,
-            "p50_latency_ms": _percentile([item["latency_ms_total"] for item in rows], 0.50),
-            "p95_latency_ms": _percentile([item["latency_ms_total"] for item in rows], 0.95),
-        }
+        variant_metrics[variant] = compute_variant_metrics(rows)
 
     metrics = {
         "scenario_count": len(full_rows),
@@ -130,6 +143,12 @@ def _summary_csv(rows: list[dict[str, Any]]) -> str:
         "passed",
         "decision_match_at_1",
         "constraint_violation",
+        "ticket_field_accuracy",
+        "observed_primary_exception",
+        "expected_primary_exception",
+        "exception_match",
+        "fifo_break_justified",
+        "audit_complete",
         "decision_status",
         "recommended_truck",
         "recommended_destination",
@@ -166,12 +185,35 @@ def _has_constraint_violation(payload) -> bool:
     return False
 
 
-def _percentile(values: list[int], quantile: float) -> int:
-    if not values:
-        return 0
-    ordered = sorted(values)
-    index = round((len(ordered) - 1) * quantile)
-    return ordered[index]
+def _ticket_field_accuracy(observed: dict[str, Any], expected: dict[str, Any]) -> float:
+    fields = [
+        "ticket_id",
+        "truck_id",
+        "vehicle_type",
+        "document_status",
+        "document_block_flags",
+        "load_condition",
+        "contract_priority_flag",
+        "destination_constraints",
+    ]
+    matches = sum(1 for field in fields if observed.get(field) == expected.get(field))
+    return round(matches / len(fields), 3)
+
+
+def _audit_complete(payload) -> bool:
+    audit = payload.audit_record
+    if audit is None:
+        return False
+    has_recommendation = payload.recommended_truck is None or audit.recommended_pair is not None
+    return all(
+        [
+            bool(audit.hard_constraints_checked),
+            bool(audit.provenance),
+            bool(audit.latencies_ms),
+            {"queue_csv_ref", "ticket_ref"}.issubset(audit.source_hashes),
+            has_recommendation,
+        ]
+    )
 
 
 if __name__ == "__main__":

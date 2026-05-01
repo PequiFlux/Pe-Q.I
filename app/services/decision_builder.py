@@ -198,6 +198,11 @@ def build_frontend_payload(
             f"variant:{preview.variant}",
             f"status:{preview.decision_status}",
         ],
+        benchmark_observed={
+            "parsed_ticket": parsed_ticket.model_dump(mode="json"),
+            "primary_exception": interpreted_context.exception_assessment.primary_exception,
+            "needs_human_review": interpreted_context.needs_human_review,
+        },
         confidence_notes=confidence_notes,
         audit_record=audit,
     )

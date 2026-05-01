@@ -148,8 +148,21 @@ def _check_streamlit_demo() -> AuditCheck:
 
 
 def _check_benchmark_cli() -> AuditCheck:
-    source = Path("app/cli/run_benchmark.py").read_text(encoding="utf-8")
-    required_tokens = ("variant_metrics", "decision_match_at_1", "constraint_violation_rate", "p95_latency_ms")
+    source = (
+        Path("app/cli/run_benchmark.py").read_text(encoding="utf-8")
+        + Path("bench/metrics.py").read_text(encoding="utf-8")
+    )
+    required_tokens = (
+        "variant_metrics",
+        "decision_match_at_1",
+        "constraint_violation_rate",
+        "ticket_field_accuracy",
+        "exception_f1",
+        "fifo_break_justified_precision",
+        "audit_completeness",
+        "latency_p50",
+        "latency_p95",
+    )
     missing = [token for token in required_tokens if token not in source]
     return AuditCheck(
         "benchmark_metrics",

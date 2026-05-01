@@ -276,6 +276,7 @@ class FrontEndPayload(StrictModel):
     gemma_visible_summary: GemmaVisibleSummary
     latency_ms: dict[str, int] = Field(default_factory=dict)
     benchmark_tags: list[str] = Field(default_factory=list)
+    benchmark_observed: dict[str, Any] = Field(default_factory=dict)
     confidence_notes: list[str] = Field(default_factory=list)
     audit_record: AuditRecord | None = None
 

@@ -31,6 +31,7 @@ from app.services.decision_builder import (
 from app.services.driver_message import compose_driver_message
 from app.services.exception_classifier import classify_exception
 from app.services.parser import parse_ticket_document
+from app.services.structured_ticket_parser import parse_structured_ticket_document
 from app.storage.jsonl_logger import JsonlLogger
 from app.storage.sqlite_store import SQLiteStore
 
@@ -63,16 +64,39 @@ class DecisionOrchestrator:
             state_machine.transition_to(FlowState.NORMALIZED)
             timers["normalize_queue_snapshot"] = int((perf_counter() - queue_t0) * 1000)
 
-            parse_t0 = perf_counter()
-            parsed_ticket = parse_ticket_document(
-                request_id=request.request_id,
-                document_ref=request.ticket_ref,
-                content_type=request.ticket_content_type,
-                candidate_truck_ids=[row.truck_id for row in normalized_queue.waiting_rows],
-                gemma_adapter=self.gemma_adapter,
-            )
-            state_machine.transition_to(FlowState.PARSED)
-            timers["parse_ticket_document"] = int((perf_counter() - parse_t0) * 1000)
+            source_hashes = {
+                "queue_csv_ref": str(Path(request.queue_csv_ref)),
+                "ticket_ref": str(Path(request.ticket_ref)),
+            }
+
+            candidate_truck_ids = [row.truck_id for row in normalized_queue.waiting_rows]
+            parsed_ticket: ParsedTicket | None = None
+            parsed_ticket_for_constraints: ParsedTicket | None = None
+            if request.variant == "fifo":
+                state_machine.transition_to(FlowState.PARSED)
+            elif request.variant == "heuristic":
+                parse_t0 = perf_counter()
+                parsed_ticket = parse_structured_ticket_document(
+                    request_id=request.request_id,
+                    document_ref=request.ticket_ref,
+                    content_type=request.ticket_content_type,
+                    candidate_truck_ids=candidate_truck_ids,
+                )
+                parsed_ticket_for_constraints = parsed_ticket
+                state_machine.transition_to(FlowState.PARSED)
+                timers["parse_structured_ticket_document"] = int((perf_counter() - parse_t0) * 1000)
+            else:
+                parse_t0 = perf_counter()
+                parsed_ticket = parse_ticket_document(
+                    request_id=request.request_id,
+                    document_ref=request.ticket_ref,
+                    content_type=request.ticket_content_type,
+                    candidate_truck_ids=candidate_truck_ids,
+                    gemma_adapter=self.gemma_adapter,
+                )
+                parsed_ticket_for_constraints = parsed_ticket
+                state_machine.transition_to(FlowState.PARSED)
+                timers["parse_ticket_document"] = int((perf_counter() - parse_t0) * 1000)
 
             interpreted_t0 = perf_counter()
             operator_note = sanitize_operator_note(request.operator_note)
@@ -94,11 +118,6 @@ class DecisionOrchestrator:
             )
             state_machine.transition_to(FlowState.INTERPRETED)
             timers["resolve_truth"] = int((perf_counter() - interpreted_t0) * 1000)
-
-            source_hashes = {
-                "queue_csv_ref": str(Path(request.queue_csv_ref)),
-                "ticket_ref": str(Path(request.ticket_ref)),
-            }
 
             if interpreted_context.needs_human_review:
                 preview = build_review_required_preview(
@@ -134,7 +153,7 @@ class DecisionOrchestrator:
             validation = validate_hard_constraints(
                 request_id=request.request_id,
                 normalized_queue=normalized_queue,
-                parsed_ticket=interpreted_context.parsed_ticket,
+                parsed_ticket=parsed_ticket_for_constraints,
                 weather_state=request.weather_state,
                 resource_state=request.resource_state,
                 candidate_destinations=request.candidate_destinations,

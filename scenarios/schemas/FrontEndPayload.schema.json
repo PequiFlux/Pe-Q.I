@@ -34,6 +34,7 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "benchmark_observed": { "type": "object" },
     "confidence_notes": {
       "type": "array",
       "items": { "type": "string" }
