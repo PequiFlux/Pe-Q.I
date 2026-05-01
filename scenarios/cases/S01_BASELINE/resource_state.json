@@ -5,6 +5,12 @@
     "capacity_pct": 90,
     "resource_type": "covered_hopper",
     "exposure": "covered",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
   }
 ]

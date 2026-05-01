@@ -5,7 +5,13 @@
     "capacity_pct": 0,
     "resource_type": "covered_hopper",
     "exposure": "covered",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
   },
   {
     "resource_id": "DST-ALT-01",
@@ -13,6 +19,12 @@
     "capacity_pct": 80,
     "resource_type": "alternate_hopper",
     "exposure": "covered",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
   }
 ]

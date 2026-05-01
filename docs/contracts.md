@@ -28,7 +28,7 @@ Referências:
 - `ticket_content_type`: exatamente `application/pdf`, `image/png`, `image/jpeg` ou `text/plain`.
 - `operator_note`: texto auxiliar do operador (obrigatório).
 - `weather_state`: objeto sintético do cenário com precipitação e severidade.
-- `resource_state`: lista de recursos com `resource_id`, `status`, `capacity_pct`, `exposure` e `allowed_vehicle_types`.
+- `resource_state`: lista de recursos com `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_vehicle_types` e `supported_load_conditions`.
 - `variant`: `fifo`, `heuristic` ou `full`.
 - `run_mode`: `interactive` ou `benchmark`.
 - `policy_profile_version`: versão da política aplicada (ex.: `v1-demo`).
@@ -193,7 +193,8 @@ Regras canônicas:
     "capacity_pct": 0,
     "exposure": "open",
     "resource_type": "hopper",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": ["truck", "bitrem"],
+    "supported_load_conditions": ["dry"]
   },
   {
     "resource_id": "DST-COV-01",
@@ -201,7 +202,8 @@ Regras canônicas:
     "capacity_pct": 100,
     "exposure": "covered",
     "resource_type": "hopper",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": ["truck", "bitrem"],
+    "supported_load_conditions": ["dry", "wet"]
   }
 ]
 ```

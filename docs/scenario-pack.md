@@ -104,7 +104,7 @@ Campos mínimos: `precipitation`, `severity`, `timestamp`.
 
 ### `resource_state.json`
 
-Campos mínimos: `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_vehicle_types`.
+Campos mínimos: `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_vehicle_types`, `supported_load_conditions`.
 
 ```json
 [
@@ -114,7 +114,8 @@ Campos mínimos: `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_v
     "capacity_pct": 0,
     "exposure": "open",
     "resource_type": "hopper",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": ["truck", "bitrem"],
+    "supported_load_conditions": ["dry"]
   },
   {
     "resource_id": "DST-COV-01",
@@ -122,7 +123,8 @@ Campos mínimos: `resource_id`, `status`, `capacity_pct`, `exposure`, `allowed_v
     "capacity_pct": 100,
     "exposure": "covered",
     "resource_type": "hopper",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": ["truck", "bitrem"],
+    "supported_load_conditions": ["dry", "wet"]
   }
 ]
 ```

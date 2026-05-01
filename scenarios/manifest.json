@@ -34,7 +34,13 @@
             "capacity_pct": 90,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -73,7 +79,13 @@
             "capacity_pct": 85,
             "resource_type": "open_hopper",
             "exposure": "open",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           },
           {
             "resource_id": "DST-COV-01",
@@ -81,7 +93,12 @@
             "capacity_pct": 85,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck"]
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -120,7 +137,13 @@
             "capacity_pct": 90,
             "resource_type": "dry_load_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           },
           {
             "resource_id": "DST-WET-01",
@@ -128,7 +151,14 @@
             "capacity_pct": 90,
             "resource_type": "wet_load_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry",
+              "wet"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -167,7 +197,13 @@
             "capacity_pct": 0,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           },
           {
             "resource_id": "DST-ALT-01",
@@ -175,7 +211,13 @@
             "capacity_pct": 80,
             "resource_type": "alternate_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -214,7 +256,13 @@
             "capacity_pct": 85,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -253,7 +301,13 @@
             "capacity_pct": 90,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -292,7 +346,12 @@
             "capacity_pct": 80,
             "resource_type": "narrow_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck"]
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -331,7 +390,13 @@
             "capacity_pct": 30,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -370,7 +435,13 @@
             "capacity_pct": 80,
             "resource_type": "open_hopper",
             "exposure": "open",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           },
           {
             "resource_id": "DST-COV-01",
@@ -378,7 +449,13 @@
             "capacity_pct": 80,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",
@@ -417,7 +494,13 @@
             "capacity_pct": 85,
             "resource_type": "open_hopper",
             "exposure": "open",
-            "allowed_vehicle_types": ["truck", "bitrem"]
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           },
           {
             "resource_id": "DST-COV-01",
@@ -425,7 +508,12 @@
             "capacity_pct": 85,
             "resource_type": "covered_hopper",
             "exposure": "covered",
-            "allowed_vehicle_types": ["truck"]
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
           }
         ],
         "policy_profile_version": "v1-demo",

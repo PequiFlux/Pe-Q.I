@@ -5,7 +5,13 @@
     "capacity_pct": 85,
     "resource_type": "open_hopper",
     "exposure": "open",
-    "allowed_vehicle_types": ["truck", "bitrem"]
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
   },
   {
     "resource_id": "DST-COV-01",
@@ -13,6 +19,11 @@
     "capacity_pct": 85,
     "resource_type": "covered_hopper",
     "exposure": "covered",
-    "allowed_vehicle_types": ["truck"]
+    "allowed_vehicle_types": [
+      "truck"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
   }
 ]

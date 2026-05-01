@@ -138,6 +138,64 @@ def test_document_block_applies_only_to_ticket_truck() -> None:
     assert by_truck["TRK-002"].eligible is True
 
 
+def test_wet_load_requires_resource_supported_load_condition_without_ticket_destination_hint() -> None:
+    snapshot = QueueSnapshot(
+        request_id="REQ-WET",
+        rows=[
+            QueueRow(
+                truck_id="TRK-001",
+                arrival_ts=datetime(2026, 4, 15, tzinfo=timezone.utc),
+                status="waiting",
+                vehicle_type=VehicleType.TRUCK,
+                queue_position=1,
+                wait_minutes=10,
+            )
+        ],
+    )
+    parsed_ticket = ParsedTicket(
+        truck_id="TRK-001",
+        vehicle_type=VehicleType.TRUCK,
+        document_status=DocumentStatus.CLEAR,
+        load_condition=LoadCondition.WET,
+        destination_constraints=[],
+        parse_confidence=0.95,
+    )
+
+    result = validate_hard_constraints(
+        request_id="REQ-WET",
+        normalized_queue=snapshot,
+        parsed_ticket=parsed_ticket,
+        weather_state=WeatherState(precipitation="none", severity="none"),
+        resource_state=[
+            ResourceState(
+                resource_id="DST-DRY-01",
+                status="available",
+                capacity_pct=70,
+                resource_type="dry_load_hopper",
+                exposure="covered",
+                allowed_vehicle_types=[VehicleType.TRUCK],
+                supported_load_conditions=[LoadCondition.DRY],
+            ),
+            ResourceState(
+                resource_id="DST-WET-01",
+                status="available",
+                capacity_pct=70,
+                resource_type="wet_load_hopper",
+                exposure="covered",
+                allowed_vehicle_types=[VehicleType.TRUCK],
+                supported_load_conditions=[LoadCondition.DRY, LoadCondition.WET],
+            ),
+        ],
+        candidate_destinations=["DST-DRY-01", "DST-WET-01"],
+        policy_profile=_policy(),
+    )
+
+    by_destination = {entry.destination_id: entry for entry in result.validation_matrix}
+    assert by_destination["DST-DRY-01"].eligible is False
+    assert by_destination["DST-DRY-01"].failed_constraints[0].constraint_id == "HC-02"
+    assert by_destination["DST-WET-01"].eligible is True
+
+
 def test_override_cannot_bypass_hard_constraints() -> None:
     validation = ValidationResult(
         validation_matrix=[

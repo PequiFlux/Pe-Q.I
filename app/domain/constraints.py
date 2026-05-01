@@ -102,13 +102,18 @@ def validate_hard_constraints(
                 parsed_ticket
                 and _ticket_applies_to_row(parsed_ticket, row.truck_id)
                 and parsed_ticket.load_condition == LoadCondition.WET
-                and parsed_ticket.destination_constraints
-                and destination_id not in parsed_ticket.destination_constraints
+                and (
+                    LoadCondition.WET not in resource.supported_load_conditions
+                    or (
+                        parsed_ticket.destination_constraints
+                        and destination_id not in parsed_ticket.destination_constraints
+                    )
+                )
             ):
                 failures.append(
                     _fail(
                         "HC-02",
-                        "ticket_document",
+                        "resource_state",
                         "Wet load requires a compatible destination.",
                     )
                 )

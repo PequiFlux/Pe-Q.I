@@ -41,6 +41,7 @@ class ResourceState(StrictModel):
     resource_type: str | None = None
     exposure: str
     allowed_vehicle_types: list[VehicleType] = Field(default_factory=list)
+    supported_load_conditions: list[LoadCondition] = Field(default_factory=lambda: [LoadCondition.DRY])
 
 
 class RawQueueRow(StrictModel):
