@@ -169,6 +169,7 @@ class DecisionOrchestrator:
                 policy_profile=DEFAULT_POLICY,
                 queue_snapshot=normalized_queue,
                 exception_assessment=interpreted_context.exception_assessment,
+                resource_state=request.resource_state,
                 variant=request.variant,
             )
             state_machine.transition_to(FlowState.RANKED)

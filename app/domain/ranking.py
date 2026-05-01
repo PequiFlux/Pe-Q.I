@@ -10,6 +10,7 @@ from app.domain.models import (
     QueueSnapshot,
     RankedCandidate,
     RankedCandidates,
+    ResourceState,
     ValidationResult,
 )
 
@@ -21,12 +22,14 @@ def rank_candidates(
     policy_profile: PolicyProfile,
     queue_snapshot: QueueSnapshot,
     exception_assessment: ExceptionAssessment,
+    resource_state: list[ResourceState] | None = None,
     variant: DecisionVariant = "full",
 ) -> RankedCandidates:
     if not validation_matrix.validation_matrix:
         raise PequiFluxError("EMPTY_VALIDATION_MATRIX", "No validation entries were generated.")
 
     queue_index = {row.truck_id: row for row in queue_snapshot.waiting_rows}
+    resource_index = {resource.resource_id: resource for resource in resource_state or []}
     max_position = max((row.queue_position for row in queue_snapshot.waiting_rows), default=1)
     candidates: list[RankedCandidate] = []
 
@@ -60,6 +63,26 @@ def rank_candidates(
             score += wait_pressure
             fired_rules.append("PR-04")
             reason_details.append("Long wait time increased ranking priority.")
+
+        capacity_penalty = 0.0
+        resource = resource_index.get(entry.destination_id)
+        if (
+            variant in {"heuristic", "full"}
+            and resource is not None
+            and policy_profile.min_operational_capacity_pct <= resource.capacity_pct < policy_profile.comfort_capacity_pct
+        ):
+            capacity_gap = policy_profile.comfort_capacity_pct - resource.capacity_pct
+            comfort_band = (
+                policy_profile.comfort_capacity_pct
+                - policy_profile.min_operational_capacity_pct
+            )
+            capacity_penalty = (
+                capacity_gap / comfort_band
+            ) * policy_profile.weights.capacity_headroom
+        if not isclose(capacity_penalty, 0.0):
+            score -= capacity_penalty
+            fired_rules.append("PR-05")
+            reason_details.append("Reduced capacity lowered ranking priority.")
 
         fifo_break = row.queue_position != 1
         candidates.append(
