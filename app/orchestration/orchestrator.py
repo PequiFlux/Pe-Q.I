@@ -18,9 +18,10 @@ from app.domain.models import (
     FrontEndPayload,
     InterpretedContext,
     ParsedTicket,
+    PolicyProfile,
     TruthResolution,
 )
-from app.domain.policy import DEFAULT_POLICY
+from app.domain.policy import load_policy_profiles
 from app.domain.ranking import rank_candidates
 from app.gemma.adapter import GemmaAdapter
 from app.orchestration.state_machine import WorkflowStateMachine
@@ -47,11 +48,15 @@ class DecisionOrchestrator:
         audit_service: AuditService | None = None,
         sqlite_store: SQLiteStore | None = None,
         jsonl_logger: JsonlLogger | None = None,
+        policy_profiles: dict[str, PolicyProfile] | None = None,
     ) -> None:
         self.gemma_adapter = gemma_adapter
         self.audit_service = audit_service or AuditService()
         self.sqlite_store = sqlite_store
         self.jsonl_logger = jsonl_logger
+        self.policy_profiles = policy_profiles or load_policy_profiles(
+            [Path("scenarios/common/policy_profile.json")]
+        )
 
     def run_decision(self, request: DecisionRequest) -> FrontEndPayload:
         state_machine = WorkflowStateMachine()
@@ -68,6 +73,7 @@ class DecisionOrchestrator:
             timers["normalize_queue_snapshot"] = int((perf_counter() - queue_t0) * 1000)
 
             source_hashes = _build_source_hashes(request)
+            policy_profile = self._policy_profile(request.policy_profile_version)
 
             candidate_truck_ids = [row.truck_id for row in normalized_queue.waiting_rows]
             parsed_ticket: ParsedTicket | None = None
@@ -157,7 +163,7 @@ class DecisionOrchestrator:
                 weather_state=request.weather_state,
                 resource_state=request.resource_state,
                 candidate_destinations=request.candidate_destinations,
-                policy_profile=DEFAULT_POLICY,
+                policy_profile=policy_profile,
             )
             state_machine.transition_to(FlowState.VALIDATED)
             timers["validate_hard_constraints"] = int((perf_counter() - validation_t0) * 1000)
@@ -166,7 +172,7 @@ class DecisionOrchestrator:
             ranking = rank_candidates(
                 request_id=request.request_id,
                 validation_matrix=validation,
-                policy_profile=DEFAULT_POLICY,
+                policy_profile=policy_profile,
                 queue_snapshot=normalized_queue,
                 exception_assessment=interpreted_context.exception_assessment,
                 resource_state=request.resource_state,
@@ -252,6 +258,15 @@ class DecisionOrchestrator:
                 driver_message=driver_message,
                 interpreted_context=blocked_context,
             )
+
+    def _policy_profile(self, version: str) -> PolicyProfile:
+        profile = self.policy_profiles.get(version)
+        if profile is None:
+            raise PequiFluxError(
+                "UNKNOWN_POLICY_PROFILE",
+                f"Unknown policy profile version: {version}",
+            )
+        return profile
 
     def _persist(self, preview, audit) -> None:
         if self.sqlite_store is None:

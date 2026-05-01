@@ -30,3 +30,10 @@ def load_policy_profile(path: str | Path) -> PolicyProfile:
     with Path(path).open("r", encoding="utf-8") as handle:
         return PolicyProfile.model_validate(json.load(handle))
 
+
+def load_policy_profiles(paths: list[str | Path]) -> dict[str, PolicyProfile]:
+    profiles: dict[str, PolicyProfile] = {}
+    for path in paths:
+        profile = load_policy_profile(path)
+        profiles[profile.version] = profile
+    return profiles
