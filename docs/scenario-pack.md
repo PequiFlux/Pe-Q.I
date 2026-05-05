@@ -153,6 +153,8 @@ Campos mínimos recomendados: `expected_status`, `acceptable_trucks`, `acceptabl
 
 ## Cenários obrigatórios
 
+Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.md`, que descreve cada caso em linguagem humana.
+
 - `S01_BASELINE`: prova que o sistema preserva FIFO em regime nominal
 - `S02_RAIN_OPEN`: chuva bloqueia destino aberto e pode justificar quebra de FIFO
 - `S03_WET_LOAD`: parsing documental identifica carga úmida, mas nota com conferência manual exige `REVIEW_REQUIRED`

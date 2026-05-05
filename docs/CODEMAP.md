@@ -17,7 +17,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |
 | Benchmarks | `bench` | Runner e métricas do pacote de cenários | `scenarios`, `app/cli` | Evidência para regressão e comparação |
 | Evidências | `assets/screenshots`, `bench/reports/sample`, `docs/DEMO_SCRIPT.md`, `docs/HACKATHON_SUBMISSION.md`, `docs/LIMITATIONS.md`, `docs/UI_DECISIONS.md` | Artefatos de avaliação para GitHub/hackathon | `app/ui`, `bench`, `docs` | Mantém demo, benchmark, limites e decisões de UI encontráveis em até dois minutos |
-| Scenarios | `scenarios` | Fixtures sintéticas, manifest e schemas JSON | `tests/scenarios`, `bench` | Fonte de casos de validação |
+| Scenarios | `scenarios` | Fixtures sintéticas, manifest, schemas JSON e README narrativo por cenário | `tests/scenarios`, `bench` | Fonte de casos de validação; `scenarios/README.md` deve explicar os casos em linguagem humana para vídeo e avaliação |
 | Tests | `tests` | Testes unitários e de cenário | `app`, `bench`, `scenarios` | Cobrem constraints, auditoria, runtime e E2E |
 
 ## Fluxos importantes
