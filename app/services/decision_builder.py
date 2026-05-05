@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.domain.enums import DecisionStatus, OperatorAction
+from app.domain.enums import DecisionStatus, OperatorAction, PolicyRule
 from app.domain.models import (
     AuditRecord,
     DecisionPreview,
@@ -107,6 +107,7 @@ def build_decision_preview(
             scenario_id=scenario_id,
             variant=variant,
             reason_summary="No eligible pair after deterministic validation.",
+            fired_rules=[PolicyRule.NO_VALID_PAIR_BLOCKS_AUTODISPATCH],
         )
 
     constraints = [
@@ -193,6 +194,7 @@ def build_blocked_preview(
     scenario_id: str,
     variant: str,
     reason_summary: str,
+    fired_rules: list[str] | None = None,
 ) -> DecisionPreview:
     return DecisionPreview(
         decision_id=_decision_id(request_id),
@@ -204,6 +206,7 @@ def build_blocked_preview(
         reason_details=[reason_summary],
         operator_actions=[OperatorAction.BLOCK],
         queue_diff=[],
+        fired_rules=fired_rules or [],
     )
 
 

@@ -64,3 +64,10 @@ class SourceKind(StrEnum):
     WEATHER_STATE = "weather_state"
     RESOURCE_STATE = "resource_state"
 
+
+class PolicyRule(StrEnum):
+    FIFO_DEFAULT = "PR-01"
+    CONTRACT_PRIORITY_MAY_BREAK_FIFO = "PR-02"
+    REDUCED_CAPACITY_PENALTY = "PR-03"
+    WAIT_SLA_PRESSURE = "PR-04"
+    NO_VALID_PAIR_BLOCKS_AUTODISPATCH = "PR-05"

@@ -11,7 +11,7 @@ from app.adapters.csv_adapter import load_queue_rows, normalize_queue_snapshot
 from app.adapters.note_adapter import sanitize_operator_note
 from app.audit.service import AuditService
 from app.domain.constraints import validate_hard_constraints
-from app.domain.enums import FlowState, Severity
+from app.domain.enums import FlowState, PolicyRule, Severity
 from app.domain.errors import PequiFluxError
 from app.domain.models import (
     DecisionRequest,
@@ -328,6 +328,7 @@ class DecisionOrchestrator:
             scenario_id=request.scenario_id,
             variant=request.variant,
             reason_summary=exc.message,
+            fired_rules=_blocked_policy_rules(exc),
         )
         blocked_context = InterpretedContext(
             parsed_ticket=ParsedTicket(),
@@ -427,6 +428,12 @@ def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:
         "weather_state": _hash_json(request.weather_state.model_dump(mode="json")),
         "resource_state": _hash_json([item.model_dump(mode="json") for item in request.resource_state]),
     }
+
+
+def _blocked_policy_rules(exc: PequiFluxError) -> list[str]:
+    if exc.code in {"NO_ELIGIBLE_CANDIDATE", "EMPTY_VALIDATION_MATRIX"}:
+        return [PolicyRule.NO_VALID_PAIR_BLOCKS_AUTODISPATCH]
+    return []
 
 
 def _build_source_hashes_if_available(request: DecisionRequest) -> dict[str, str]:

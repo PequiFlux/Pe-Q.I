@@ -6,7 +6,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 
 | Símbolo | Tipo | Arquivo | Responsabilidade | Entradas | Saídas | Observações |
 |---|---|---|---|---|---|---|
-| `app.cli.run_scenario` | CLI module | `app/cli/run_scenario.py` | Executa um cenário sintético | Caminho/ID de cenário | Decisão e payload de execução | Entrada padrão para demo local |
+| `app.cli.run_scenario` | CLI module | `app/cli/run_scenario.py` | Executa um cenário sintético | Caminho/ID de cenário | Decisão e payload de execução | Entrada padrão para demo local; valida `required_policy_rules` quando o expected do cenário declarar |
 | `app.cli.run_benchmark` | CLI module | `app/cli/run_benchmark.py` | Executa benchmark de cenários | Manifest e fixtures | Métricas/relatório | Usado por Docker/Compose |
 | `app.cli.prewarm_gemma` | CLI module | `app/cli/prewarm_gemma.py` | Preaquece runtime Gemma/Ollama | Configuração de runtime | Status de prewarm | Não deve substituir runtime ausente |
 | `app.cli.blueprint_audit` | CLI module | `app/cli/blueprint_audit.py` | Audita alinhamento com blueprint | Blueprint/docs | Relatório de auditoria | Apoia checks públicos |
@@ -22,6 +22,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.domain.constraints` | module | `app/domain/constraints.py` | Aplica hard constraints | Decisão candidata, contexto | Bloqueios/revisões | Não duplicar em serviços/UI |
 | `app.domain.ranking` | module | `app/domain/ranking.py` | Ordena e pontua fila | Fila, política, contexto | Ranking | Reutilizar antes de criar scoring paralelo |
 | `app.domain.policy` | module | `app/domain/policy.py` | Carrega/aplica perfil de política | Policy profile | Política validada | Alinha scenarios/common |
+| `app.domain.enums.PolicyRule` | enum | `app/domain/enums.py` | Fonte única dos IDs `PR-01`..`PR-05` | Regras de política documentadas | IDs usados em ranking/auditoria/UI/testes | Evita desalinhamento entre blueprint, implementação e apresentação |
 | `app.services.decision_builder` | module | `app/services/decision_builder.py` | Monta decisão e payload de saída | Resultado de domínio/orquestração | Front-end/audit payload | `queue_diff` usa semântica pós-chamada: `called`, `unchanged`, `shifted`, `blocked`, com `position_after=None` para caminhão chamado |
 | `app.gemma.adapter` | module | `app/gemma/adapter.py` | Adapta runtime LLM para contrato do sistema | Prompt/contexto | Contexto interpretado ou erro | Sem fallback silencioso |
 | `app.gemma.runtime_factory` | module | `app/gemma/runtime_factory.py` | Constrói runtime configurado | Configuração | Runtime | Deve falhar se dependência obrigatória faltar |

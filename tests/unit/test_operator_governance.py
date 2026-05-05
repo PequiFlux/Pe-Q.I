@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app.domain.enums import DecisionStatus, OperatorAction
+from app.domain.enums import DecisionStatus, OperatorAction, PolicyRule
 from app.domain.errors import PequiFluxError
 from app.domain.models import FrontEndPayload
 from app.services.operator_governance import finalize_operator_decision
@@ -69,7 +69,7 @@ def _payload() -> FrontEndPayload:
                     ],
                 },
             ],
-            "fired_rules": ["PR-01"],
+            "fired_rules": [PolicyRule.FIFO_DEFAULT],
             "rejected_candidates": [],
             "recommended_pair": {
                 "truck_id": "TRK-001",

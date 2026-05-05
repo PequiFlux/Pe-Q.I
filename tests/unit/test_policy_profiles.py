@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from app.domain.enums import PolicyRule
 from app.domain.models import DecisionRequest, PolicyProfile
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
@@ -48,6 +49,8 @@ def test_orchestrator_uses_requested_policy_profile_version() -> None:
 
     assert payload.decision_status == "BLOCKED"
     assert "No eligible candidate" in payload.reason_summary
+    assert payload.audit_record is not None
+    assert PolicyRule.NO_VALID_PAIR_BLOCKS_AUTODISPATCH in payload.audit_record.fired_rules
 
 
 def test_orchestrator_fails_closed_for_unknown_policy_profile_version() -> None:

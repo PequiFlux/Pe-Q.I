@@ -384,9 +384,10 @@ Perfil padrão (`v1-demo`):
 |------|-------|-------|-------------|
 | FIFO position | 40 | PR-01 | Ordem de chegada preservada quando possível |
 | Contract priority | 30 | PR-02 | Caminhão contratado supera FIFO entre elegíveis |
-| Resource fit | 15 | PR-03 | Destino compatível com exceção ativa |
-| Capacity headroom | 10 | PR-05 | Capacidade reduzida penaliza |
+| Resource fit | 15 | A-05 weight | Destino compatível com exceção ativa |
+| Capacity headroom | 10 | PR-03 | Capacidade reduzida penaliza |
 | Wait SLA pressure | 5 | PR-04 | Espera excessiva recebe bônus limitado |
+| No valid pair | - | PR-05 | Ausência de par válido gera `BLOCKED`, não improvisação |
 
 Desempate: score maior, posição menor na fila, chegada mais cedo, ID lexicográfico.
 

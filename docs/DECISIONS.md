@@ -4,6 +4,28 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — IDs de política centralizados em `PolicyRule`
+
+Contexto:
+O ranking emitia `PR-03` para ajuste de destino por exceção ativa e `PR-05` para penalidade de capacidade, enquanto blueprint e docs definem `PR-03` como penalidade por capacidade reduzida e `PR-05` como bloqueio por ausência de par válido.
+
+Decisão:
+Criar `PolicyRule` em `app/domain/enums.py` como fonte única dos IDs `PR-01`..`PR-05` e usar o enum no ranking, no bloqueio por ausência de candidato e nos testes.
+
+Alternativas rejeitadas:
+Manter IDs de política como strings soltas espalhadas pelo domínio.
+
+Impacto:
+Auditoria, UI e testes passam a consumir os mesmos IDs documentados; `resource_fit` continua como peso de score do perfil `A-05`, mas não reutiliza `PR-03`.
+
+Arquivos/módulos afetados:
+- `app/domain/enums.py`
+- `app/domain/ranking.py`
+- `app/services/decision_builder.py`
+- `app/orchestration/orchestrator.py`
+- `tests/unit/test_ranking.py`
+- `tests/unit/test_policy_profiles.py`
+
 ### 2026-05-05 — `queue_diff` representa fila pós-chamada
 
 Contexto:

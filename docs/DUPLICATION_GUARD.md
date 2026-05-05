@@ -27,6 +27,7 @@ Procurar:
 - Hard constraints: reutilizar `app/domain/constraints.py`.
 - Ranking/FIFO/prioridade: reutilizar `app/domain/ranking.py`.
 - Policy profile: reutilizar `app/domain/policy.py` e `scenarios/common/policy_profile.json`.
+- IDs de regras de política: reutilizar `app/domain/enums.py::PolicyRule`; não escrever `PR-01`..`PR-05` como string solta em ranking, auditoria, UI ou testes.
 - Resolução de verdade entre ticket, nota e estado: reutilizar `app/orchestration/truth_resolver.py`.
 - Transições e estados terminais: reutilizar `app/orchestration/state_machine.py`.
 - Construção de payload/decisão: reutilizar `app/services/decision_builder.py`.

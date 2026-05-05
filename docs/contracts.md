@@ -21,6 +21,18 @@ Referências:
 - [`app/domain/models.py`](../app/domain/models.py)
 - [`scenarios/schemas/DecisionRequest.schema.json`](../scenarios/schemas/DecisionRequest.schema.json)
 
+### `PolicyRule`
+
+IDs de política vivem em [`app/domain/enums.py`](../app/domain/enums.py) e devem ser usados em ranking, auditoria, UI e testes:
+
+| Enum | ID | Significado |
+|---|---|---|
+| `FIFO_DEFAULT` | `PR-01` | FIFO é o padrão |
+| `CONTRACT_PRIORITY_MAY_BREAK_FIFO` | `PR-02` | prioridade contratual pode quebrar FIFO entre pares elegíveis |
+| `REDUCED_CAPACITY_PENALTY` | `PR-03` | capacidade acima do mínimo e abaixo do conforto penaliza ranking |
+| `WAIT_SLA_PRESSURE` | `PR-04` | espera excessiva adiciona pressão limitada de SLA |
+| `NO_VALID_PAIR_BLOCKS_AUTODISPATCH` | `PR-05` | ausência de par válido gera `BLOCKED` |
+
 ### Detalhes de entrada (`DecisionRequest`)
 
 - `queue_csv_ref`: caminho do arquivo `queue.csv` do cenário.

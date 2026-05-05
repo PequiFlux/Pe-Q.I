@@ -64,6 +64,11 @@ def _validate_payload(payload: FrontEndPayload, expected: dict[str, Any]) -> Non
     if missing_constraints:
         errors.append(f"missing rejected constraints={sorted(missing_constraints)}")
 
+    fired_rules = set(payload.audit_record.fired_rules if payload.audit_record else [])
+    missing_policy_rules = set(expected.get("required_policy_rules", [])) - fired_rules
+    if missing_policy_rules:
+        errors.append(f"missing policy rules={sorted(missing_policy_rules)}")
+
     if errors:
         raise SystemExit("Scenario validation failed: " + "; ".join(errors))
 

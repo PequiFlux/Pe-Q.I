@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from math import isclose
 
+from app.domain.enums import PolicyRule
 from app.domain.errors import PequiFluxError
 from app.domain.models import (
     DecisionVariant,
@@ -43,17 +44,16 @@ def rank_candidates(
 
         fifo_component = (max_position - row.queue_position + 1) / max_position
         score += fifo_component * policy_profile.weights.fifo_position
-        fired_rules.append("PR-01")
+        fired_rules.append(PolicyRule.FIFO_DEFAULT)
         reason_details.append("FIFO ordering preserved when possible.")
 
         if variant in {"heuristic", "full"} and row.contract_priority_flag:
             score += policy_profile.weights.contract_priority
-            fired_rules.append("PR-02")
+            fired_rules.append(PolicyRule.CONTRACT_PRIORITY_MAY_BREAK_FIFO)
             reason_details.append("Contract priority published in the queue snapshot.")
 
         if variant == "full" and entry.destination_id in exception_assessment.affected_resources:
             score += policy_profile.weights.resource_fit
-            fired_rules.append("PR-03")
             reason_details.append("Destination matches the active exception context.")
 
         wait_pressure = 0.0
@@ -61,7 +61,7 @@ def rank_candidates(
             wait_pressure = min(row.wait_minutes / 120, 1.0) * policy_profile.weights.wait_sla_pressure
         if not isclose(wait_pressure, 0.0):
             score += wait_pressure
-            fired_rules.append("PR-04")
+            fired_rules.append(PolicyRule.WAIT_SLA_PRESSURE)
             reason_details.append("Long wait time increased ranking priority.")
 
         capacity_penalty = 0.0
@@ -81,7 +81,7 @@ def rank_candidates(
             ) * policy_profile.weights.capacity_headroom
         if not isclose(capacity_penalty, 0.0):
             score -= capacity_penalty
-            fired_rules.append("PR-05")
+            fired_rules.append(PolicyRule.REDUCED_CAPACITY_PENALTY)
             reason_details.append("Reduced capacity lowered ranking priority.")
 
         fifo_break = row.queue_position != 1
