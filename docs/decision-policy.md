@@ -25,6 +25,7 @@ As regras abaixo ordenam somente pares já elegíveis:
 | `PR-03` | capacidade reduzida penaliza ranking |
 | `PR-04` | espera excessiva pode adicionar pressão de SLA |
 | `PR-05` | ausência de par válido gera `BLOCKED`, não improvisação |
+| `PR-06` | destino alinhado à exceção ativa recebe bônus auditável |
 
 ## Verdade do Sistema
 
@@ -47,4 +48,3 @@ Conflitos materiais nunca são resolvidos implicitamente. Se o conflito afeta el
 - não existem fallbacks operacionais;
 - dado ausente ou inconsistente não pode virar default silencioso;
 - override exige motivo e continua passando pela mesma validação.
-

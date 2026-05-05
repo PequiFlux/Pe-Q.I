@@ -87,3 +87,42 @@ def test_capacity_between_minimum_and_comfort_penalizes_ranking() -> None:
     low_capacity = next(item for item in ranking.candidates if item.destination_id == "DST-LOWCAP-01")
     assert PolicyRule.REDUCED_CAPACITY_PENALTY in low_capacity.fired_rules
     assert any("Reduced capacity" in detail for detail in low_capacity.reason_details)
+
+
+def test_full_variant_resource_fit_bonus_is_auditable_policy_rule() -> None:
+    snapshot = QueueSnapshot(
+        request_id="REQ-FIT",
+        rows=[
+            QueueRow(
+                truck_id="TRK-001",
+                arrival_ts=datetime(2026, 4, 15, tzinfo=timezone.utc),
+                status="waiting",
+                vehicle_type=VehicleType.TRUCK,
+                queue_position=1,
+                wait_minutes=10,
+            )
+        ],
+    )
+    validation = ValidationResult(
+        validation_matrix=[
+            ValidationEntry(truck_id="TRK-001", destination_id="DST-COV-01", eligible=True),
+        ],
+        policy_profile_version="v1-demo",
+    )
+
+    ranking = rank_candidates(
+        request_id="REQ-FIT",
+        validation_matrix=validation,
+        policy_profile=_policy(),
+        queue_snapshot=snapshot,
+        exception_assessment=ExceptionAssessment(
+            primary_exception="WET_LOAD",
+            severity=Severity.MEDIUM,
+            affected_resources=["DST-COV-01"],
+        ),
+        variant="full",
+    )
+
+    candidate = ranking.candidates[0]
+    assert PolicyRule.RESOURCE_FIT in candidate.fired_rules
+    assert any("active exception context" in detail for detail in candidate.reason_details)

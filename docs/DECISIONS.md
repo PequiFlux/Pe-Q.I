@@ -4,6 +4,25 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Resource fit vira regra auditável `PR-06`
+
+Contexto:
+O ranking somava `policy_profile.weights.resource_fit` quando o destino aparecia em `exception_assessment.affected_resources`, mas registrava apenas `reason_details`. A pontuação influenciava a decisão sem aparecer como regra disparada.
+
+Decisão:
+Adicionar `PolicyRule.RESOURCE_FIT = "PR-06"` e dispará-la no ranking completo quando o bônus de aderência ao recurso for aplicado.
+
+Alternativas rejeitadas:
+Reorganizar IDs `PR-01`..`PR-05`, o que quebraria contratos, cenários e documentação já publicados.
+
+Impacto:
+Toda contribuição de score relevante passa a ter regra auditável em `fired_rules`; auditoria e UI enxergam o bônus de recurso como política explícita.
+
+Arquivos/módulos afetados:
+- `app/domain/enums.py`
+- `app/domain/ranking.py`
+- `tests/unit/test_ranking.py`
+
 ### 2026-05-05 — Bloqueio por erro usa terminal controlado da state machine
 
 Contexto:
@@ -127,13 +146,13 @@ Contexto:
 O ranking emitia `PR-03` para ajuste de destino por exceção ativa e `PR-05` para penalidade de capacidade, enquanto blueprint e docs definem `PR-03` como penalidade por capacidade reduzida e `PR-05` como bloqueio por ausência de par válido.
 
 Decisão:
-Criar `PolicyRule` em `app/domain/enums.py` como fonte única dos IDs `PR-01`..`PR-05` e usar o enum no ranking, no bloqueio por ausência de candidato e nos testes.
+Criar `PolicyRule` em `app/domain/enums.py` como fonte única dos IDs de política e usar o enum no ranking, no bloqueio por ausência de candidato e nos testes.
 
 Alternativas rejeitadas:
 Manter IDs de política como strings soltas espalhadas pelo domínio.
 
 Impacto:
-Auditoria, UI e testes passam a consumir os mesmos IDs documentados; `resource_fit` continua como peso de score do perfil `A-05`, mas não reutiliza `PR-03`.
+Auditoria, UI e testes passam a consumir os mesmos IDs documentados. Esta decisão foi estendida depois por `PR-06 RESOURCE_FIT`, mantendo `resource_fit` como peso do perfil `A-05` com regra auditável própria.
 
 Arquivos/módulos afetados:
 - `app/domain/enums.py`

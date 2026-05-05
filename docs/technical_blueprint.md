@@ -216,6 +216,7 @@ As regras abaixo são publicadas como política versionada. Elas podem justifica
 | PR-03 | `REDUCED_CAPACITY_PENALTY` | Destino com capacidade acima do mínimo mas abaixo do conforto perde score. |
 | PR-04 | `WAIT_SLA_PRESSURE` | Caminhões com espera excessiva podem receber pequeno bônus, sem anular hard constraints. |
 | PR-05 | `NO_VALID_PAIR_BLOCKS_AUTODISPATCH` | Se não houver par elegível e a evidência for suficiente, o resultado é `BLOCKED`, não improvisação. |
+| PR-06 | `RESOURCE_FIT` | Destino alinhado a `affected_resources` da exceção ativa recebe bônus auditável no ranking completo. |
 
 ### 3.3 Requisitos funcionais
 

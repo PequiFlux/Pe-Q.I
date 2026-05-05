@@ -32,6 +32,7 @@ IDs de política vivem em [`app/domain/enums.py`](../app/domain/enums.py) e deve
 | `REDUCED_CAPACITY_PENALTY` | `PR-03` | capacidade acima do mínimo e abaixo do conforto penaliza ranking |
 | `WAIT_SLA_PRESSURE` | `PR-04` | espera excessiva adiciona pressão limitada de SLA |
 | `NO_VALID_PAIR_BLOCKS_AUTODISPATCH` | `PR-05` | ausência de par válido gera `BLOCKED` |
+| `RESOURCE_FIT` | `PR-06` | destino alinhado à exceção ativa recebe bônus auditável no ranking completo |
 
 ### Detalhes de entrada (`DecisionRequest`)
 

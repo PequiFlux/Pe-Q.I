@@ -54,6 +54,7 @@ def rank_candidates(
 
         if variant == "full" and entry.destination_id in exception_assessment.affected_resources:
             score += policy_profile.weights.resource_fit
+            fired_rules.append(PolicyRule.RESOURCE_FIT)
             reason_details.append("Destination matches the active exception context.")
 
         wait_pressure = 0.0

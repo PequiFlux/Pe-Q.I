@@ -27,7 +27,7 @@ Procurar:
 - Hard constraints: reutilizar `app/domain/constraints.py`.
 - Ranking/FIFO/prioridade: reutilizar `app/domain/ranking.py`.
 - Policy profile: reutilizar `app/domain/policy.py` e `scenarios/common/policy_profile.json`.
-- IDs de regras de política: reutilizar `app/domain/enums.py::PolicyRule`; não escrever `PR-01`..`PR-05` como string solta em ranking, auditoria, UI ou testes.
+- IDs de regras de política: reutilizar `app/domain/enums.py::PolicyRule`; não escrever `PR-01`..`PR-06` como string solta em ranking, auditoria, UI ou testes.
 - Resolução de verdade entre ticket, nota e estado: reutilizar `app/orchestration/truth_resolver.py`.
 - Transições e estados terminais: reutilizar `app/orchestration/state_machine.py`.
 - Construção de payload/decisão: reutilizar `app/services/decision_builder.py`.
@@ -48,6 +48,7 @@ Procurar:
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.
+- Toda contribuição de score em `app/domain/ranking.py` deve adicionar `PolicyRule` correspondente em `fired_rules`; não deixar bônus/penalidade só em `reason_details`.
 - Faixas de benchmark na UI devem ler `bench/reports`, reutilizar `bench/metrics.py` ou mostrar snapshot explícito do relatório versionado; não criar métrica de comparação paralela.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
