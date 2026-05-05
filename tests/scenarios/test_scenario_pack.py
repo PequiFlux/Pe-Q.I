@@ -7,6 +7,7 @@ from app.adapters.csv_adapter import load_queue_rows, normalize_queue_snapshot
 from app.adapters.document_adapter import build_document_bundle
 from app.adapters.state_adapter import load_resource_state, load_weather_state
 from app.domain.models import DecisionRequest
+from app.services.structured_ticket_parser import load_expected_ticket_fixture
 
 
 REQUIRED_CASES = {
@@ -53,7 +54,11 @@ def test_scenario_pack_v0_is_complete_and_loadable() -> None:
             candidate_truck_ids=[row.truck_id for row in snapshot.waiting_rows],
         )
         assert bundle.sha256
-        assert bundle.extracted_text
+        if request.ticket_content_type == "text/plain":
+            assert bundle.extracted_text
+        else:
+            assert bundle.rendered_pages
+            assert load_expected_ticket_fixture(request.ticket_ref) is not None
 
         weather = load_weather_state(files["weather_state"])
         resources = load_resource_state(files["resource_state"])

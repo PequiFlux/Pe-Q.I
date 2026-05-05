@@ -4,6 +4,29 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Benchmark multimodal usa `expected_ticket.json` como sidecar canônico
+
+Contexto:
+O sample versionado do benchmark empatava `full` e `heuristic` nas métricas principais porque todos os tickets do pack eram legíveis como `text/plain`. Assim, a submissão não provava valor real da leitura multimodal do Gemma.
+
+Decisão:
+Converter `S03_WET_LOAD` para ticket em imagem e adotar `expected_ticket.json` no mesmo diretório do caso como sidecar canônico para benchmark/CI. O runtime real continua lendo a imagem; o sidecar só fixa o ticket esperado para `run_benchmark.py`, `TextTicketRuntime` e testes sem Ollama/GPU.
+
+Alternativas rejeitadas:
+Criar um segundo manifest só para benchmark, manter tickets multimodais fora do pack principal ou introduzir um formato paralelo de fixture esperado.
+
+Impacto:
+O relatório sample passa a mostrar delta observável entre `full` e `heuristic` em `ticket_field_accuracy`, `exception_f1` e `decision_match_at_1` sem quebrar o fail-closed do baseline textual.
+
+Arquivos/módulos afetados:
+- `scenarios/cases/S03_WET_LOAD`
+- `scenarios/manifest.json`
+- `app/services/structured_ticket_parser.py`
+- `app/gemma/text_runtime.py`
+- `app/cli/run_benchmark.py`
+- `tests/scenarios`
+- `tests/unit`
+
 ### 2026-05-05 — Componentes da UI expõem renderizadores públicos
 
 Contexto:

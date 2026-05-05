@@ -95,7 +95,7 @@ def test_gemma_adapter_wraps_runtime_failures_as_formal_errors() -> None:
 
 
 def test_text_runtime_is_limited_to_text_plain_fixtures() -> None:
-    with pytest.raises(PequiFluxError, match="TEXT_RUNTIME_REQUIRES_TEXT_TICKET"):
+    with pytest.raises(PequiFluxError, match="TEXT_RUNTIME_REQUIRES_EXPECTED_TICKET"):
         GemmaAdapter(runtime=TextTicketRuntime()).parse_ticket_document(_bundle())
 
 
@@ -121,3 +121,19 @@ def test_gemma_adapter_passes_extracted_text_as_runtime_metadata() -> None:
 
     assert ticket.truck_id == "TRK-001"
     assert ticket.parse_confidence == 0.92
+
+
+def test_text_runtime_reads_expected_ticket_sidecar_for_multimodal_fixture() -> None:
+    bundle = DocumentBundle(
+        request_id="REQ-S03",
+        document_ref="scenarios/cases/S03_WET_LOAD/ticket.png",
+        content_type="image/png",
+        sha256="abc123",
+        rendered_pages=["scenarios/cases/S03_WET_LOAD/ticket.png"],
+        candidate_truck_ids=["TRK-001"],
+    )
+
+    ticket = GemmaAdapter(runtime=TextTicketRuntime()).parse_ticket_document(bundle)
+
+    assert ticket.ticket_id == "TCK-S03-001"
+    assert ticket.load_condition.value == "wet"

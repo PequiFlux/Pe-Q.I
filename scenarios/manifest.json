@@ -108,9 +108,9 @@
     },
     {
       "scenario_id": "S03_WET_LOAD",
-      "description": "Documented wet load restricts the destination.",
+      "description": "Image-native ticket documents a wet load and keeps review grounded in multimodal evidence.",
       "files": {
-        "ticket": "scenarios/cases/S03_WET_LOAD/ticket.txt",
+        "ticket": "scenarios/cases/S03_WET_LOAD/ticket.png",
         "queue": "scenarios/cases/S03_WET_LOAD/queue.csv",
         "operator_note": "scenarios/cases/S03_WET_LOAD/operator_note.txt",
         "weather_state": "scenarios/cases/S03_WET_LOAD/weather_state.json",
@@ -122,8 +122,8 @@
         "scenario_id": "S03_WET_LOAD",
         "variant": "full",
         "queue_csv_ref": "scenarios/cases/S03_WET_LOAD/queue.csv",
-        "ticket_ref": "scenarios/cases/S03_WET_LOAD/ticket.txt",
-        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/cases/S03_WET_LOAD/ticket.png",
+        "ticket_content_type": "image/png",
         "operator_note": "Motorista informou umidade na carga; conferir destino compativel.",
         "weather_state": {
           "precipitation": "none",

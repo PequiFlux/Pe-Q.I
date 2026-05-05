@@ -38,6 +38,7 @@ Cada cenário no diretório `scenarios/cases/<SCENARIO>/` deve conter os artefat
 ```text
 scenarios/cases/<SCENARIO>/
 ├─ ticket.(pdf|png|jpg|jpeg|txt)
+├─ expected_ticket.json   # opcional para benchmark/CI de casos multimodais
 ├─ queue.csv
 ├─ operator_note.txt
 ├─ weather_state.json
@@ -50,6 +51,8 @@ Regra de desenho: **ticket e nota** podem ser semiestruturados; **queue/weather/
 ### `ticket.*`
 
 Objetivo: fornecer evidência suficiente para o parser inferir: `ticket_id`, `truck_id`, `vehicle_type`, `document_status`, `document_block_flags`, `load_condition`, `contract_priority_flag`, `destination_constraints`.
+
+Para tickets `pdf/png/jpg/jpeg`, o pack pode versionar `expected_ticket.json` como sidecar canônico do benchmark/CI. Ele não substitui a leitura multimodal do runtime real; só fixa o alvo esperado para comparação e testes sem GPU/Ollama.
 
 Exemplos:
 
@@ -157,7 +160,7 @@ Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.
 
 - `S01_BASELINE`: prova que o sistema preserva FIFO em regime nominal
 - `S02_RAIN_OPEN`: chuva bloqueia destino aberto e pode justificar quebra de FIFO
-- `S03_WET_LOAD`: parsing documental identifica carga úmida, mas nota com conferência manual exige `REVIEW_REQUIRED`
+- `S03_WET_LOAD`: ticket em imagem expõe carga úmida; sem leitura multimodal o baseline falha fechado, enquanto o sistema completo chega ao `REVIEW_REQUIRED` correto
 - `S04_CONVEYOR_DOWN`: estado local bloqueia recurso
 - `S05_CONTRACT_PRIORITY`: política publicada pode romper FIFO
 - `S06_DOCUMENT_BLOCK`: bloqueio documental torna caminhão inelegível

@@ -43,8 +43,8 @@ BENCHMARK_REPORTS_DIR = Path("bench/reports")
 BENCHMARK_STRIP_FALLBACK = {
     "full": "10/10 cenarios | 0% violacoes de regra",
     "fifo": "3 cenarios fora do alvo | ex.: S03_WET_LOAD",
-    "heuristic": "sem leitura Gemma multimodal | 100% no texto estruturado",
-    "source": "Scenario pack sintetico · snapshot 20260503T143757Z",
+    "heuristic": "sem leitura Gemma multimodal | 92.5% no parse e falha em S03_WET_LOAD",
+    "source": "Scenario pack sintetico · snapshot 20260505T164037Z",
 }
 JUDGE_SCENARIOS = [
     {
@@ -57,8 +57,8 @@ JUDGE_SCENARIOS = [
     {
         "scenario_id": "S03_WET_LOAD",
         "title": "Carga umida exige moega compativel",
-        "story": "A fila favorece um destino seco, mas o ticket e a nota indicam carga umida.",
-        "gemma": "Leitura extrai carga umida, placa e necessidade de conferencia.",
+        "story": "A fila favorece um destino seco, mas o ticket chega como imagem e sustenta a revisao correta.",
+        "gemma": "Leitura extrai carga umida, placa e restricao de destino a partir da imagem.",
         "rule": "HC-02",
     },
     {

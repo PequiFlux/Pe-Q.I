@@ -210,7 +210,7 @@ O sistema oferece dois runtimes de interpretação, selecionados por `PEQUIFLUX_
 | Aspecto | Detalhe |
 |---------|---------|
 | Backend | Parser determinístico puro — sem modelo, sem GPU, sem rede |
-| Parsing | Regex simples sobre `ticket.txt` (campos `key: value`) |
+| Parsing | Regex simples sobre `ticket.txt`; fixtures multimodais de CI usam `expected_ticket.json` sidecar |
 | Classificação de exceção | Retorna `MANUAL_REVIEW_HINT` com `needs_human_review=true` |
 | `reason_summary` | Trunca o prompt em 220 caracteres |
 | Tool calling | Não disponível — adapter delega ao fluxo determinístico |
@@ -266,6 +266,7 @@ O benchmark executa **10 cenários × 3 variantes** e computa métricas comparat
 
 - `constraint_violation_rate = 0` no sistema completo
 - Ganho sobre baseline heurístico em `ticket_field_accuracy`, `exception_f1` e `decision_match_at_1`
+- O sample versionado precisa incluir ao menos um caso multimodal onde `heuristic` falha fechado ou perde acurácia e `full` acerta
 - 100% das quebras de FIFO e overrides com trilha reconstruível
 - 10/10 cenários executam sem edição manual
 
@@ -276,6 +277,14 @@ docker compose run --rm benchmark
 ```
 
 Saída: `bench/reports/<run_id>/` com `metrics.json`, `per_scenario.json` e `summary.csv`.
+
+### Snapshot versionado
+
+O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` como ticket em `image/png`.
+
+- `full`: `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 1.0`
+- `heuristic`: `decision_match_at_1 = 0.9`, `exception_f1 = 0.667`, `ticket_field_accuracy = 0.925`
+- `S03_WET_LOAD`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao `REVIEW_REQUIRED` correto com `ticket_field_accuracy = 1.0`
 
 ### Setup do Gemma (necessário antes do benchmark com runtime ollama)
 
@@ -436,7 +445,7 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 |----|------|-------------|
 | S01 | BASELINE | Nominal; FIFO preservado |
 | S02 | RAIN_OPEN | Chuva bloqueia destino aberto (HC-01) |
-| S03 | WET_LOAD | Carga úmida do documento (HC-02) |
+| S03 | WET_LOAD | Ticket em imagem força leitura multimodal; sem Gemma o fluxo fecha, com Gemma a revisão fica correta (HC-02) |
 | S04 | CONVEYOR_DOWN | Recurso indisponível (HC-03) |
 | S05 | CONTRACT_PRIORITY | Prioridade contratual quebra FIFO (PR-02) |
 | S06 | DOCUMENT_BLOCK | Bloqueio documental (HC-04) |
@@ -445,7 +454,7 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 | S09 | HUMAN_OVERRIDE | Governança de override (HC-07) |
 | S10 | FIFO_BREAK_JUSTIFIED | Chuva + compatibilidade justificam quebra de FIFO (narrativa principal) |
 
-Cada cenário contém: `ticket.txt`, `queue.csv`, `operator_note.txt`, `weather_state.json`, `resource_state.json` e `expected_decision.json`.
+Cada cenário contém: `ticket.(txt|pdf|png|jpg|jpeg)`, `queue.csv`, `operator_note.txt`, `weather_state.json`, `resource_state.json` e `expected_decision.json`. Casos multimodais podem adicionar `expected_ticket.json` como sidecar canônico de benchmark/CI.
 
 ---
 

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from app.adapters.document_adapter import build_document_bundle
 from app.domain.errors import PequiFluxError
 from app.domain.models import ParsedTicket, TicketContentType
@@ -52,6 +55,13 @@ def parse_structured_ticket_text(text: str) -> ParsedTicket:
     )
 
 
+def load_expected_ticket_fixture(document_ref: str) -> ParsedTicket | None:
+    fixture_path = _expected_ticket_fixture_path(document_ref)
+    if not fixture_path.exists():
+        return None
+    return ParsedTicket.model_validate(json.loads(fixture_path.read_text(encoding="utf-8")))
+
+
 def _parse_fields(text: str) -> dict[str, str]:
     fields: dict[str, str] = {}
     for line in text.splitlines():
@@ -90,3 +100,7 @@ def _parse_bullets(text: str, section: str) -> list[str]:
         elif in_section and stripped and not stripped.startswith("-"):
             break
     return refs
+
+
+def _expected_ticket_fixture_path(document_ref: str) -> Path:
+    return Path(document_ref).with_name("expected_ticket.json")

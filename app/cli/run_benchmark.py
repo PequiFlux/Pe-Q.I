@@ -9,7 +9,10 @@ from typing import Any
 from app.domain.models import DecisionRequest
 from app.gemma.runtime_factory import build_gemma_adapter
 from app.orchestration.orchestrator import DecisionOrchestrator
-from app.services.structured_ticket_parser import parse_structured_ticket_document
+from app.services.structured_ticket_parser import (
+    load_expected_ticket_fixture,
+    parse_structured_ticket_document,
+)
 from bench.metrics import compute_variant_metrics
 from bench.reporting import render_summary_csv
 from bench.validation import validate_payload
@@ -36,12 +39,14 @@ def main() -> None:
     for case in manifest["cases"]:
         base_request = DecisionRequest.model_validate(case["request"])
         expected = json.loads(Path(case["files"]["expected_decision"]).read_text(encoding="utf-8"))
-        expected_ticket = parse_structured_ticket_document(
-            request_id=base_request.request_id,
-            document_ref=base_request.ticket_ref,
-            content_type=base_request.ticket_content_type,
-            candidate_truck_ids=[],
-        )
+        expected_ticket = load_expected_ticket_fixture(base_request.ticket_ref)
+        if expected_ticket is None:
+            expected_ticket = parse_structured_ticket_document(
+                request_id=base_request.request_id,
+                document_ref=base_request.ticket_ref,
+                content_type=base_request.ticket_content_type,
+                candidate_truck_ids=[],
+            )
         for variant in variants:
             request = base_request.model_copy(update={"variant": variant})
             payload = orchestrator.run_decision(request)

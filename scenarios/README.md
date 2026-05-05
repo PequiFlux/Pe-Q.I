@@ -17,7 +17,7 @@ O manifest completo fica em [`manifest.json`](./manifest.json). A estrutura e os
 |---|---|
 | `S01_BASELINE` | Operacao nominal; nao ha excecao relevante; o sistema deve preservar FIFO. |
 | `S02_RAIN_OPEN` | Chuva bloqueia destino aberto; o sistema deve evitar moega exposta e escolher par coberto compativel. |
-| `S03_WET_LOAD` | Documento/nota indicam carga umida; destino seco fica inadequado e a decisao pode exigir revisao humana. |
+| `S03_WET_LOAD` | Ticket chega como imagem; a leitura multimodal identifica carga umida e sustenta a revisao humana correta. |
 | `S04_CONVEYOR_DOWN` | Recurso local esta indisponivel; moega/correia em manutencao bloqueia despacho automatico para aquele destino. |
 | `S05_CONTRACT_PRIORITY` | Prioridade contratual publicada pode justificar quebra de FIFO quando as hard constraints estao limpas. |
 | `S06_DOCUMENT_BLOCK` | Documento ou nota fiscal ambigua/bloqueada torna o caminhao inelegivel para despacho automatico. |
@@ -29,18 +29,19 @@ O manifest completo fica em [`manifest.json`](./manifest.json). A estrutura e os
 ## O que olhar no video
 
 - `S10_FIFO_BREAK_JUSTIFIED` e o caso principal para mostrar legitimidade da quebra de FIFO.
-- `S03_WET_LOAD` mostra por que ler documento/nota muda a decisao.
+- `S03_WET_LOAD` mostra por que um ticket em imagem nao pode ser tratado como cosmetica de demo.
 - `S06_DOCUMENT_BLOCK` mostra que falta de verdade operacional vira revisao humana, nao fallback.
 
 ## Arquivos por caso
 
 ```text
-ticket.txt
+ticket.(txt|pdf|png|jpg|jpeg)
 queue.csv
 operator_note.txt
 weather_state.json
 resource_state.json
 expected_decision.json
+expected_ticket.json  # opcional em casos multimodais
 ```
 
 Todos os dados sao sinteticos e public-safe.
