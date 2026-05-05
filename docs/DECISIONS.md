@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Runtime textual não depende de frase do prompt
+
+Contexto:
+`TextTicketRuntime` extraía fixtures procurando a frase `Extracted text, if available:` no prompt. Isso acoplava benchmark/testes ao wording usado para o modelo.
+
+Decisão:
+Passar `extracted_text` por metadata do runtime e reutilizar `parse_structured_ticket_text` como parser determinístico de fixture.
+
+Alternativas rejeitadas:
+Manter parsing por marcador textual no prompt ou duplicar o parser dentro do runtime fake.
+
+Impacto:
+Prompts podem ser ajustados para o modelo sem quebrar fixtures `text/plain`; testes e benchmark continuam usando o contrato estruturado.
+
+Arquivos/módulos afetados:
+- `app/gemma/adapter.py`
+- `app/gemma/text_runtime.py`
+- `app/services/structured_ticket_parser.py`
+- `tests/unit/test_gemma_adapter.py`
+
 ### 2026-05-05 — Timestamps da fila são timezone-aware e normalizados para UTC
 
 Contexto:

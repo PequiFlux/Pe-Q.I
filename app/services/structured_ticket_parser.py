@@ -24,7 +24,17 @@ def parse_structured_ticket_document(
             "Heuristic benchmark variant requires extractable ticket text.",
         )
 
-    fields = _parse_fields(bundle.extracted_text)
+    return parse_structured_ticket_text(bundle.extracted_text)
+
+
+def parse_structured_ticket_text(text: str) -> ParsedTicket:
+    if not text.strip():
+        raise PequiFluxError(
+            "STRUCTURED_TICKET_TEXT_REQUIRED",
+            "Structured ticket fixture requires extractable ticket text.",
+        )
+
+    fields = _parse_fields(text)
     return ParsedTicket.model_validate(
         {
             "ticket_id": fields.get("ticket_id"),
@@ -37,7 +47,7 @@ def parse_structured_ticket_document(
             "destination_constraints": _parse_list(fields.get("destination_constraints", "")),
             "parse_confidence": float(fields.get("parse_confidence", "0.0")),
             "ambiguities": _parse_list(fields.get("ambiguities", "")),
-            "evidence_refs": _parse_bullets(bundle.extracted_text, "evidence_refs"),
+            "evidence_refs": _parse_bullets(text, "evidence_refs"),
         }
     )
 

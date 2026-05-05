@@ -18,6 +18,28 @@ def _bundle() -> DocumentBundle:
     )
 
 
+def _text_fixture_bundle() -> DocumentBundle:
+    return DocumentBundle(
+        request_id="REQ-001",
+        document_ref="scenarios/cases/S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        content_type="text/plain",
+        sha256="abc123",
+        extracted_text="\n".join(
+            [
+                "ticket_id: TCK-001",
+                "truck_id: TRK-001",
+                "vehicle_type: truck",
+                "document_status: clear",
+                "load_condition: dry",
+                "parse_confidence: 0.92",
+                "evidence_refs:",
+                "- nota fiscal validada",
+            ]
+        ),
+        candidate_truck_ids=["TRK-001"],
+    )
+
+
 class DictRuntime:
     def generate_structured(self, **kwargs):
         return {
@@ -75,3 +97,27 @@ def test_gemma_adapter_wraps_runtime_failures_as_formal_errors() -> None:
 def test_text_runtime_is_limited_to_text_plain_fixtures() -> None:
     with pytest.raises(PequiFluxError, match="TEXT_RUNTIME_REQUIRES_TEXT_TICKET"):
         GemmaAdapter(runtime=TextTicketRuntime()).parse_ticket_document(_bundle())
+
+
+def test_text_runtime_reads_fixture_text_from_metadata_not_prompt_marker() -> None:
+    runtime = TextTicketRuntime()
+
+    ticket = runtime.generate_structured(
+        prompt="Prompt wording changed without embedded fixture text.",
+        response_model=ParsedTicket,
+        metadata={
+            "content_type": "text/plain",
+            "extracted_text": _text_fixture_bundle().extracted_text,
+        },
+    )
+
+    assert isinstance(ticket, ParsedTicket)
+    assert ticket.ticket_id == "TCK-001"
+    assert ticket.evidence_refs == ["nota fiscal validada"]
+
+
+def test_gemma_adapter_passes_extracted_text_as_runtime_metadata() -> None:
+    ticket = GemmaAdapter(runtime=TextTicketRuntime()).parse_ticket_document(_text_fixture_bundle())
+
+    assert ticket.truck_id == "TRK-001"
+    assert ticket.parse_confidence == 0.92

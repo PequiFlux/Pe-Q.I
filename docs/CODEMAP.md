@@ -11,7 +11,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Orquestração | `app/orchestration` | Fluxo de decisão, resolução de verdade e máquina de estados | `app/domain`, `app/services`, `app/audit` | `DecisionOrchestrator.run_decision()` é fachada; etapas internas são `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` e `persist_and_log`, coordenando camadas sem substituir regras determinísticas |
 | Domínio | `app/domain` | Modelos, enums, constraints, ranking e política determinística | `scenarios/common` | Regras hard-constraint vivem aqui; `PolicyRule` é a fonte única dos IDs `PR-01`..`PR-05` usados em ranking, auditoria, UI e testes |
 | Serviços | `app/services` | Builders, parsers, governança operacional, classificação de exceções e mensagens | `app/domain`, `app/gemma` | Adaptam dados para decisão sem fallback silencioso |
-| Gemma | `app/gemma` | Runtime, adapter, schemas, prompts e gateway da camada LLM | `app/domain`, runtime externo | Interpretação deve falhar fechado quando inválida |
+| Gemma | `app/gemma` | Runtime, adapter, schemas, prompts e gateway da camada LLM | `app/domain`, runtime externo | Interpretação deve falhar fechado quando inválida; `TextTicketRuntime` consome texto de fixture por metadata, não por frase do prompt |
 | Adapters | `app/adapters` | Leitura de CSV, estados, notas e documentos | `app/domain`, arquivos de cenário | Entrada de dados sintéticos e públicos |
 | Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável |
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |

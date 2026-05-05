@@ -59,6 +59,7 @@ class GemmaAdapter:
                     "document_ref": bundle.document_ref,
                     "content_type": bundle.content_type,
                     "sha256": bundle.sha256,
+                    "extracted_text": bundle.extracted_text,
                     "rendered_pages": list(bundle.rendered_pages),
                 },
             )
