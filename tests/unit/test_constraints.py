@@ -138,7 +138,9 @@ def test_document_block_applies_only_to_ticket_truck() -> None:
     assert by_truck["TRK-002"].eligible is True
 
 
-def test_wet_load_requires_resource_supported_load_condition_without_ticket_destination_hint() -> None:
+def test_wet_load_requires_resource_supported_load_condition_without_ticket_destination_hint() -> (
+    None
+):
     snapshot = QueueSnapshot(
         request_id="REQ-WET",
         rows=[

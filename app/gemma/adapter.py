@@ -30,11 +30,9 @@ class StructuredGemmaRuntime(Protocol):
         prompt: str,
         response_model: type[ModelT],
         metadata: dict[str, Any],
-    ) -> ModelT | dict[str, Any]:
-        ...
+    ) -> ModelT | dict[str, Any]: ...
 
-    def summarize(self, *, prompt: str, metadata: dict[str, Any]) -> str:
-        ...
+    def summarize(self, *, prompt: str, metadata: dict[str, Any]) -> str: ...
 
 
 class GemmaAdapter:
@@ -75,7 +73,9 @@ class GemmaAdapter:
         try:
             return ParsedTicket.model_validate(result)
         except ValidationError as exc:
-            raise SchemaViolationError("Gemma runtime did not return a valid ParsedTicket.") from exc
+            raise SchemaViolationError(
+                "Gemma runtime did not return a valid ParsedTicket."
+            ) from exc
 
     def summarize_decision(self, preview: DecisionPreview) -> str:
         if self.runtime is None:
@@ -139,4 +139,6 @@ class GemmaAdapter:
         try:
             return ExceptionAssessment.model_validate(result)
         except ValidationError as exc:
-            raise SchemaViolationError("Gemma runtime did not return a valid ExceptionAssessment.") from exc
+            raise SchemaViolationError(
+                "Gemma runtime did not return a valid ExceptionAssessment."
+            ) from exc

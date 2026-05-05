@@ -3,7 +3,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.domain.enums import DocumentStatus, LoadCondition, Severity, VehicleType
-from app.domain.models import ExceptionAssessment, ParsedTicket, QueueRow, QueueSnapshot, WeatherState
+from app.domain.models import (
+    ExceptionAssessment,
+    ParsedTicket,
+    QueueRow,
+    QueueSnapshot,
+    WeatherState,
+)
 from app.services.exception_classifier import classify_exception
 
 

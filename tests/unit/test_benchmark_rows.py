@@ -8,6 +8,7 @@ from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
 from app.orchestration.orchestrator import DecisionOrchestrator
 from bench.rows import (
+    audit_complete,
     build_payload_row,
     build_raw_fifo_row,
     has_constraint_violation,
@@ -53,6 +54,22 @@ def test_build_raw_fifo_row_marks_constraint_violation_from_fifo_safe_audit() ->
     assert row["decision_match_at_1"] is False
 
 
+def test_build_raw_fifo_row_marks_unknown_destination_as_constraint_violation() -> None:
+    scenario_id = "S15_UNKNOWN_DESTINATION_IN_TICKET"
+    fifo_safe_payload = _orchestrator().run_decision(_request(scenario_id, "fifo"))
+
+    row = build_raw_fifo_row(
+        request=_request(scenario_id, "full"),
+        expected=_expected(scenario_id),
+        fifo_safe_payload=fifo_safe_payload,
+    )
+
+    assert row["recommended_truck"] == "TRK-051"
+    assert row["recommended_destination"] == "DST-GHOST-99"
+    assert row["constraint_violation"] is True
+    assert row["decision_match_at_1"] is False
+
+
 def test_build_payload_row_and_expected_match_for_full_payload() -> None:
     scenario_id = "S10_FIFO_BREAK_JUSTIFIED"
     expected = _expected(scenario_id)
@@ -72,6 +89,26 @@ def test_build_payload_row_and_expected_match_for_full_payload() -> None:
     assert row["constraint_violation"] is False
     assert row["fifo_break"] is True
     assert row["audit_complete"] is True
+
+
+def test_audit_complete_is_status_aware_for_review_required_payload() -> None:
+    scenario_id = "S03_WET_LOAD"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+
+    assert payload.decision_status == "REVIEW_REQUIRED"
+    assert payload.audit_record is not None
+    assert payload.audit_record.hard_constraints_checked == []
+    assert audit_complete(payload) is True
+
+
+def test_audit_complete_is_status_aware_for_blocked_payload() -> None:
+    scenario_id = "S16_ALL_DESTINATIONS_BLOCKED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert payload.audit_record.hard_constraints_checked == []
+    assert audit_complete(payload) is True
 
 
 def test_ticket_field_accuracy_scores_declared_fields() -> None:

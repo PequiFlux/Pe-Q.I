@@ -84,7 +84,9 @@ def test_capacity_between_minimum_and_comfort_penalizes_ranking() -> None:
     )
 
     assert ranking.candidates[0].destination_id == "DST-COMFORT-01"
-    low_capacity = next(item for item in ranking.candidates if item.destination_id == "DST-LOWCAP-01")
+    low_capacity = next(
+        item for item in ranking.candidates if item.destination_id == "DST-LOWCAP-01"
+    )
     assert PolicyRule.REDUCED_CAPACITY_PENALTY in low_capacity.fired_rules
     assert any("Reduced capacity" in detail for detail in low_capacity.reason_details)
 

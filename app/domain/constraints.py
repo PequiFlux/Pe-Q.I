@@ -57,7 +57,9 @@ def validate_override_action(
         None,
     )
     if entry is None:
-        raise PequiFluxError("UNKNOWN_OVERRIDE_PAIR", "Override pair is not in the validation matrix.")
+        raise PequiFluxError(
+            "UNKNOWN_OVERRIDE_PAIR", "Override pair is not in the validation matrix."
+        )
     if not entry.eligible:
         failed = ", ".join(failure.constraint_id for failure in entry.failed_constraints)
         raise PequiFluxError(
@@ -78,7 +80,9 @@ def validate_hard_constraints(
 ) -> ValidationResult:
     resources = {resource.resource_id: resource for resource in resource_state}
     missing_destinations = [
-        destination_id for destination_id in candidate_destinations if destination_id not in resources
+        destination_id
+        for destination_id in candidate_destinations
+        if destination_id not in resources
     ]
     if missing_destinations:
         raise PequiFluxError(
@@ -119,9 +123,7 @@ def validate_hard_constraints(
                 )
 
             if resource.status in {"down", "blocked"}:
-                failures.append(
-                    _fail("HC-03", "resource_state", "Destination is down or blocked.")
-                )
+                failures.append(_fail("HC-03", "resource_state", "Destination is down or blocked."))
 
             if _ticket_applies_to_row(parsed_ticket, row.truck_id) and (
                 parsed_ticket.document_status != DocumentStatus.CLEAR
@@ -135,7 +137,10 @@ def validate_hard_constraints(
                     )
                 )
 
-            if resource.allowed_vehicle_types and row.vehicle_type not in resource.allowed_vehicle_types:
+            if (
+                resource.allowed_vehicle_types
+                and row.vehicle_type not in resource.allowed_vehicle_types
+            ):
                 failures.append(
                     _fail(
                         "HC-05",

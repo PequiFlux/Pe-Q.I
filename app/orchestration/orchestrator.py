@@ -87,6 +87,7 @@ class DecisionOrchestrator:
         state_machine = WorkflowStateMachine()
         timers: dict[str, int] = {}
         source_hashes: dict[str, str] = {}
+        interpreted_context_for_error: InterpretedContext | None = None
         try:
             loaded = self.load_inputs(request, state_machine, timers)
             source_hashes = loaded.source_hashes
@@ -96,6 +97,7 @@ class DecisionOrchestrator:
                 state_machine=state_machine,
                 timers=timers,
             )
+            interpreted_context_for_error = interpreted.interpreted_context
 
             if interpreted.interpreted_context.needs_human_review:
                 state_machine.transition_to(FlowState.REVIEW_REQUIRED)
@@ -138,7 +140,14 @@ class DecisionOrchestrator:
         except PequiFluxError as exc:
             if not source_hashes:
                 source_hashes = _build_source_hashes_if_available(request)
-            return self._build_blocked_payload(request, exc, state_machine, timers, source_hashes)
+            return self._build_blocked_payload(
+                request,
+                exc,
+                state_machine,
+                timers,
+                source_hashes,
+                interpreted_context_for_error,
+            )
 
     def load_inputs(
         self,
@@ -321,6 +330,7 @@ class DecisionOrchestrator:
         state_machine: WorkflowStateMachine,
         timers: dict[str, int],
         source_hashes: dict[str, str],
+        interpreted_context: InterpretedContext | None = None,
     ) -> FrontEndPayload:
         state_machine.force_terminal(FlowState.BLOCKED, reason=exc.message)
         preview = build_blocked_preview(
@@ -339,12 +349,26 @@ class DecisionOrchestrator:
                 ambiguities=[exc.message],
             ),
             truth_resolution=TruthResolution(
-                authoritative_sources=[],
-                material_conflicts=[exc.message],
+                authoritative_sources=(
+                    interpreted_context.truth_resolution.authoritative_sources
+                    if interpreted_context is not None
+                    else []
+                ),
+                material_conflicts=[
+                    *(
+                        interpreted_context.truth_resolution.material_conflicts
+                        if interpreted_context is not None
+                        else []
+                    ),
+                    exc.message,
+                ],
             ),
-            provenance=[],
+            provenance=interpreted_context.provenance if interpreted_context is not None else [],
             needs_human_review=True,
-            review_reasons=[exc.message],
+            review_reasons=[
+                *(interpreted_context.review_reasons if interpreted_context is not None else []),
+                exc.message,
+            ],
         )
         audit = self.audit_service.generate_audit_payload(
             interpreted_context=blocked_context,
@@ -380,7 +404,9 @@ class DecisionOrchestrator:
         driver_message = compose_driver_message(
             request_id=preview.request_id,
             decision_status=preview.decision_status,
-            recommended_truck=preview.recommended_truck.truck_id if preview.recommended_truck else None,
+            recommended_truck=(
+                preview.recommended_truck.truck_id if preview.recommended_truck else None
+            ),
             recommended_destination=(
                 preview.recommended_destination.destination_id
                 if preview.recommended_destination
@@ -426,7 +452,9 @@ def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:
         "ticket_ref": _hash_file(request.ticket_ref),
         "operator_note": _hash_text(request.operator_note),
         "weather_state": _hash_json(request.weather_state.model_dump(mode="json")),
-        "resource_state": _hash_json([item.model_dump(mode="json") for item in request.resource_state]),
+        "resource_state": _hash_json(
+            [item.model_dump(mode="json") for item in request.resource_state]
+        ),
     }
 
 

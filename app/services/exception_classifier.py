@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 from app.domain.enums import DocumentStatus, LoadCondition, Severity
-from app.domain.models import ExceptionAssessment, ParsedTicket, QueueSnapshot, ResourceState, WeatherState
+from app.domain.models import (
+    ExceptionAssessment,
+    ParsedTicket,
+    QueueSnapshot,
+    ResourceState,
+    WeatherState,
+)
 from app.gemma.adapter import GemmaAdapter
 
 
@@ -21,14 +27,22 @@ def classify_exception(
         return ExceptionAssessment(
             primary_exception="RESOURCE_UNAVAILABLE",
             severity=Severity.HIGH,
-            affected_resources=[resource.resource_id for resource in resource_state if resource.status in {"down", "blocked"}],
+            affected_resources=[
+                resource.resource_id
+                for resource in resource_state
+                if resource.status in {"down", "blocked"}
+            ],
         )
 
-    if weather_state.precipitation != "none" and any(resource.exposure == "open" for resource in resource_state):
+    if weather_state.precipitation != "none" and any(
+        resource.exposure == "open" for resource in resource_state
+    ):
         return ExceptionAssessment(
             primary_exception="RAIN_ON_OPEN_DESTINATION",
             severity=Severity.HIGH,
-            affected_resources=[resource.resource_id for resource in resource_state if resource.exposure == "open"],
+            affected_resources=[
+                resource.resource_id for resource in resource_state if resource.exposure == "open"
+            ],
         )
 
     if parsed_ticket and parsed_ticket.document_status != DocumentStatus.CLEAR:

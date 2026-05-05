@@ -62,7 +62,9 @@ def test_resource_state_prevails_over_parsed_destination_constraint() -> None:
     )
 
     assert context.needs_human_review is True
-    assert any("resource_state prevails" in item for item in context.truth_resolution.material_conflicts)
+    assert any(
+        "resource_state prevails" in item for item in context.truth_resolution.material_conflicts
+    )
     assert context.truth_resolution.authoritative_sources[:3] == [
         "queue_snapshot",
         "weather_state",
@@ -87,7 +89,9 @@ def test_weather_state_prevails_over_free_text_rain_note() -> None:
     )
 
     assert context.needs_human_review is True
-    assert any("weather_state prevails" in item for item in context.truth_resolution.material_conflicts)
+    assert any(
+        "weather_state prevails" in item for item in context.truth_resolution.material_conflicts
+    )
 
 
 def test_queue_snapshot_contract_priority_prevails_over_ticket_flag() -> None:
@@ -108,4 +112,6 @@ def test_queue_snapshot_contract_priority_prevails_over_ticket_flag() -> None:
     )
 
     assert context.needs_human_review is True
-    assert any("queue_snapshot contract_priority_flag prevails" in item for item in context.review_reasons)
+    assert any(
+        "queue_snapshot contract_priority_flag prevails" in item for item in context.review_reasons
+    )

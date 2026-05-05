@@ -172,10 +172,10 @@ Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.
 - `S12_PDF_SCANNED_DOCUMENT_BLOCK`: robustez multimodal com PDF escaneado sem texto extraível
 - `S13_TRUCK_ID_NOT_IN_QUEUE`: conflito entre documento e fila local
 - `S14_NOTE_RAIN_WEATHER_NONE_CONFLICT`: conflito entre nota operacional e `weather_state`
-- `S15_UNKNOWN_DESTINATION_IN_TICKET`: conflito entre documento e `resource_state`
+- `S15_UNKNOWN_DESTINATION_IN_TICKET`: conflito entre documento/FIFO bruto e `resource_state`
 - `S16_ALL_DESTINATIONS_BLOCKED`: fail-closed sem par elegível
-- `S17_OVERRIDE_INELIGIBLE_PAIR`: coberto por teste unitário de governança de override
-- `S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR`: coberto por teste unitário de governança de override
+- `S17_OVERRIDE_INELIGIBLE_PAIR`: cenário versionado e teste unitário de governança para override inelegível
+- `S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR`: cenário versionado e teste unitário de governança para override elegível não-top
 - `S19_TIE_BREAK_EQUAL_SCORE`: desempate determinístico de ranking
 - `S20_LARGE_QUEUE_100_TRUCKS`: stress sintético com 100 caminhões
 

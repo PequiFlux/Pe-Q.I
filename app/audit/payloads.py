@@ -38,10 +38,11 @@ def build_audit_record(
         fired_rules=preview.fired_rules,
         rejected_candidates=rejected,
         recommended_pair=recommended_pair,
-        fifo_break=bool(preview.recommended_truck and preview.recommended_truck.queue_position_before != 1),
+        fifo_break=bool(
+            preview.recommended_truck and preview.recommended_truck.queue_position_before != 1
+        ),
         provenance=[item.model_dump(mode="json") for item in interpreted_context.provenance],
         operator_action=operator_action,
         latencies_ms=latencies_ms,
         source_hashes=source_hashes,
     )
-

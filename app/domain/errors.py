@@ -26,4 +26,3 @@ class FallbackForbiddenError(PequiFluxError):
             "FALLBACK_FORBIDDEN",
             "Fallback behavior is forbidden by repository policy.",
         )
-

@@ -136,10 +136,17 @@ def pair_rejected(
 ) -> bool:
     if not truck_id or not destination_id or not payload.audit_record:
         return False
+    pair_was_validated = False
+    for checked in payload.audit_record.hard_constraints_checked:
+        if checked["truck_id"] != truck_id or checked["destination_id"] != destination_id:
+            continue
+        pair_was_validated = True
+        if not checked.get("eligible", False):
+            return True
     for rejected in payload.audit_record.rejected_candidates:
         if rejected["truck_id"] == truck_id and rejected["destination_id"] == destination_id:
             return True
-    return False
+    return not pair_was_validated
 
 
 def ticket_field_accuracy(observed: dict[str, Any], expected: dict[str, Any]) -> float:
@@ -153,13 +160,31 @@ def audit_complete(payload: FrontEndPayload) -> bool:
     audit = payload.audit_record
     if audit is None:
         return False
-    has_recommendation = payload.recommended_truck is None or audit.recommended_pair is not None
-    return all(
+    has_terminal_context = bool(
+        payload.reason_summary
+        and payload.decision_status
+        and payload.benchmark_observed.get("primary_exception")
+        and payload.gemma_visible_summary.exception_label
+    )
+    has_base_audit = all(
         [
-            bool(audit.hard_constraints_checked),
             bool(audit.provenance),
             bool(audit.latencies_ms),
             {"queue_csv_ref", "ticket_ref"}.issubset(audit.source_hashes),
+            audit.request_id == payload.request_id,
+            audit.scenario_id == payload.scenario_id,
+            audit.variant == payload.variant,
+        ]
+    )
+    if payload.decision_status in {"BLOCKED", "REVIEW_REQUIRED"}:
+        return has_base_audit and has_terminal_context
+
+    has_recommendation = payload.recommended_truck is None or audit.recommended_pair is not None
+    return all(
+        [
+            payload.decision_status == "PREVIEW_READY",
+            bool(audit.hard_constraints_checked),
+            has_base_audit,
             has_recommendation,
         ]
     )

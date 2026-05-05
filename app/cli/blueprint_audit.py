@@ -102,6 +102,7 @@ def run_audit(manifest_path: Path) -> list[AuditCheck]:
         _check_streamlit_demo(),
         _check_benchmark_cli(),
         _check_fail_closed_docs(),
+        _check_blueprint_bridge(),
         _check_root_env_absent(),
     ]
     return checks
@@ -232,6 +233,31 @@ def _check_fail_closed_docs() -> AuditCheck:
             "blueprint docs do not promise operational fallback"
             if not findings
             else f"findings={findings[:12]}"
+        ),
+    )
+
+
+def _check_blueprint_bridge() -> AuditCheck:
+    canonical = Path("technical_blueprint.md")
+    bridge = Path("docs/technical_blueprint.md")
+    findings = []
+    if not canonical.exists():
+        findings.append("technical_blueprint.md:missing")
+    if not bridge.exists():
+        findings.append("docs/technical_blueprint.md:missing")
+    else:
+        source = bridge.read_text(encoding="utf-8")
+        if "../technical_blueprint.md" not in source:
+            findings.append("docs/technical_blueprint.md:missing canonical link")
+        if len(source.splitlines()) > 80:
+            findings.append("docs/technical_blueprint.md:should remain a short bridge")
+    return AuditCheck(
+        "blueprint_bridge",
+        not findings,
+        (
+            "docs blueprint is a short bridge to root canonical blueprint"
+            if not findings
+            else f"findings={findings}"
         ),
     )
 

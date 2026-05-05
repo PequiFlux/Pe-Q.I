@@ -19,4 +19,3 @@ class BenchmarkRunner:
             request = DecisionRequest.model_validate(case["request"])
             payloads.append(self.orchestrator.run_decision(request))
         return payloads, compute_benchmark_metrics(payloads)
-

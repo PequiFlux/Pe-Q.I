@@ -14,11 +14,17 @@ def validate_payload(payload: FrontEndPayload, expected: dict[str, Any]) -> None
     if truck_id not in expected["acceptable_trucks"]:
         errors.append(f"truck={truck_id}, acceptable={expected['acceptable_trucks']}")
 
-    destination_id = payload.recommended_destination.destination_id if payload.recommended_destination else None
+    destination_id = (
+        payload.recommended_destination.destination_id if payload.recommended_destination else None
+    )
     if destination_id not in expected["acceptable_destinations"]:
-        errors.append(f"destination={destination_id}, acceptable={expected['acceptable_destinations']}")
+        errors.append(
+            f"destination={destination_id}, acceptable={expected['acceptable_destinations']}"
+        )
 
-    fifo_break = bool(payload.recommended_truck and payload.recommended_truck.queue_position_before != 1)
+    fifo_break = bool(
+        payload.recommended_truck and payload.recommended_truck.queue_position_before != 1
+    )
     if fifo_break != expected["fifo_break_expected"]:
         errors.append(f"fifo_break={fifo_break}, expected={expected['fifo_break_expected']}")
 

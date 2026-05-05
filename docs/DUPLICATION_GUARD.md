@@ -39,6 +39,8 @@ Procurar:
 ## Regras adicionadas
 
 - Não criar fallback model, fallback heuristic, retry silencioso ou substituição automática de dependência.
+- Não manter scripts soltos de teste manual de Gemma na raiz; contratos de runtime/adapter devem ficar em `tests/unit` ou CLIs oficiais.
+- Manter apenas `technical_blueprint.md` da raiz como blueprint longo; `docs/technical_blueprint.md` deve permanecer uma ponte curta para evitar drift.
 - Não colocar regra de domínio em `app/ui` ou `app/cli`; chamar orquestração/domínio existente.
 - Não criar novo parser de ticket sem verificar `app/services/parser.py`, `app/services/structured_ticket_parser.py` e `app/adapters/document_adapter.py`.
 - Fixtures textuais de ticket devem reutilizar `app/services/structured_ticket_parser.py`; `TextTicketRuntime` não deve extrair dados de frases do prompt.
@@ -56,11 +58,16 @@ Procurar:
 - O benchmark deve distinguir `raw_fifo` de `fifo_safe`; não chamar a variante operacional `fifo` de FIFO puro em relatório público.
 - Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
 - Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.
+- Completude de auditoria do benchmark deve ser status-aware em `bench.rows.audit_complete`; não exigir matriz de validação para `BLOCKED`/`REVIEW_REQUIRED` corretos.
+- Validação de violação do FIFO bruto deve tratar par caminhão-destino ausente da matriz como inválido em `bench.rows.pair_rejected`; não interpretar destino desconhecido como “sem violação”.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
 - Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.
 - Caminhos reprodutíveis mínimos devem usar `demo-text`/`ui-text`; não fazer quickstart depender implicitamente do serviço `gemma`.
 - Checks públicos devem reutilizar `pytest`, `black`, `app.cli.blueprint_audit` e `app.cli.run_benchmark`; não criar runner paralelo de CI para métricas ou auditoria.
+- Format check público deve rodar `black --check app bench tests scripts`; não voltar a listas manuais de arquivos em CI, Makefile ou `scripts/check-quality.sh`.
+- Consistência do sample público deve ficar em `tests/unit/test_public_sample_consistency.py`; não criar validação paralela entre README, `metrics.json` e `summary.csv`.
+- A imagem de teste deve incluir apenas `bench/reports/sample/` entre relatórios versionados; não remover as exceções correspondentes em `.dockerignore` sem mover o teste de contrato público.
 - Finalização de ação humana deve reutilizar `SQLiteStore.save_operator_finalization`; não encadear `save_operator_action`, `save_decision_finalized` e `save_audit_record` com commits separados.
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.
 - Renderizadores e helpers compartilhados entre módulos de UI devem ser importados por nomes públicos sem `_`; prefixo `_` fica reservado para helpers internos do próprio arquivo.

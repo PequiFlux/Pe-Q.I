@@ -14,4 +14,3 @@ class JsonlLogger:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(payload, ensure_ascii=True, separators=(",", ":")))
             handle.write("\n")
-

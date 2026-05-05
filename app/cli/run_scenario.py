@@ -55,7 +55,9 @@ def _summary(payload: FrontEndPayload) -> dict[str, Any]:
         ),
         "reason_summary": payload.reason_summary,
         "fired_rules": payload.audit_record.fired_rules if payload.audit_record else [],
-        "rejected_count": len(payload.audit_record.rejected_candidates) if payload.audit_record else 0,
+        "rejected_count": (
+            len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
+        ),
         "latency_ms": payload.latency_ms,
         "benchmark_tags": payload.benchmark_tags,
         "confidence_notes": payload.confidence_notes,

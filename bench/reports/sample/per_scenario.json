@@ -169,7 +169,7 @@
   },
   {
     "audit_complete": false,
-    "constraint_violation": false,
+    "constraint_violation": true,
     "decision_match_at_1": false,
     "decision_status": "PREVIEW_READY",
     "error": null,
@@ -189,7 +189,7 @@
     "variant": "raw_fifo"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -231,7 +231,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -421,7 +421,7 @@
   },
   {
     "audit_complete": false,
-    "constraint_violation": false,
+    "constraint_violation": true,
     "decision_match_at_1": false,
     "decision_status": "PREVIEW_READY",
     "error": null,
@@ -441,7 +441,7 @@
     "variant": "raw_fifo"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": false,
     "decision_status": "REVIEW_REQUIRED",
@@ -903,7 +903,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1050,7 +1050,7 @@
     "variant": "fifo_safe"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1071,7 +1071,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1113,7 +1113,7 @@
     "variant": "raw_fifo"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1134,7 +1134,7 @@
     "variant": "fifo_safe"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1155,7 +1155,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1177,9 +1177,9 @@
   },
   {
     "audit_complete": false,
-    "constraint_violation": false,
+    "constraint_violation": true,
     "decision_match_at_1": false,
-    "decision_status": "REVIEW_REQUIRED",
+    "decision_status": "PREVIEW_READY",
     "error": null,
     "exception_match": false,
     "expected_primary_exception": "NO_EXCEPTION",
@@ -1189,7 +1189,7 @@
     "latency_ms_total": 0,
     "observed_primary_exception": "NO_CONTEXT",
     "passed": true,
-    "recommended_destination": null,
+    "recommended_destination": "DST-GHOST-99",
     "recommended_truck": "TRK-051",
     "rejected_count": 0,
     "scenario_id": "S15_UNKNOWN_DESTINATION_IN_TICKET",
@@ -1218,7 +1218,7 @@
     "variant": "fifo_safe"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1239,7 +1239,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "REVIEW_REQUIRED",
@@ -1281,7 +1281,7 @@
     "variant": "raw_fifo"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "BLOCKED",
@@ -1302,7 +1302,7 @@
     "variant": "fifo_safe"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "BLOCKED",
@@ -1323,7 +1323,7 @@
     "variant": "heuristic"
   },
   {
-    "audit_complete": false,
+    "audit_complete": true,
     "constraint_violation": false,
     "decision_match_at_1": true,
     "decision_status": "BLOCKED",
@@ -1341,6 +1341,174 @@
     "rejected_count": 0,
     "scenario_id": "S16_ALL_DESTINATIONS_BLOCKED",
     "ticket_field_accuracy": 0.375,
+    "variant": "full"
+  },
+  {
+    "audit_complete": false,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": false,
+    "expected_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "NO_CONTEXT",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-171",
+    "rejected_count": 0,
+    "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+    "ticket_field_accuracy": 0.0,
+    "variant": "raw_fifo"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-171",
+    "rejected_count": 3,
+    "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+    "ticket_field_accuracy": 0.0,
+    "variant": "fifo_safe"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-171",
+    "rejected_count": 3,
+    "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+    "ticket_field_accuracy": 1.0,
+    "variant": "heuristic"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-171",
+    "rejected_count": 3,
+    "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+    "ticket_field_accuracy": 1.0,
+    "variant": "full"
+  },
+  {
+    "audit_complete": false,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": false,
+    "expected_primary_exception": "NO_EXCEPTION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "NO_CONTEXT",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-181",
+    "rejected_count": 0,
+    "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+    "ticket_field_accuracy": 0.0,
+    "variant": "raw_fifo"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "NO_EXCEPTION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "NO_EXCEPTION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-181",
+    "rejected_count": 0,
+    "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+    "ticket_field_accuracy": 0.0,
+    "variant": "fifo_safe"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "NO_EXCEPTION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "NO_EXCEPTION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-181",
+    "rejected_count": 0,
+    "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+    "ticket_field_accuracy": 1.0,
+    "variant": "heuristic"
+  },
+  {
+    "audit_complete": true,
+    "constraint_violation": false,
+    "decision_match_at_1": true,
+    "decision_status": "PREVIEW_READY",
+    "error": null,
+    "exception_match": true,
+    "expected_primary_exception": "NO_EXCEPTION",
+    "fifo_break": false,
+    "fifo_break_expected": false,
+    "fifo_break_justified": false,
+    "latency_ms_total": 0,
+    "observed_primary_exception": "NO_EXCEPTION",
+    "passed": true,
+    "recommended_destination": "DST-COV-01",
+    "recommended_truck": "TRK-181",
+    "rejected_count": 0,
+    "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+    "ticket_field_accuracy": 1.0,
     "variant": "full"
   },
   {

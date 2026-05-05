@@ -38,7 +38,7 @@ audit:
 
 format-check:
 	docker build --target test -t pequiflux-yard-copilot:test .
-	docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py bench/rows.py bench/variants.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py tests/unit/test_benchmark_rows.py tests/unit/test_benchmark_variants_names.py tests/unit/test_decision_builder.py app/cli/blueprint_audit.py tests/scenarios/test_scenario_pack.py tests/unit/test_operator_governance.py
+	docker run --rm pequiflux-yard-copilot:test python -m black --check app bench tests scripts
 
 benchmark-smoke:
 	docker build --target test -t pequiflux-yard-copilot:test .

@@ -26,7 +26,9 @@ def finalize_operator_decision(
 ) -> tuple[DecisionFinalized, AuditRecord]:
     audit = payload.audit_record
     if audit is None:
-        raise PequiFluxError("AUDIT_RECORD_REQUIRED", "Operator finalization requires an audit record.")
+        raise PequiFluxError(
+            "AUDIT_RECORD_REQUIRED", "Operator finalization requires an audit record."
+        )
 
     action = OperatorDecision(
         action_type=OperatorAction(action_type),
@@ -61,11 +63,15 @@ def finalize_operator_decision(
 
 def _validate_action(*, payload: FrontEndPayload, action: OperatorDecision) -> None:
     if not action.reason.strip():
-        raise PequiFluxError("OPERATOR_REASON_REQUIRED", "Operator action requires an explicit reason.")
+        raise PequiFluxError(
+            "OPERATOR_REASON_REQUIRED", "Operator action requires an explicit reason."
+        )
 
     if action.action_type == OperatorAction.APPROVE:
         if payload.decision_status != DecisionStatus.PREVIEW_READY:
-            raise PequiFluxError("APPROVAL_REQUIRES_PREVIEW", "Approve requires a preview-ready decision.")
+            raise PequiFluxError(
+                "APPROVAL_REQUIRES_PREVIEW", "Approve requires a preview-ready decision."
+            )
         if payload.recommended_truck is None or payload.recommended_destination is None:
             raise PequiFluxError("APPROVAL_TARGET_REQUIRED", "Approve requires a recommended pair.")
         return
@@ -78,7 +84,9 @@ def _validate_action(*, payload: FrontEndPayload, action: OperatorDecision) -> N
         validate_override_action(validation=validation, operator_action=action)
         return
 
-    raise PequiFluxError("UNSUPPORTED_OPERATOR_ACTION", f"Unsupported operator action: {action.action_type}")
+    raise PequiFluxError(
+        "UNSUPPORTED_OPERATOR_ACTION", f"Unsupported operator action: {action.action_type}"
+    )
 
 
 def _validation_from_audit(payload: FrontEndPayload) -> ValidationResult:
@@ -103,4 +111,6 @@ def _final_status(action_type: OperatorAction) -> DecisionStatus:
         return DecisionStatus.BLOCKED
     if action_type == OperatorAction.OVERRIDE:
         return DecisionStatus.OVERRIDDEN
-    raise PequiFluxError("UNSUPPORTED_OPERATOR_ACTION", f"Unsupported operator action: {action_type}")
+    raise PequiFluxError(
+        "UNSUPPORTED_OPERATOR_ACTION", f"Unsupported operator action: {action_type}"
+    )

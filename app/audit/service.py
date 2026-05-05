@@ -23,4 +23,3 @@ class AuditService:
             source_hashes=source_hashes,
             operator_action=operator_action,
         )
-

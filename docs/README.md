@@ -15,11 +15,11 @@ Esta pasta converte o `technical_blueprint.md` em documentação operacional, mo
 - [`HACKATHON_SUBMISSION.md`](./HACKATHON_SUBMISSION.md): critérios da hackathon mapeados para evidências versionadas
 - [`LIMITATIONS.md`](./LIMITATIONS.md): limites explícitos do protótipo e claims não permitidos
 - [`UI_DECISIONS.md`](./UI_DECISIONS.md): decisões de interface para operador, FIFO e auditoria
-- [`technical_blueprint.md`](./technical_blueprint.md): referência extensa original
+- [`technical_blueprint.md`](./technical_blueprint.md): ponte curta para o blueprint canônico da raiz
 
 ## Regra de precedência
 
-O blueprint continua sendo a referência ampla, mas os documentos modulares desta pasta são a referência de implementação do repositório.
+O blueprint canônico da raiz continua sendo a referência ampla, mas os documentos modulares desta pasta são a referência de implementação do repositório.
 
 Quando houver conflito entre o blueprint e a política atual do repositório, prevalecem estes documentos modulares. Em particular:
 

@@ -26,7 +26,9 @@ def load_queue_rows(path: str) -> list[RawQueueRow]:
         rows: list[RawQueueRow] = []
         for line_number, raw in enumerate(reader, start=2):
             if not raw.get("truck_id"):
-                raise PequiFluxError("EMPTY_TRUCK_ID", f"Queue row {line_number} has an empty truck_id.")
+                raise PequiFluxError(
+                    "EMPTY_TRUCK_ID", f"Queue row {line_number} has an empty truck_id."
+                )
             arrival_ts = _parse_arrival_ts(raw.get("arrival_ts"), line_number)
             rows.append(
                 RawQueueRow(
@@ -75,7 +77,9 @@ def normalize_queue_snapshot(
 
 def _parse_arrival_ts(value: str | None, line_number: int) -> datetime:
     if not value or not value.strip():
-        raise PequiFluxError("INVALID_ARRIVAL_TS", f"Queue row {line_number} has an empty arrival_ts.")
+        raise PequiFluxError(
+            "INVALID_ARRIVAL_TS", f"Queue row {line_number} has an empty arrival_ts."
+        )
     raw_value = value.strip()
     try:
         parsed = datetime.fromisoformat(raw_value)

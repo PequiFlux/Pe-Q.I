@@ -82,7 +82,9 @@ def _build_queue_diff(
 def _blocked_truck_ids(validation: ValidationResult, selected_truck_id: str) -> set[str]:
     eligible_by_truck: dict[str, bool] = {}
     for entry in validation.validation_matrix:
-        eligible_by_truck[entry.truck_id] = eligible_by_truck.get(entry.truck_id, False) or entry.eligible
+        eligible_by_truck[entry.truck_id] = (
+            eligible_by_truck.get(entry.truck_id, False) or entry.eligible
+        )
     return {
         truck_id
         for truck_id, has_eligible_destination in eligible_by_truck.items()
@@ -117,11 +119,7 @@ def build_decision_preview(
         if entry.truck_id == top.truck_id
     ]
     if top.fifo_break:
-        break_reasons = [
-            detail
-            for detail in top.reason_details
-            if "FIFO" not in detail
-        ]
+        break_reasons = [detail for detail in top.reason_details if "FIFO" not in detail]
         reason_summary = (
             "FIFO break justified by " + "; ".join(break_reasons)
             if break_reasons

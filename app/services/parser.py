@@ -20,4 +20,3 @@ def parse_ticket_document(
         candidate_truck_ids=candidate_truck_ids,
     )
     return gemma_adapter.parse_ticket_document(bundle)
-

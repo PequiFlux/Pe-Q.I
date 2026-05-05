@@ -45,7 +45,9 @@ def test_fifo_variant_does_not_call_gemma_or_parse_ticket() -> None:
 def test_heuristic_variant_uses_structured_parser_without_gemma() -> None:
     orchestrator = DecisionOrchestrator(gemma_adapter=GemmaAdapter(runtime=RuntimeThatMustNotRun()))
 
-    payload = orchestrator.run_decision(_request("heuristic", scenario_id="S10_FIFO_BREAK_JUSTIFIED"))
+    payload = orchestrator.run_decision(
+        _request("heuristic", scenario_id="S10_FIFO_BREAK_JUSTIFIED")
+    )
 
     assert "parse_structured_ticket_document" in payload.latency_ms
     assert "parse_ticket_document" not in payload.latency_ms

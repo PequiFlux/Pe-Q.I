@@ -60,8 +60,19 @@ def resolve_truth(
         )
 
     if parsed_ticket and parsed_ticket.truck_id:
-        row = next((item for item in queue_snapshot.waiting_rows if item.truck_id == parsed_ticket.truck_id), None)
-        if row and row.vehicle_type != parsed_ticket.vehicle_type and parsed_ticket.vehicle_type != VehicleType.UNKNOWN:
+        row = next(
+            (
+                item
+                for item in queue_snapshot.waiting_rows
+                if item.truck_id == parsed_ticket.truck_id
+            ),
+            None,
+        )
+        if (
+            row
+            and row.vehicle_type != parsed_ticket.vehicle_type
+            and parsed_ticket.vehicle_type != VehicleType.UNKNOWN
+        ):
             material_conflicts.append(
                 "Truth hierarchy conflict: queue_snapshot vehicle_type prevails over parsed ticket vehicle_type."
             )
@@ -94,7 +105,8 @@ def resolve_truth(
                 *LOCAL_AUTHORITATIVE_SOURCES,
                 *(
                     []
-                    if parsed_ticket is None or parsed_ticket.parse_confidence < TRUSTED_TICKET_CONFIDENCE
+                    if parsed_ticket is None
+                    or parsed_ticket.parse_confidence < TRUSTED_TICKET_CONFIDENCE
                     else ["ticket_document"]
                 ),
                 "operator_note",

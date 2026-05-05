@@ -253,7 +253,7 @@ O adapter retorna `None` e o orquestrador falha fechado com `MODEL_RUNTIME_UNAVA
 
 ## Benchmark
 
-O benchmark executa o pack versionado atual (**18 cenários × 4 linhas comparativas**) e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
+O benchmark executa o pack versionado atual (**20 cenários × 4 linhas comparativas**) e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
 
 ### Variantes
 
@@ -297,10 +297,10 @@ Saída: `bench/reports/<run_id>/` com `metrics.json`, `per_scenario.json` e `sum
 O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` e `S11_IMAGE_ROTATED_WET_LOAD` como tickets em `image/png`, além de `S12_PDF_SCANNED_DOCUMENT_BLOCK` como PDF escaneado sem texto extraível.
 Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma.
 
-- `full`: `18/18`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.965`
-- `heuristic`: `decision_match_at_1 = 0.833`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.833`
-- `fifo_safe`: `decision_match_at_1 = 0.667`, `constraint_violation_rate = 0.0`
-- `raw_fifo`: `decision_match_at_1 = 0.167`, `constraint_violation_rate = 0.222`
+- `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`
+- `heuristic`: `decision_match_at_1 = 0.85`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.85`, `audit_completeness = 0.85`
+- `fifo_safe`: `decision_match_at_1 = 0.7`, `constraint_violation_rate = 0.0`
+- `raw_fifo`: `decision_match_at_1 = 0.25`, `constraint_violation_rate = 0.35`
 - `S03_WET_LOAD`, `S11_IMAGE_ROTATED_WET_LOAD` e `S12_PDF_SCANNED_DOCUMENT_BLOCK`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao resultado esperado via sidecar multimodal de CI.
 
 ### Setup do Gemma (necessário para `make demo`, `make ui` e benchmark com runtime Ollama)
@@ -458,7 +458,7 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
 ## Scenario Pack
 
-18 cenários sintéticos em `scenarios/cases/`:
+20 cenários sintéticos em `scenarios/cases/`:
 
 | ID | Nome | O que testa |
 |----|------|-------------|
@@ -478,6 +478,8 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 | S14 | NOTE_RAIN_WEATHER_NONE_CONFLICT | Nota e `weather_state` entram em conflito material |
 | S15 | UNKNOWN_DESTINATION_IN_TICKET | Ticket aponta destino ausente no `resource_state` |
 | S16 | ALL_DESTINATIONS_BLOCKED | Nenhum par elegível gera `BLOCKED` fail-closed |
+| S17 | OVERRIDE_INELIGIBLE_PAIR | Override para par inelegível falha fechado |
+| S18 | OVERRIDE_ELIGIBLE_NON_TOP_PAIR | Override para par elegível não-top é auditável |
 | S19 | TIE_BREAK_EQUAL_SCORE | Desempate determinístico para scores iguais |
 | S20 | LARGE_QUEUE_100_TRUCKS | Stress sintético com 100 caminhões |
 
@@ -537,7 +539,7 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 │   ├── scenarios/            # Validação e2e do scenario pack
 │   ├── e2e/                  # Testes end-to-end completos
 │   └── failure/              # Testes de caminho de falha (fail-closed)
-├── technical_blueprint.md    # Especificação técnica primária (3.100+ linhas)
+├── technical_blueprint.md    # Blueprint técnico canônico (3.100+ linhas)
 ├── compose.yaml              # Serviços Docker Compose e profiles
 ├── Dockerfile                # Build multi-stage (wheels -> runtime -> test -> ui)
 ├── pyproject.toml            # Metadados do projeto e configuração pytest
@@ -597,8 +599,8 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | [`docs/SURFACE_MAP.md`](docs/SURFACE_MAP.md) | Contratos públicos/exportados |
 | [`docs/DUPLICATION_GUARD.md`](docs/DUPLICATION_GUARD.md) | Pontos de reutilização e anti-duplicação |
 | [`docs/SETUP_STATUS.md`](docs/SETUP_STATUS.md) | Estado de setup, checks e comandos disponíveis |
-| [`docs/technical_blueprint.md`](docs/technical_blueprint.md) | Blueprint original completo |
-| [`technical_blueprint.md`](technical_blueprint.md) | Cópia raiz (fonte primária) |
+| [`technical_blueprint.md`](technical_blueprint.md) | Blueprint técnico canônico |
+| [`docs/technical_blueprint.md`](docs/technical_blueprint.md) | Ponte curta para a fonte canônica da raiz |
 
 ---
 

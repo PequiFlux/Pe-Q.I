@@ -15,4 +15,3 @@ def load_resource_state(path: str) -> list[ResourceState]:
     with Path(path).open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
     return [ResourceState.model_validate(item) for item in payload]
-

@@ -45,7 +45,7 @@ COPY --chown=pequiflux:pequiflux docs docs
 COPY --chown=pequiflux:pequiflux scenarios scenarios
 COPY --chown=pequiflux:pequiflux scripts scripts
 COPY --chown=pequiflux:pequiflux tests tests
-COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md gemma_test.py Dockerfile compose.yaml ./
+COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md README.md Dockerfile compose.yaml ./
 
 USER pequiflux
 

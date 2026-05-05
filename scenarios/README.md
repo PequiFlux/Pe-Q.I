@@ -29,8 +29,10 @@ O manifest completo fica em [`manifest.json`](./manifest.json). A estrutura e os
 | `S12_PDF_SCANNED_DOCUMENT_BLOCK` | PDF escaneado sem texto extraível exige leitura multimodal para identificar bloqueio documental. |
 | `S13_TRUCK_ID_NOT_IN_QUEUE` | Ticket aponta caminhão ausente da fila; a fila local prevalece e a decisão exige revisão. |
 | `S14_NOTE_RAIN_WEATHER_NONE_CONFLICT` | Nota menciona chuva, mas o estado local diz tempo seco; conflito material exige revisão. |
-| `S15_UNKNOWN_DESTINATION_IN_TICKET` | Ticket aponta destino inexistente no estado de recursos; `resource_state` prevalece e bloqueia automação. |
+| `S15_UNKNOWN_DESTINATION_IN_TICKET` | Ticket e FIFO bruto apontam destino inexistente no estado de recursos; `resource_state` prevalece e bloqueia automação. |
 | `S16_ALL_DESTINATIONS_BLOCKED` | Todos os destinos estão inelegíveis; o sistema falha fechado em `BLOCKED`. |
+| `S17_OVERRIDE_INELIGIBLE_PAIR` | Override para par inelegível é rejeitado pela validação de hard constraints. |
+| `S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR` | Override para par elegível não-top é permitido quando há motivo explícito e auditável. |
 | `S19_TIE_BREAK_EQUAL_SCORE` | Destinos com score empatado usam desempate determinístico lexicográfico. |
 | `S20_LARGE_QUEUE_100_TRUCKS` | Fila sintética com 100 caminhões valida estabilidade do ranking e do benchmark. |
 

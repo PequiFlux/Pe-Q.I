@@ -59,7 +59,9 @@ def rank_candidates(
 
         wait_pressure = 0.0
         if variant in {"heuristic", "full"}:
-            wait_pressure = min(row.wait_minutes / 120, 1.0) * policy_profile.weights.wait_sla_pressure
+            wait_pressure = (
+                min(row.wait_minutes / 120, 1.0) * policy_profile.weights.wait_sla_pressure
+            )
         if not isclose(wait_pressure, 0.0):
             score += wait_pressure
             fired_rules.append(PolicyRule.WAIT_SLA_PRESSURE)
@@ -70,12 +72,13 @@ def rank_candidates(
         if (
             variant in {"heuristic", "full"}
             and resource is not None
-            and policy_profile.min_operational_capacity_pct <= resource.capacity_pct < policy_profile.comfort_capacity_pct
+            and policy_profile.min_operational_capacity_pct
+            <= resource.capacity_pct
+            < policy_profile.comfort_capacity_pct
         ):
             capacity_gap = policy_profile.comfort_capacity_pct - resource.capacity_pct
             comfort_band = (
-                policy_profile.comfort_capacity_pct
-                - policy_profile.min_operational_capacity_pct
+                policy_profile.comfort_capacity_pct - policy_profile.min_operational_capacity_pct
             )
             capacity_penalty = (
                 capacity_gap / comfort_band

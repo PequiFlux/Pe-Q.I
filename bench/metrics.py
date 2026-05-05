@@ -9,9 +9,7 @@ def compute_benchmark_metrics(payloads: list[FrontEndPayload]) -> dict[str, floa
     total = len(payloads)
     preview_ready = sum(1 for payload in payloads if payload.decision_status == "PREVIEW_READY")
     blocked = sum(1 for payload in payloads if payload.decision_status == "BLOCKED")
-    review_required = sum(
-        1 for payload in payloads if payload.decision_status == "REVIEW_REQUIRED"
-    )
+    review_required = sum(1 for payload in payloads if payload.decision_status == "REVIEW_REQUIRED")
     return {
         "total_runs": float(total),
         "preview_ready_ratio": (preview_ready / total) if total else 0.0,
@@ -47,9 +45,7 @@ def _mean(values: list[float]) -> float:
 
 
 def _macro_f1(rows: list[dict[str, Any]]) -> float:
-    labels = {
-        item["expected_primary_exception"] for item in rows
-    } | {
+    labels = {item["expected_primary_exception"] for item in rows} | {
         item["observed_primary_exception"] for item in rows
     }
     if not labels:

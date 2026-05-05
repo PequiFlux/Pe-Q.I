@@ -98,7 +98,9 @@ class ToolGateway:
         if schema is None:
             return
         if schema.get("type") != "object":
-            raise PequiFluxError("SCHEMA_ERROR", f"Tool schema for {tool_name} must be an object schema.")
+            raise PequiFluxError(
+                "SCHEMA_ERROR", f"Tool schema for {tool_name} must be an object schema."
+            )
 
         properties = schema.get("properties", {})
         required = set(schema.get("required", []))
@@ -109,7 +111,9 @@ class ToolGateway:
         if not additional_allowed:
             extra = sorted(set(arguments) - set(properties))
             if extra:
-                raise PequiFluxError("SCHEMA_ERROR", f"Unexpected tool arguments: {', '.join(extra)}")
+                raise PequiFluxError(
+                    "SCHEMA_ERROR", f"Unexpected tool arguments: {', '.join(extra)}"
+                )
 
         for key, value in arguments.items():
             if key in properties:
@@ -190,7 +194,11 @@ def _validate_ids(
         for key, item in value.items():
             if key in {"truck_id", "requested_truck_id"} and truck_ids and item not in truck_ids:
                 raise PequiFluxError("DOMAIN_VALIDATION_ERROR", f"Unknown truck_id: {item}")
-            if key in {"destination_id", "requested_destination_id"} and destination_ids and item not in destination_ids:
+            if (
+                key in {"destination_id", "requested_destination_id"}
+                and destination_ids
+                and item not in destination_ids
+            ):
                 raise PequiFluxError("DOMAIN_VALIDATION_ERROR", f"Unknown destination_id: {item}")
             if key == "request_id" and request_ids and item not in request_ids:
                 raise PequiFluxError("DOMAIN_VALIDATION_ERROR", f"Unknown request_id: {item}")

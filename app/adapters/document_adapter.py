@@ -22,7 +22,9 @@ def build_document_bundle(
     cache_dir: str | Path | None = None,
 ) -> DocumentBundle:
     if content_type not in ALLOWED_CONTENT_TYPES:
-        raise PequiFluxError("UNSUPPORTED_CONTENT_TYPE", f"Unsupported content type: {content_type}")
+        raise PequiFluxError(
+            "UNSUPPORTED_CONTENT_TYPE", f"Unsupported content type: {content_type}"
+        )
 
     path = Path(document_ref)
     if not path.exists():
@@ -144,6 +146,5 @@ def _max_rendered_pages() -> int:
 
 def _safe_stem(value: str) -> str:
     return "".join(
-        character if character.isalnum() or character in {"-", "_"} else "_"
-        for character in value
+        character if character.isalnum() or character in {"-", "_"} else "_" for character in value
     )

@@ -1,25 +1,25 @@
 {
   "failed_count": 0,
-  "passed_count": 18,
-  "scenario_count": 18,
+  "passed_count": 20,
+  "scenario_count": 20,
   "variant_metrics": {
     "fifo_safe": {
-      "audit_completeness": 0.778,
+      "audit_completeness": 1.0,
       "constraint_violation_rate": 0.0,
-      "decision_match_at_1": 0.667,
-      "exception_f1": 0.733,
+      "decision_match_at_1": 0.7,
+      "exception_f1": 0.735,
       "failed_count": 0,
       "fifo_break_justified_precision": 1.0,
       "latency_p50": 0,
       "latency_p95": 0,
       "p50_latency_ms": 0,
       "p95_latency_ms": 0,
-      "passed_count": 18,
-      "scenario_count": 18,
+      "passed_count": 20,
+      "scenario_count": 20,
       "ticket_field_accuracy": 0.0
     },
     "full": {
-      "audit_completeness": 0.667,
+      "audit_completeness": 1.0,
       "constraint_violation_rate": 0.0,
       "decision_match_at_1": 1.0,
       "exception_f1": 1.0,
@@ -29,14 +29,14 @@
       "latency_p95": 0,
       "p50_latency_ms": 0,
       "p95_latency_ms": 0,
-      "passed_count": 18,
-      "scenario_count": 18,
-      "ticket_field_accuracy": 0.965
+      "passed_count": 20,
+      "scenario_count": 20,
+      "ticket_field_accuracy": 0.969
     },
     "heuristic": {
-      "audit_completeness": 0.611,
+      "audit_completeness": 0.85,
       "constraint_violation_rate": 0.0,
-      "decision_match_at_1": 0.833,
+      "decision_match_at_1": 0.85,
       "exception_f1": 0.678,
       "failed_count": 0,
       "fifo_break_justified_precision": 1.0,
@@ -44,14 +44,14 @@
       "latency_p95": 0,
       "p50_latency_ms": 0,
       "p95_latency_ms": 0,
-      "passed_count": 18,
-      "scenario_count": 18,
-      "ticket_field_accuracy": 0.833
+      "passed_count": 20,
+      "scenario_count": 20,
+      "ticket_field_accuracy": 0.85
     },
     "raw_fifo": {
       "audit_completeness": 0.0,
-      "constraint_violation_rate": 0.222,
-      "decision_match_at_1": 0.167,
+      "constraint_violation_rate": 0.35,
+      "decision_match_at_1": 0.25,
       "exception_f1": 0.0,
       "failed_count": 0,
       "fifo_break_justified_precision": 0.0,
@@ -59,8 +59,8 @@
       "latency_p95": 0,
       "p50_latency_ms": 0,
       "p95_latency_ms": 0,
-      "passed_count": 18,
-      "scenario_count": 18,
+      "passed_count": 20,
+      "scenario_count": 20,
       "ticket_field_accuracy": 0.0
     }
   }

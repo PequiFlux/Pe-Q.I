@@ -4,19 +4,79 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Blueprint canônico fica na raiz
+
+Contexto:
+O repositório mantinha `technical_blueprint.md` e `docs/technical_blueprint.md` como documentos longos. Isso já produzia diferença entre os arquivos e criava risco permanente de drift em uma superfície pública da submissão.
+
+Decisão:
+Manter `technical_blueprint.md` na raiz como fonte canônica longa. Transformar `docs/technical_blueprint.md` em ponte curta para a fonte canônica e fazer `app.cli.blueprint_audit` validar que a ponte continua curta e aponta para `../technical_blueprint.md`.
+
+Alternativas rejeitadas:
+Manter duas cópias longas sincronizadas manualmente ou mover a fonte canônica para `docs/` agora, o que exigiria ajustar o caminho já usado por Docker/CI e README sem ganho prático.
+
+Impacto:
+Reduz drift documental e preserva compatibilidade com a imagem Docker e o audit existente.
+
+Arquivos/módulos afetados:
+- `technical_blueprint.md`
+- `docs/technical_blueprint.md`
+- `app/cli/blueprint_audit.py`
+- `README.md`
+- `docs`
+
+### 2026-05-05 — Audit completeness é status-aware
+
+Contexto:
+Casos `BLOCKED` e `REVIEW_REQUIRED` corretos podem parar antes da matriz de validação, mas ainda precisam ser auditáveis. Exigir `hard_constraints_checked` para todos os status subestimava `audit_completeness` no sample.
+
+Decisão:
+Manter matriz de validação obrigatória para `PREVIEW_READY`. Para `BLOCKED` e `REVIEW_REQUIRED`, considerar a auditoria completa quando houver razão terminal, status, contexto observado, hashes de fonte e audit record coerente.
+
+Alternativas rejeitadas:
+Forçar matriz vazia ou artificial em estados terminais apenas para satisfazer métrica agregada.
+
+Impacto:
+A métrica passa a medir auditabilidade real por tipo de estado sem mascarar ausência de validação em previews automáticos.
+
+Arquivos/módulos afetados:
+- `bench/rows.py`
+- `tests/unit/test_benchmark_rows.py`
+- `bench/reports/sample`
+- `docs`
+
+### 2026-05-05 — FIFO bruto fora da matriz é inválido no benchmark
+
+Contexto:
+`raw_fifo` não aplica hard constraints, mas o benchmark ainda precisa diferenciar par bruto elegível de par bruto impossível. Quando o destino declarado na fila não existe em `resource_state`, o par não aparece na matriz de validação e não deve ser contado como sem violação.
+
+Decisão:
+Em `bench.rows.pair_rejected`, considerar violação quando o par caminhão-destino informado pelo FIFO bruto não aparece em `audit_record.hard_constraints_checked`. Pares sem destino continuam como chamada FIFO incompleta/review, não como violação material.
+
+Alternativas rejeitadas:
+Classificar destino desconhecido como não violação por ausência de rejeição explícita em `rejected_candidates`.
+
+Impacto:
+S15 passa a exercitar FIFO bruto com destino inexistente, e o benchmark marca essa chamada como inválida/violação.
+
+Arquivos/módulos afetados:
+- `bench/rows.py`
+- `tests/unit/test_benchmark_rows.py`
+- `scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/queue.csv`
+
 ### 2026-05-05 — Scenario Pack expande robustez além de S01-S10
 
 Contexto:
 O sample já tinha um caso multimodal (`S03_WET_LOAD`), mas a tese de valor do Gemma fica mais forte quando o benchmark cobre variações multimodais, conflitos de verdade e invariantes operacionais.
 
 Decisão:
-Manter S01-S10 como pack obrigatório original e adicionar cenários versionados S11-S16, S19 e S20 ao mesmo `scenarios/manifest.json`. Cobrir S17/S18 como testes unitários de governança de override, porque o manifest atual executa decisão, não finalização humana pós-preview.
+Manter S01-S10 como pack obrigatório original e adicionar cenários versionados S11-S20 ao mesmo `scenarios/manifest.json`. S17/S18 também têm testes unitários de governança de override, porque a validade final do override acontece após o preview.
 
 Alternativas rejeitadas:
 Criar um manifest paralelo de robustez ou tratar override como fixture de benchmark sem o fluxo de finalização do operador.
 
 Impacto:
-O benchmark passa a exercitar imagem rotacionada, PDF escaneado, conflitos entre documento/fila/nota/estado local, ausência de par elegível, desempate determinístico e fila com 100 caminhões sem alterar o contrato público de cenário.
+O benchmark passa a exercitar imagem rotacionada, PDF escaneado, conflitos entre documento/fila/nota/estado local, ausência de par elegível, override governado, desempate determinístico e fila com 100 caminhões sem alterar o contrato público de cenário.
 
 Arquivos/módulos afetados:
 - `scenarios/manifest.json`
@@ -31,10 +91,10 @@ Contexto:
 O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível.
 
 Decisão:
-Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check` no escopo já formatado, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo smoke textual.
+Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check app bench tests scripts`, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo smoke textual.
 
 Alternativas rejeitadas:
-Rodar `black --check .` agora, porque o legado ainda exige reformatar dezenas de arquivos e isso misturaria uma mudança mecânica grande com o ajuste de CI. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.
+Rodar `black --check .`, porque isso inclui documentação, assets e artefatos fora do escopo Python. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.
 
 Impacto:
 GitHub passa a mostrar status checks úteis em push/PR sem depender de GPU. O endurecimento para Black no repositório inteiro fica separado de uma mudança futura puramente mecânica.

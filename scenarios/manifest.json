@@ -821,6 +821,124 @@
       }
     },
     {
+      "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+      "description": "Operator override cannot select an ineligible pair blocked by hard constraints.",
+      "files": {
+        "ticket": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "queue": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "operator_note": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/operator_note.txt",
+        "weather_state": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/weather_state.json",
+        "resource_state": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/resource_state.json",
+        "expected_decision": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S17-0001",
+        "scenario_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "ticket_ref": "scenarios/cases/S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Operador tenta selecionar destino aberto sob chuva; override deve falhar fechado.",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-OPEN-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 80,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+      "description": "Operator override may choose an eligible non-top pair with an explicit reason.",
+      "files": {
+        "ticket": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "queue": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "operator_note": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/operator_note.txt",
+        "weather_state": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/weather_state.json",
+        "resource_state": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/resource_state.json",
+        "expected_decision": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S18-0001",
+        "scenario_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "ticket_ref": "scenarios/cases/S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Supervisor pode escolher um par elegivel nao-top desde que registre motivo.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "resource_id": "DST-COV-02",
+            "status": "available",
+            "capacity_pct": 90,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
       "scenario_id": "S19_TIE_BREAK_EQUAL_SCORE",
       "description": "Equal score for two destinations must resolve through deterministic lexicographic destination tie-break.",
       "files": {

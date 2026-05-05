@@ -10,9 +10,7 @@ from app.domain.models import AuditRecord, DecisionFinalized, DecisionPreview, O
 class SQLiteStore:
     def __init__(self, path: str = "pequiflux.db", migrations_path: str | None = None) -> None:
         self.path = Path(path)
-        self.migrations_path = migrations_path or str(
-            Path(__file__).with_name("migrations.sql")
-        )
+        self.migrations_path = migrations_path or str(Path(__file__).with_name("migrations.sql"))
 
     def initialize(self) -> None:
         with sqlite3.connect(self.path) as connection:
@@ -79,7 +77,11 @@ class SQLiteStore:
                 preview.variant,
                 preview.decision_status,
                 preview.recommended_truck.truck_id if preview.recommended_truck else None,
-                preview.recommended_destination.destination_id if preview.recommended_destination else None,
+                (
+                    preview.recommended_destination.destination_id
+                    if preview.recommended_destination
+                    else None
+                ),
                 preview.created_at.isoformat(),
             ),
         )

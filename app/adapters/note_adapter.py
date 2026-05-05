@@ -10,4 +10,3 @@ def sanitize_operator_note(note: str, *, max_length: int = 2000) -> str:
     if len(normalized) > max_length:
         raise PequiFluxError("NOTE_TOO_LONG", "Operator note exceeds the supported limit.")
     return normalized
-
