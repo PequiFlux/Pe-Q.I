@@ -30,9 +30,7 @@ def load_case_defaults(case: dict[str, Any]) -> dict[str, str]:
     return {
         "queue_csv": Path(files["queue"]).read_text(encoding="utf-8"),
         "ticket_text": (
-            ticket_path.read_text(encoding="utf-8")
-            if ticket_path.suffix.lower() == ".txt"
-            else ""
+            ticket_path.read_text(encoding="utf-8") if ticket_path.suffix.lower() == ".txt" else ""
         ),
         "operator_note": Path(files["operator_note"]).read_text(encoding="utf-8").strip(),
         "weather_json": Path(files["weather_state"]).read_text(encoding="utf-8"),

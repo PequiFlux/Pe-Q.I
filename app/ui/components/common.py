@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import csv
 import html
-from pathlib import Path
 from typing import Any
 
 from app.domain.models import DecisionRequest, FrontEndPayload
+from app.services.raw_fifo import raw_fifo_call as _raw_fifo_call
+from app.services.raw_fifo import raw_queue_rows
 
 
 def step_status(payload: FrontEndPayload, latency_key: str) -> str:
@@ -50,29 +50,8 @@ def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]
 
 
 def raw_fifo_call(request: DecisionRequest) -> tuple[str, str]:
-    rows = raw_queue_rows(request)
-    waiting = [
-        row
-        for row in rows
-        if (row.get("status") or "waiting").lower() == "waiting" and row.get("truck_id")
-    ]
-    if not waiting:
-        return "sem chamada", "sem destino"
-    first = min(waiting, key=lambda row: row.get("arrival_ts") or "")
-    return first["truck_id"], first.get("declared_destination") or "sem destino"
-
-
-def raw_queue_rows(request: DecisionRequest) -> list[dict[str, str]]:
-    try:
-        rows = list(
-            csv.DictReader(Path(request.queue_csv_ref).read_text(encoding="utf-8").splitlines())
-        )
-    except (OSError, csv.Error):
-        return []
-    rows = sorted(rows, key=lambda row: row.get("arrival_ts") or "")
-    for position, row in enumerate(rows, start=1):
-        row["position"] = str(position)
-    return rows
+    truck_id, destination_id = _raw_fifo_call(request)
+    return truck_id or "sem chamada", destination_id or "sem destino"
 
 
 def truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:

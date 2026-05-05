@@ -87,6 +87,7 @@ O contrato esperado do parser é:
 Campos críticos obrigatórios para cálculo de decisão: `document_status`, `load_condition`, `vehicle_type` e `parse_confidence`.
 
 `parse_confidence`, `ambiguities` e `evidence_refs` são metadados do parser, não precisam existir no ticket bruto.
+Quando `parse_confidence` aparece no ticket estruturado textual, ele deve ser numérico; valor inválido falha fechado com `INVALID_STRUCTURED_TICKET_FIELD`.
 
 ### O que o ticket deve conter para viabilizar a decisão
 

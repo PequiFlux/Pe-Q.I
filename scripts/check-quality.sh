@@ -26,9 +26,9 @@ fi
 
 echo "==> black"
 if command -v black >/dev/null 2>&1; then
-  black --check app/ui
+  black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
 elif command -v docker >/dev/null 2>&1; then
-  docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui
+  docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
 else
   echo "black e docker não encontrados. Não foi possível executar format check." >&2
   exit 1

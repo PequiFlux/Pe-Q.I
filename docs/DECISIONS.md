@@ -4,6 +4,70 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — CI público usa runtime textual e quality gate mínimo
+
+Contexto:
+O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível.
+
+Decisão:
+Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check` no escopo já formatado, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir `format-check` antes de testes e auditoria.
+
+Alternativas rejeitadas:
+Rodar `black --check .` agora, porque o legado ainda exige reformatar dezenas de arquivos e isso misturaria uma mudança mecânica grande com o ajuste de CI. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.
+
+Impacto:
+GitHub passa a mostrar status checks úteis em push/PR sem depender de GPU. O endurecimento para Black no repositório inteiro fica separado de uma mudança futura puramente mecânica.
+
+Arquivos/módulos afetados:
+- `.github/workflows/ci.yml`
+- `Makefile`
+- `scripts/check-quality.sh`
+- `docs`
+
+### 2026-05-05 — Quickstart usa runtime textual sem depender de Ollama
+
+Contexto:
+O quickstart indicava `docker run --rm pequiflux-yard-copilot:local`, mas o runtime padrão da aplicação procurava Ollama em `http://gemma:11434`. Em um `docker run` isolado esse host não existe, e o caminho Compose completo também depende do serviço `gemma` com `gpus: all`.
+
+Decisão:
+Definir `PEQUIFLUX_GEMMA_RUNTIME=text` na imagem Docker standalone e adicionar serviços/atalhos `demo-text` e `ui-text` sem `depends_on: gemma`. Manter `demo`, `ui` e `benchmark` como modo completo Ollama/Gemma.
+
+Alternativas rejeitadas:
+Remover o modo Ollama do Compose ou alterar o default global do código para `text`, o que tornaria menos explícita a diferença entre runtime mínimo e runtime completo.
+
+Impacto:
+Avaliadores sem GPU/modelo local conseguem rodar CLI e UI antes do setup de Gemma, enquanto a trilha completa continua disponível para demonstrar parsing multimodal real.
+
+Arquivos/módulos afetados:
+- `Dockerfile`
+- `compose.yaml`
+- `Makefile`
+- `README.md`
+- `docs/docker.md`
+- `docs/gemma.md`
+
+### 2026-05-05 — Benchmark separa `raw_fifo` de `fifo_safe`
+
+Contexto:
+A variante operacional `fifo` ainda passa por `validate_hard_constraints`, então ela não representa FIFO puro. O README chamava essa linha de baseline ingênuo, enquanto a UI já mostrava separadamente o "FIFO chamaria" pela fila bruta.
+
+Decisão:
+Manter o contrato interno `DecisionVariant="fifo"` por compatibilidade, mas reportar essa saída no benchmark como `fifo_safe`. Adicionar uma linha `raw_fifo` calculada por `app.services.raw_fifo`, sem hard constraints, para a comparação narrativa de FIFO puro.
+
+Alternativas rejeitadas:
+Renomear o enum `fifo` para `fifo_safe`, o que exigiria migração de schema, UI, fixtures e payloads sem alterar a decisão operacional.
+
+Impacto:
+O relatório público passa a distinguir FIFO bruto de FIFO seguro entre pares elegíveis, e a UI reutiliza a mesma fonte de FIFO bruto que o benchmark.
+
+Arquivos/módulos afetados:
+- `app/cli/run_benchmark.py`
+- `app/services/raw_fifo.py`
+- `app/ui/components/common.py`
+- `bench/reports/sample`
+- `README.md`
+- `docs`
+
 ### 2026-05-05 — Benchmark multimodal usa `expected_ticket.json` como sidecar canônico
 
 Contexto:

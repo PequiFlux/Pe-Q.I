@@ -171,7 +171,8 @@ Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.
 
 ## Variantes de benchmark
 
-- `fifo`: baseline ingênuo por ordem de chegada
+- `raw_fifo`: FIFO bruto por ordem de chegada e destino declarado, sem contexto nem hard constraints
+- `fifo_safe`: variante operacional `fifo`, ou seja, FIFO entre pares elegíveis após hard constraints
 - `heuristic`: downstream determinístico com interpretação simplificada
 - `full`: Gemma + downstream determinístico completo
 

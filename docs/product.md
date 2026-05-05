@@ -21,7 +21,7 @@ O sistema existe para resolver exceções operacionais sem transferir a autorida
 - ranking explicável
 - payload auditável
 - UI única filmável
-- benchmark com variantes `fifo`, `heuristic` e `full`
+- benchmark com `raw_fifo`, `fifo_safe`, `heuristic` e `full`
 
 ## Fora de escopo
 
@@ -45,4 +45,3 @@ O sistema existe para resolver exceções operacionais sem transferir a autorida
 - o benchmark exporta comparação entre variantes
 - a UI mostra recomendação, restrições e ação humana acima da dobra
 - o repositório permanece 100% sintético e publicável
-

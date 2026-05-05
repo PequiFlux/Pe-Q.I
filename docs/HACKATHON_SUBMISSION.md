@@ -6,9 +6,9 @@ Mapa dos criterios esperados da submissao para evidencias versionadas no reposit
 |---|---|---|
 | Uso claro de Gemma | `app/gemma/`, `docs/gemma.md`, `docs/adr/ADR-0002-gemma-as-interpretation-layer.md` | Gemma interpreta documento; regras deterministicas decidem |
 | Problema real e delimitado | `README.md`, `docs/product.md`, `docs/LIMITATIONS.md` | Escopo: despacho de patio sob excecao operacional |
-| Demo avaliavel | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `docs/DEMO_SCRIPT.md` | `make ui` ou `docker compose --profile ui up ui` |
+| Demo avaliavel | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `docs/DEMO_SCRIPT.md` | `make ui-text` sem GPU; `make ui` para Gemma/Ollama completo |
 | Benchmark comparativo | `app/cli/run_benchmark.py`, `bench/metrics.py`, `bench/reports/sample/` | `make bench` gera `metrics.json`, `summary.csv`, `per_scenario.json` |
-| Reprodutibilidade | `Dockerfile`, `compose.yaml`, `Makefile`, `config/env.example` | `make demo`, `make test`, `make audit` |
+| Reprodutibilidade | `Dockerfile`, `compose.yaml`, `Makefile`, `config/env.example` | `make demo-text`, `make ui-text`, `make test`, `make audit` |
 | Auditoria e explicabilidade | `app/audit/`, `app/services/decision_builder.py`, schemas em `scenarios/schemas/` | Payload final inclui `AuditRecord`, regras disparadas e hashes |
 | Operador no controle | `app/services/operator_governance.py`, `docs/UI_DECISIONS.md` | UI mostra aprovar, bloquear ou sobrescrever com motivo |
 | Falha fechada | `app/gemma/fallback.py`, `tests/unit/test_no_fallbacks.py` | Ausencia de dependencia gera erro/revisao, nunca substituicao silenciosa |

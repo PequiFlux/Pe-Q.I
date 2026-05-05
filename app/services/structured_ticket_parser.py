@@ -48,7 +48,9 @@ def parse_structured_ticket_text(text: str) -> ParsedTicket:
             "load_condition": fields.get("load_condition", "unknown"),
             "contract_priority_flag": _parse_bool(fields.get("contract_priority_flag", "false")),
             "destination_constraints": _parse_list(fields.get("destination_constraints", "")),
-            "parse_confidence": float(fields.get("parse_confidence", "0.0")),
+            "parse_confidence": _parse_float(
+                fields.get("parse_confidence", "0.0"), "parse_confidence"
+            ),
             "ambiguities": _parse_list(fields.get("ambiguities", "")),
             "evidence_refs": _parse_bullets(text, "evidence_refs"),
         }
@@ -84,6 +86,16 @@ def _parse_list(value: str) -> list[str]:
 
 def _parse_bool(value: str) -> bool:
     return value.strip().lower() in {"true", "1", "yes", "sim"}
+
+
+def _parse_float(value: str, field_name: str) -> float:
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise PequiFluxError(
+            "INVALID_STRUCTURED_TICKET_FIELD",
+            f"Structured ticket field {field_name} must be a valid number.",
+        ) from exc
 
 
 def _parse_bullets(text: str, section: str) -> list[str]:

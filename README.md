@@ -13,7 +13,7 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 | Em dois minutos | Onde ver |
 |---|---|
 | Tese | Pe-Q.I recomenda quem chamar, para qual moega, por que o FIFO puro falharia e qual regra sustenta a decisão |
-| Demo executável | `make ui` para a interface; `make demo` para o cenário padrão |
+| Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo |
 | Benchmark | `make bench` gera relatório; [`bench/reports/sample/`](bench/reports/sample/) traz uma amostra versionada |
 | Evidência visual | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) e imagem acima |
 | Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
@@ -22,8 +22,8 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 Atalhos principais:
 
 ```bash
-make demo
-make ui
+make demo-text
+make ui-text
 make test
 make bench
 make audit
@@ -87,20 +87,22 @@ O que Gemma 4 prova nesta submissão — três pontos onde um baseline heurísti
 - Docker e Docker Compose
 - (Para GPU) NVIDIA Container Toolkit
 
-### Build e execução de um cenário
+### Build e execução mínima de um cenário
 
 ```bash
 docker build -t pequiflux-yard-copilot:local .
 docker run --rm pequiflux-yard-copilot:local
 ```
 
+Esse caminho usa `PEQUIFLUX_GEMMA_RUNTIME=text` dentro da imagem e não requer GPU, Ollama nem serviço `gemma`.
+
 Atalho:
 
 ```bash
-make demo
+make demo-text
 ```
 
-Isso executa o cenário **S10_FIFO_BREAK_JUSTIFIED** com o runtime Ollama Gemma.
+Isso executa o cenário **S10_FIFO_BREAK_JUSTIFIED** com runtime textual determinístico.
 
 ### Suite de testes
 
@@ -120,18 +122,20 @@ O target `test` usa `PEQUIFLUX_GEMMA_RUNTIME=text` — não requer GPU nem Ollam
 ### Streamlit UI
 
 ```bash
-docker compose --profile ui up ui
+docker compose --profile ui-text up ui-text
 ```
 
 Atalho:
 
 ```bash
-make ui
+make ui-text
 ```
 
 Abra [http://localhost:8501](http://localhost:8501).
 
-### Benchmark completo
+Para a UI completa com Ollama/Gemma, rode `make ui` depois do setup do modelo.
+
+### Benchmark completo com Gemma/Ollama
 
 ```bash
 docker compose run --rm benchmark
@@ -158,15 +162,14 @@ PEQUIFLUX_GEMMA_RUNTIME=text pytest -q
 A demo padrão (cenário S10) demonstra o narrative central do projeto: **a quebra de FIFO é justificada por restrições operacionais**.
 
 ```bash
-# Cenário único via Compose (com Gemma via Ollama)
-docker compose run --rm demo
+# Caminho minimo reprodutivel, sem GPU/Ollama
+docker compose run --rm demo-text
 
 # Cenário específico
-docker compose run --rm demo python -m app.cli.run_scenario --scenario S02_RAIN_OPEN
+SCENARIO=S02_RAIN_OPEN make demo-text
 
-# Sem GPU — usar runtime text
-docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:local \
-  python -m app.cli.run_scenario --scenario S10_FIFO_BREAK_JUSTIFIED
+# Modo completo com Gemma/Ollama
+docker compose run --rm demo
 ```
 
 Saída esperada (JSON):
@@ -177,14 +180,21 @@ Saída esperada (JSON):
   "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
   "variant": "full",
   "decision_status": "PREVIEW_READY",
-  "recommended_truck": { "truck_id": "TRK-003", "queue_position_before": 3 },
+  "recommended_truck": { "truck_id": "TRK-005", "queue_position_before": 5 },
   "recommended_destination": { "destination_id": "DST-COV-01" },
-  "reason_summary": "Chuva bloqueou destino aberto; carga úmida exige destino coberto compatível.",
-  "fired_rules": ["HC-01", "HC-02", "PR-02"],
-  "rejected_count": 4,
-  "latency_ms": { "gemma": 3200, "rules": 41, "total": 3280 }
+  "reason_summary": "FIFO break justified by Long wait time increased ranking priority.",
+  "fired_rules": ["PR-01", "PR-04"],
+  "rejected_count": 9,
+  "hard_constraints_checked": ["HC-01", "HC-05"],
+  "latency_ms": {
+    "parse_ticket_document": 0,
+    "validate_hard_constraints": 0,
+    "rank_candidates": 0
+  }
 }
 ```
+
+`fired_rules` lista apenas regras de política/ranking (`PR-*`). Hard constraints (`HC-*`) aparecem em `hard_constraints_checked` e nos candidatos rejeitados da matriz de validação.
 
 ---
 
@@ -240,7 +250,7 @@ O adapter retorna `None` e o orquestrador falha fechado com `MODEL_RUNTIME_UNAVA
 
 ## Benchmark
 
-O benchmark executa **10 cenários × 3 variantes** e computa métricas comparativas:
+O benchmark executa **10 cenários × 4 linhas comparativas** e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
 
 ### Variantes
 
@@ -248,7 +258,8 @@ O benchmark executa **10 cenários × 3 variantes** e computa métricas comparat
 |----------|--------|---------------|
 | `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção, tool calling, `reason_summary` gerada |
 | `heuristic` | Não | Mesmo rules engine determinístico; parser de texto estruturado; explicação por template |
-| `fifo` | Não | Baseline FIFO ingênuo; ignora contexto; apenas para comparação |
+| `fifo_safe` | Não | FIFO entre pares elegíveis; ignora interpretação documental, mas respeita hard constraints |
+| `raw_fifo` | Não | FIFO bruto por `arrival_ts` e `declared_destination`; ignora contexto e constraints |
 
 ### Métricas
 
@@ -284,9 +295,11 @@ O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` com
 
 - `full`: `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 1.0`
 - `heuristic`: `decision_match_at_1 = 0.9`, `exception_f1 = 0.667`, `ticket_field_accuracy = 0.925`
+- `fifo_safe`: `decision_match_at_1 = 0.8`, `constraint_violation_rate = 0.0`
+- `raw_fifo`: `decision_match_at_1 = 0.3`, `constraint_violation_rate = 0.4`
 - `S03_WET_LOAD`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao `REVIEW_REQUIRED` correto com `ticket_field_accuracy = 1.0`
 
-### Setup do Gemma (necessário antes do benchmark com runtime ollama)
+### Setup do Gemma (necessário para `make demo`, `make ui` e benchmark com runtime Ollama)
 
 ```bash
 # Puxar o modelo para o volume do Ollama
@@ -393,7 +406,7 @@ Perfil padrão (`v1-demo`):
 |------|-------|-------|-------------|
 | FIFO position | 40 | PR-01 | Ordem de chegada preservada quando possível |
 | Contract priority | 30 | PR-02 | Caminhão contratado supera FIFO entre elegíveis |
-| Resource fit | 15 | A-05 weight | Destino compatível com exceção ativa |
+| Resource fit | 15 | PR-06 | Destino alinhado à exceção ativa recebe bônus auditável |
 | Capacity headroom | 10 | PR-03 | Capacidade reduzida penaliza |
 | Wait SLA pressure | 5 | PR-04 | Espera excessiva recebe bônus limitado |
 | No valid pair | - | PR-05 | Ausência de par válido gera `BLOCKED`, não improvisação |
@@ -425,7 +438,9 @@ Se a verdade é insuficiente, a decisão é `BLOCKED` ou `REVIEW_REQUIRED` com m
 |----------|--------|---------------|
 | `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção, tool calling, `reason_summary` gerada |
 | `heuristic` | Não | Rules engine determinístico; parser de texto; templates de explicação |
-| `fifo` | Não | Baseline FIFO ingênuo; ignora contexto; uso comparativo |
+| `fifo` | Não | Variante operacional FIFO segura: preserva fila entre pares elegíveis e ainda respeita hard constraints |
+
+No relatório de benchmark, essa variante aparece como `fifo_safe`. A linha `raw_fifo` é calculada separadamente a partir da fila bruta para representar o FIFO puro que a UI mostra em "FIFO chamaria".
 
 Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
@@ -466,7 +481,7 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 
 | Variável | Default | Propósito |
 |----------|---------|-----------|
-| `PEQUIFLUX_GEMMA_RUNTIME` | `ollama` | Backend Gemma: `ollama`, `text` ou `none` |
+| `PEQUIFLUX_GEMMA_RUNTIME` | `ollama` no código; `text` na imagem Docker standalone | Backend Gemma: `ollama`, `text` ou `none` |
 | `GEMMA_BASE_URL` | `http://gemma:11434` | Endpoint da API Ollama |
 | `GEMMA_MODEL` | `gemma4:latest` | Identificador do modelo no Ollama |
 | `GEMMA_TIMEOUT_SECONDS` | `45` | Timeout para chamadas Gemma |
@@ -475,7 +490,7 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 | `PEQUIFLUX_IN_CONTAINER` | `0` | Setado para `1` pelo Dockerfile |
 | `PEQUIFLUX_SQLITE_PATH` | `var/db/pequiflux_ui.db` | Caminho do banco SQLite |
 
-Para GPU, set `OLLAMA_IMAGE` para a variante GPU e instale o NVIDIA Container Toolkit.
+`make demo-text` e `make ui-text` não sobem o serviço `gemma` e não exigem GPU. Para o modo completo, set `OLLAMA_IMAGE` para a variante desejada e instale o NVIDIA Container Toolkit se usar GPU.
 
 ---
 

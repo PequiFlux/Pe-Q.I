@@ -31,7 +31,9 @@ Requisitos:
 
 ## Runtime Docker
 
-O Compose sobe um serviço local `gemma` com Ollama e injeta o runtime na aplicação:
+O caminho mínimo (`make demo-text`, `make ui-text` ou `docker run --rm pequiflux-yard-copilot:local`) usa `PEQUIFLUX_GEMMA_RUNTIME=text` e não sobe Ollama. Esse modo existe para reprodutibilidade básica em máquinas sem GPU/modelo local.
+
+O Compose completo sobe um serviço local `gemma` com Ollama e injeta o runtime na aplicação:
 
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`

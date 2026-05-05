@@ -3,7 +3,7 @@
   "passed_count": 10,
   "scenario_count": 10,
   "variant_metrics": {
-    "fifo": {
+    "fifo_safe": {
       "audit_completeness": 0.8,
       "constraint_violation_rate": 0.0,
       "decision_match_at_1": 0.8,
@@ -47,6 +47,21 @@
       "passed_count": 10,
       "scenario_count": 10,
       "ticket_field_accuracy": 0.925
+    },
+    "raw_fifo": {
+      "audit_completeness": 0.0,
+      "constraint_violation_rate": 0.4,
+      "decision_match_at_1": 0.3,
+      "exception_f1": 0.0,
+      "failed_count": 0,
+      "fifo_break_justified_precision": 0.0,
+      "latency_p50": 0,
+      "latency_p95": 0,
+      "p50_latency_ms": 0,
+      "p95_latency_ms": 0,
+      "passed_count": 10,
+      "scenario_count": 10,
+      "ticket_field_accuracy": 0.0
     }
   }
 }

@@ -151,7 +151,7 @@ o sistema deve devolver:
 | Ranking explicável | Sim |
 | Audit payload imutável | Sim |
 | UI única filmável | Sim |
-| Benchmark com 3 variantes | Sim |
+| Benchmark com 4 linhas comparativas | Sim |
 | Fail-closed explicito | Sim |
 
 ### 2.6 Fora de escopo
@@ -182,7 +182,7 @@ A submissão só é considerada pronta quando todos os itens abaixo forem verdad
 
 1. os 10 cenários obrigatórios executam em lote sem edição manual;
 2. o fluxo completo roda localmente após setup/cache;
-3. o benchmark exporta relatório comparando `fifo`, `heuristic` e `full`;
+3. o benchmark exporta relatório comparando `raw_fifo`, `fifo_safe`, `heuristic` e `full`;
 4. a UI mostra acima da dobra a recomendação, as restrições, a ação humana e um painel curto que torne a centralidade do Gemma visível;
 5. toda quebra de FIFO e todo override têm trilha auditável persistida;
 6. o repositório público contém somente dados e artefatos sintéticos.
@@ -2210,12 +2210,13 @@ fifo_break_justified_precision
 ### 7.9 Protocolo experimental reproduzível
 
 1. validar `manifest.json` e schemas do pack;
-2. rodar `fifo` em todos os 10 cenários;
-3. rodar `heuristic` em todos os 10 cenários;
-4. rodar `full` em todos os 10 cenários;
-5. exportar `report.json`, `summary.csv` e gráficos;
-6. persistir logs e audit payloads;
-7. opcionalmente rodar ablações `--no_multimodal` e `--no_tools`.
+2. calcular `raw_fifo` em todos os 10 cenários;
+3. rodar `fifo_safe` em todos os 10 cenários;
+4. rodar `heuristic` em todos os 10 cenários;
+5. rodar `full` em todos os 10 cenários;
+6. exportar `report.json`, `summary.csv` e gráficos;
+7. persistir logs e audit payloads;
+8. opcionalmente rodar ablações `--no_multimodal` e `--no_tools`.
 
 ### 7.10 O que constitui prova de valor real do Gemma 4
 

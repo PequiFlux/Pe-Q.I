@@ -51,10 +51,11 @@ USER pequiflux
 
 EXPOSE 8501
 
+ENV PEQUIFLUX_GEMMA_RUNTIME=text
+
 CMD ["python", "-m", "app.cli.run_scenario", "--scenario", "S10_FIFO_BREAK_JUSTIFIED"]
 
 FROM runtime AS test
-ENV PEQUIFLUX_GEMMA_RUNTIME=text
 CMD ["pytest", "-q"]
 
 FROM runtime AS ui

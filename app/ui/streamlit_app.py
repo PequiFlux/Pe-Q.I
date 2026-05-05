@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import csv
-import json
 import os
 from contextlib import nullcontext
 from pathlib import Path
@@ -20,7 +18,8 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.components.common import escape, percent_label
+from app.ui.benchmark_summary import load_benchmark_summary
+from app.ui.components.common import escape
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
@@ -40,12 +39,6 @@ from app.ui.styles import inject_styles
 from app.ui.ui_runner import run_payload_pair
 
 BENCHMARK_REPORTS_DIR = Path("bench/reports")
-BENCHMARK_STRIP_FALLBACK = {
-    "full": "10/10 cenarios | 0% violacoes de regra",
-    "fifo": "3 cenarios fora do alvo | ex.: S03_WET_LOAD",
-    "heuristic": "sem leitura Gemma multimodal | 92.5% no parse e falha em S03_WET_LOAD",
-    "source": "Scenario pack sintetico · snapshot 20260505T164037Z",
-}
 JUDGE_SCENARIOS = [
     {
         "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
@@ -168,7 +161,7 @@ def _render_intro() -> None:
 
 
 def _render_benchmark_strip() -> None:
-    summary = _benchmark_summary()
+    summary = load_benchmark_summary(BENCHMARK_REPORTS_DIR)
     st.markdown(
         f"""
         <section class="benchmark-strip">
@@ -189,51 +182,6 @@ def _render_benchmark_strip() -> None:
         """,
         unsafe_allow_html=True,
     )
-
-
-def _benchmark_summary() -> dict[str, str]:
-    report_dir = _latest_benchmark_report_dir()
-    if report_dir is None:
-        return BENCHMARK_STRIP_FALLBACK
-    try:
-        metrics = json.loads((report_dir / "metrics.json").read_text(encoding="utf-8"))
-        rows = list(
-            csv.DictReader((report_dir / "summary.csv").read_text(encoding="utf-8").splitlines())
-        )
-    except (OSError, json.JSONDecodeError, csv.Error):
-        return BENCHMARK_STRIP_FALLBACK
-    full = metrics["variant_metrics"]["full"]
-    fifo = metrics["variant_metrics"]["fifo"]
-    heuristic = metrics["variant_metrics"]["heuristic"]
-    fifo_misses = [
-        row["scenario_id"]
-        for row in rows
-        if row.get("variant") == "fifo" and row.get("decision_match_at_1") == "False"
-    ]
-    first_miss = fifo_misses[0] if fifo_misses else "nenhum"
-    return {
-        "full": (
-            f"{int(full['passed_count'])}/{int(full['scenario_count'])} cenarios | "
-            f"{percent_label(full['constraint_violation_rate'])} violacoes de regra"
-        ),
-        "fifo": (f"{len(fifo_misses)} cenarios fora do alvo" f" | ex.: {first_miss}"),
-        "heuristic": (
-            "sem leitura Gemma multimodal"
-            f" | {percent_label(heuristic['ticket_field_accuracy'])} no texto estruturado"
-        ),
-        "source": f"Scenario pack sintetico · {report_dir.name}",
-    }
-
-
-def _latest_benchmark_report_dir() -> Path | None:
-    if not BENCHMARK_REPORTS_DIR.exists():
-        return None
-    candidates = [
-        path
-        for path in BENCHMARK_REPORTS_DIR.iterdir()
-        if path.is_dir() and (path / "metrics.json").exists() and (path / "summary.csv").exists()
-    ]
-    return sorted(candidates)[-1] if candidates else None
 
 
 def _render_judge_mode(case_by_id: dict[str, dict[str, Any]]) -> tuple[bool, str]:

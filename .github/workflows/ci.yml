@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    env:
+      PEQUIFLUX_GEMMA_RUNTIME: text
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements*.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-all.txt
+
+      - name: Black format check
+        run: python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
+
+      - name: Pytest
+        run: pytest -q
+
+      - name: Blueprint audit
+        run: python -m app.cli.blueprint_audit
+
+      - name: Text-runtime benchmark smoke
+        run: python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate

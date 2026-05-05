@@ -41,6 +41,17 @@ services:
     volumes:
       - app-cache:/app/cache
 
+  demo-text:
+    build:
+      context: .
+      target: runtime
+    image: pequiflux-yard-copilot:local
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: text
+    command: ["python", "-m", "app.cli.run_scenario", "--scenario", "${SCENARIO:-S10_FIFO_BREAK_JUSTIFIED}"]
+    volumes:
+      - app-cache:/app/cache
+
   gemma-prewarm:
     build:
       context: .
@@ -109,6 +120,24 @@ services:
     volumes:
       - app-cache:/app/cache
     profiles: ["ui"]
+
+  ui-text:
+    build:
+      context: .
+      target: ui
+    image: pequiflux-yard-copilot:ui
+    environment:
+      PEQUIFLUX_GEMMA_RUNTIME: text
+    ports:
+      - "8501:8501"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - app-cache:/app/cache
+    profiles: ["ui-text"]
 
 volumes:
   gemma-models:

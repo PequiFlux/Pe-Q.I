@@ -26,6 +26,7 @@ Procurar:
 
 - Hard constraints: reutilizar `app/domain/constraints.py`.
 - Ranking/FIFO/prioridade: reutilizar `app/domain/ranking.py`.
+- FIFO bruto para comparação narrativa: reutilizar `app/services/raw_fifo.py`.
 - Policy profile: reutilizar `app/domain/policy.py` e `scenarios/common/policy_profile.json`.
 - IDs de regras de política: reutilizar `app/domain/enums.py::PolicyRule`; não escrever `PR-01`..`PR-06` como string solta em ranking, auditoria, UI ou testes.
 - Resolução de verdade entre ticket, nota e estado: reutilizar `app/orchestration/truth_resolver.py`.
@@ -51,9 +52,12 @@ Procurar:
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.
 - Toda contribuição de score em `app/domain/ranking.py` deve adicionar `PolicyRule` correspondente em `fired_rules`; não deixar bônus/penalidade só em `reason_details`.
 - Faixas de benchmark na UI devem ler `bench/reports`, reutilizar `bench/metrics.py` ou mostrar snapshot explícito do relatório versionado; não criar métrica de comparação paralela.
+- O benchmark deve distinguir `raw_fifo` de `fifo_safe`; não chamar a variante operacional `fifo` de FIFO puro em relatório público.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
 - Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.
+- Caminhos reprodutíveis mínimos devem usar `demo-text`/`ui-text`; não fazer quickstart depender implicitamente do serviço `gemma`.
+- Checks públicos devem reutilizar `pytest`, `black`, `app.cli.blueprint_audit` e `app.cli.run_benchmark`; não criar runner paralelo de CI para métricas ou auditoria.
 - Finalização de ação humana deve reutilizar `SQLiteStore.save_operator_finalization`; não encadear `save_operator_action`, `save_decision_finalized` e `save_audit_record` com commits separados.
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.
 - Renderizadores e helpers compartilhados entre módulos de UI devem ser importados por nomes públicos sem `_`; prefixo `_` fica reservado para helpers internos do próprio arquivo.
