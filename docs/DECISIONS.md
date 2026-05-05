@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Orquestrador como pipeline nomeado
+
+Contexto:
+`DecisionOrchestrator.run_decision()` concentrava carregamento de entradas, parsing, classificação, resolução de verdade, validação, ranking, preview, auditoria, persistência e logging.
+
+Decisão:
+Manter `run_decision()` como fachada pública e dividir o fluxo em etapas internas nomeadas: `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` e `persist_and_log`.
+
+Alternativas rejeitadas:
+Mover regras de domínio para a UI/CLI ou criar um segundo runner paralelo para demo.
+
+Impacto:
+Novas regras de decisão continuam em domínio/serviços existentes; o orquestrador apenas coordena etapas testáveis e preserva finalização auditável comum.
+
+Arquivos/módulos afetados:
+- `app/orchestration/orchestrator.py`
+- `docs/CODEMAP.md`
+- `docs/SURFACE_MAP.md`
+- `docs/DUPLICATION_GUARD.md`
+
 ### 2026-05-05 — UI Streamlit dividida por responsabilidade
 
 Contexto:

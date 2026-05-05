@@ -8,7 +8,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 |---|---|---|---|---|
 | UI | `app/ui` | Interface Streamlit em Judge Mode para demonstrar cenários narrativos e a legitimidade da quebra de FIFO antes dos detalhes técnicos | `app/orchestration`, `app/adapters`, `bench/reports` | `streamlit_app.py` compõe a tela; `scenario_loader.py` carrega fixtures e prepara `DecisionRequest`; `ui_runner.py` chama `DecisionOrchestrator` com cache de recurso Streamlit; `components/decision_card.py`, `components/validation_matrix.py` e `components/audit_panel.py` concentram cartões, heatmap e ação/auditoria; `styles.py` concentra CSS. CSV/JSON ficam no Modo técnico |
 | CLI | `app/cli` | Entrypoints para cenário, benchmark, prewarm e auditoria de blueprint | `app/orchestration`, `bench`, `scenarios` | Deve continuar executável via Docker |
-| Orquestração | `app/orchestration` | Fluxo de decisão, resolução de verdade e máquina de estados | `app/domain`, `app/services`, `app/audit` | Coordena camadas sem substituir regras determinísticas |
+| Orquestração | `app/orchestration` | Fluxo de decisão, resolução de verdade e máquina de estados | `app/domain`, `app/services`, `app/audit` | `DecisionOrchestrator.run_decision()` é fachada; etapas internas são `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` e `persist_and_log`, coordenando camadas sem substituir regras determinísticas |
 | Domínio | `app/domain` | Modelos, enums, constraints, ranking e política determinística | `scenarios/common` | Regras hard-constraint vivem aqui |
 | Serviços | `app/services` | Builders, parsers, governança operacional, classificação de exceções e mensagens | `app/domain`, `app/gemma` | Adaptam dados para decisão sem fallback silencioso |
 | Gemma | `app/gemma` | Runtime, adapter, schemas, prompts e gateway da camada LLM | `app/domain`, runtime externo | Interpretação deve falhar fechado quando inválida |
@@ -22,7 +22,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 
 ## Fluxos importantes
 
-- Cenário CLI/UI: adapters carregam fixtures, orquestração resolve contexto, domínio aplica constraints/ranking quando há verdade suficiente, serviços constroem decisão, auditoria registra resultado terminal.
+- Cenário CLI/UI: adapters carregam fixtures; `DecisionOrchestrator` executa `load_inputs -> interpret_context -> validate_and_rank -> build_payload -> persist_and_log`; domínio aplica constraints/ranking quando há verdade suficiente; serviços constroem decisão; auditoria registra resultado terminal.
 - Benchmark: `bench/runner.py` executa casos de `scenarios/manifest.json` e compara decisões esperadas.
 - LLM: `app/gemma` interpreta contexto; saída ausente ou inválida deve gerar erro/revisão explícita, nunca fallback de decisão.
 
