@@ -39,13 +39,6 @@ def classify_exception(
             needs_human_review=parsed_ticket.parse_confidence < 0.75,
         )
 
-    if parsed_ticket and parsed_ticket.load_condition == LoadCondition.WET:
-        return ExceptionAssessment(
-            primary_exception="WET_LOAD",
-            severity=Severity.MEDIUM,
-            affected_resources=list(parsed_ticket.destination_constraints),
-        )
-
     if _requires_contextual_classification(note, parsed_ticket) and gemma_adapter is not None:
         return gemma_adapter.classify_exception(
             request_id=request_id,
@@ -61,6 +54,13 @@ def classify_exception(
             primary_exception="MANUAL_REVIEW_HINT",
             severity=Severity.MEDIUM,
             needs_human_review=True,
+        )
+
+    if parsed_ticket and parsed_ticket.load_condition == LoadCondition.WET:
+        return ExceptionAssessment(
+            primary_exception="WET_LOAD",
+            severity=Severity.MEDIUM,
+            affected_resources=list(parsed_ticket.destination_constraints),
         )
 
     return ExceptionAssessment(

@@ -1,6 +1,7 @@
 services:
   gemma:
-    image: "${OLLAMA_IMAGE:-alpine/ollama:latest}"
+    image: "${OLLAMA_IMAGE:-ollama/ollama:latest}"
+    gpus: all
     volumes:
       - gemma-models:/root/.ollama
     environment:
@@ -111,4 +112,6 @@ services:
 
 volumes:
   gemma-models:
+    name: ml_ollama_models
   app-cache:
+    name: pequiflux_app_cache

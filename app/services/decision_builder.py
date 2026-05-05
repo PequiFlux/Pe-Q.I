@@ -26,17 +26,44 @@ def _build_queue_diff(
     reason_summary: str,
 ) -> list[QueueDiffEntry]:
     diff: list[QueueDiffEntry] = []
+    selected_position: int | None = None
+    for row in queue_snapshot.waiting_rows:
+        if row.truck_id == top_candidate_truck_id:
+            selected_position = row.queue_position
+            break
     for row in queue_snapshot.waiting_rows:
         is_selected = row.truck_id == top_candidate_truck_id
-        diff.append(
-            QueueDiffEntry(
-                truck_id=row.truck_id,
-                position_before=row.queue_position,
-                position_after=1 if is_selected else row.queue_position,
-                decision="selected" if is_selected else "unchanged",
-                reason=reason_summary if is_selected else "No change applied.",
+        if is_selected:
+            diff.append(
+                QueueDiffEntry(
+                    truck_id=row.truck_id,
+                    position_before=row.queue_position,
+                    position_after=1,
+                    decision="recommended",
+                    reason=reason_summary,
+                )
             )
-        )
+        elif selected_position is not None and row.queue_position < selected_position:
+            diff.append(
+                QueueDiffEntry(
+                    truck_id=row.truck_id,
+                    position_before=row.queue_position,
+                    position_after=None,
+                    decision="skipped",
+                    reason="ranked_below_recommended",
+                )
+            )
+        else:
+            new_position = row.queue_position - (1 if selected_position is not None else 0)
+            diff.append(
+                QueueDiffEntry(
+                    truck_id=row.truck_id,
+                    position_before=row.queue_position,
+                    position_after=new_position,
+                    decision="shifted",
+                    reason="displaced_by_recommended_selection",
+                )
+            )
     return diff
 
 

@@ -2,8 +2,11 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.scannerwork/
 
 .code-review-graph/graph.db
+checker
+third_party/
 bench/reports/
 logs/
 var/
@@ -13,4 +16,3 @@ var/
 .gstack/
 .codex
 .codex/
-AGENTS.md

@@ -273,6 +273,7 @@ def _render_outputs(payload: FrontEndPayload, request: DecisionRequest, case: di
     )
 
     _render_status_bar(payload)
+    _render_operational_overview(payload, request, case)
     top_left, top_right = st.columns([1.05, 0.95], gap="large")
     with top_left:
         _render_recommendation(payload)

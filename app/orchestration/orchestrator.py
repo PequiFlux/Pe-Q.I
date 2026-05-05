@@ -61,6 +61,7 @@ class DecisionOrchestrator:
     def run_decision(self, request: DecisionRequest) -> FrontEndPayload:
         state_machine = WorkflowStateMachine()
         timers: dict[str, int] = {}
+        source_hashes: dict[str, str] = {}
         try:
             queue_t0 = perf_counter()
             queue_rows = load_queue_rows(request.queue_csv_ref)
@@ -134,13 +135,6 @@ class DecisionOrchestrator:
                     review_reasons=interpreted_context.review_reasons,
                     queue_snapshot=normalized_queue,
                 )
-                driver_message = compose_driver_message(
-                    request_id=request.request_id,
-                    decision_status=preview.decision_status,
-                    recommended_truck=None,
-                    recommended_destination=None,
-                    reason_summary=preview.reason_summary,
-                )
                 audit = self.audit_service.generate_audit_payload(
                     interpreted_context=interpreted_context,
                     validation=None,
@@ -149,11 +143,11 @@ class DecisionOrchestrator:
                     source_hashes=source_hashes,
                 )
                 state_machine.transition_to(FlowState.REVIEW_REQUIRED)
-                return build_frontend_payload(
+                return self._finalize_payload(
                     preview=preview,
                     audit=audit,
-                    driver_message=driver_message,
                     interpreted_context=interpreted_context,
+                    state=state_machine.current_state,
                 )
 
             validation_t0 = perf_counter()
@@ -200,26 +194,12 @@ class DecisionOrchestrator:
                 latencies_ms=timers,
                 source_hashes=source_hashes,
             )
-            driver_message = compose_driver_message(
-                request_id=request.request_id,
-                decision_status=preview.decision_status,
-                recommended_truck=preview.recommended_truck.truck_id if preview.recommended_truck else None,
-                recommended_destination=(
-                    preview.recommended_destination.destination_id
-                    if preview.recommended_destination
-                    else None
-                ),
-                reason_summary=preview.reason_summary,
-            )
-            payload = build_frontend_payload(
+            return self._finalize_payload(
                 preview=preview,
                 audit=audit,
-                driver_message=driver_message,
                 interpreted_context=interpreted_context,
+                state=state_machine.current_state,
             )
-            self._persist(preview, audit)
-            self._log(state_machine.current_state, request, payload.reason_summary)
-            return payload
 
         except PequiFluxError as exc:
             state_machine.current_state = FlowState.BLOCKED
@@ -228,13 +208,6 @@ class DecisionOrchestrator:
                 scenario_id=request.scenario_id,
                 variant=request.variant,
                 reason_summary=exc.message,
-            )
-            driver_message = compose_driver_message(
-                request_id=request.request_id,
-                decision_status=preview.decision_status,
-                recommended_truck=None,
-                recommended_destination=None,
-                reason_summary=preview.reason_summary,
             )
             blocked_context = InterpretedContext(
                 parsed_ticket=ParsedTicket(),
@@ -252,12 +225,18 @@ class DecisionOrchestrator:
                 needs_human_review=True,
                 review_reasons=[exc.message],
             )
-            self._log(state_machine.current_state, request, exc.message)
-            return build_frontend_payload(
-                preview=preview,
-                audit=None,
-                driver_message=driver_message,
+            audit = self.audit_service.generate_audit_payload(
                 interpreted_context=blocked_context,
+                validation=None,
+                preview=preview,
+                latencies_ms=timers,
+                source_hashes=source_hashes,
+            )
+            return self._finalize_payload(
+                preview=preview,
+                audit=audit,
+                interpreted_context=blocked_context,
+                state=state_machine.current_state,
             )
 
     def _policy_profile(self, version: str) -> PolicyProfile:
@@ -269,6 +248,35 @@ class DecisionOrchestrator:
             )
         return profile
 
+    def _finalize_payload(
+        self,
+        *,
+        preview,
+        audit,
+        interpreted_context: InterpretedContext,
+        state: FlowState,
+    ) -> FrontEndPayload:
+        driver_message = compose_driver_message(
+            request_id=preview.request_id,
+            decision_status=preview.decision_status,
+            recommended_truck=preview.recommended_truck.truck_id if preview.recommended_truck else None,
+            recommended_destination=(
+                preview.recommended_destination.destination_id
+                if preview.recommended_destination
+                else None
+            ),
+            reason_summary=preview.reason_summary,
+        )
+        payload = build_frontend_payload(
+            preview=preview,
+            audit=audit,
+            driver_message=driver_message,
+            interpreted_context=interpreted_context,
+        )
+        self._persist(preview, audit)
+        self._log(state, preview.request_id, preview.scenario_id, preview.reason_summary)
+        return payload
+
     def _persist(self, preview, audit) -> None:
         if self.sqlite_store is None:
             return
@@ -276,13 +284,13 @@ class DecisionOrchestrator:
         self.sqlite_store.save_decision(preview)
         self.sqlite_store.save_audit_record(audit)
 
-    def _log(self, state: FlowState, request: DecisionRequest, summary: str) -> None:
+    def _log(self, state: FlowState, request_id: str, scenario_id: str, summary: str) -> None:
         if self.jsonl_logger is None:
             return
         self.jsonl_logger.write(
             {
-                "request_id": request.request_id,
-                "scenario_id": request.scenario_id,
+                "request_id": request_id,
+                "scenario_id": scenario_id,
                 "module": "orchestrator",
                 "state": state,
                 "event_type": "decision_computed",

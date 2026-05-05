@@ -36,7 +36,7 @@ O Compose sobe um serviço local `gemma` com Ollama e injeta o runtime na aplica
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`
 - `GEMMA_MODEL=gemma4:latest` por padrão
-- `OLLAMA_IMAGE=alpine/ollama:latest` por padrão, para runtime CPU-only menor
+- `OLLAMA_IMAGE=ollama/ollama:latest` por padrão, para runtime com suporte a GPU quando Docker/NVIDIA estiver disponível
 
 O modelo precisa estar cacheado no volume `gemma-models` antes da demo real:
 

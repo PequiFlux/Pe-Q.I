@@ -1,6 +1,7 @@
 .git
 .gitignore
 .pytest_cache
+.scannerwork
 .code-review-graph
 .codex
 AGENTS.md

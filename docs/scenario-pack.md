@@ -155,7 +155,7 @@ Campos mínimos recomendados: `expected_status`, `acceptable_trucks`, `acceptabl
 
 - `S01_BASELINE`: prova que o sistema preserva FIFO em regime nominal
 - `S02_RAIN_OPEN`: chuva bloqueia destino aberto e pode justificar quebra de FIFO
-- `S03_WET_LOAD`: parsing documental muda a decisão
+- `S03_WET_LOAD`: parsing documental identifica carga úmida, mas nota com conferência manual exige `REVIEW_REQUIRED`
 - `S04_CONVEYOR_DOWN`: estado local bloqueia recurso
 - `S05_CONTRACT_PRIORITY`: política publicada pode romper FIFO
 - `S06_DOCUMENT_BLOCK`: bloqueio documental torna caminhão inelegível
