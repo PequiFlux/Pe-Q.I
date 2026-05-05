@@ -27,6 +27,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.gemma.adapter` | module | `app/gemma/adapter.py` | Adapta runtime LLM para contrato do sistema | Prompt/contexto | Contexto interpretado ou erro | Sem fallback silencioso |
 | `app.gemma.runtime_factory` | module | `app/gemma/runtime_factory.py` | Constrói runtime configurado | Configuração | Runtime | Deve falhar se dependência obrigatória faltar |
 | `app.adapters.document_adapter` | module | `app/adapters/document_adapter.py` | Ingestão de documento/ticket | Arquivo sintético | Dados extraídos | Testes cobrem caminhos de documento |
+| `app.adapters.csv_adapter` | module | `app/adapters/csv_adapter.py` | Carrega e normaliza fila CSV | `queue.csv` com `arrival_ts` timezone-aware | `RawQueueRow`/`QueueSnapshot` em UTC | Rejeita data inválida ou timestamp sem timezone com `PequiFluxError` |
 | `app.storage.sqlite_store` | module | `app/storage/sqlite_store.py` | Persistência SQLite local | Payloads auditáveis | Registros persistidos | Usar migrations versionadas |
 | `bench.runner` | module | `bench/runner.py` | Executa suíte de cenários | Manifest/fixtures | Resultados agregados | Usado por Compose benchmark |
 | `bench.metrics` | module | `bench/metrics.py` | Calcula métricas de benchmark | Resultados de casos | Métricas | Evitar métrica paralela sem decisão |

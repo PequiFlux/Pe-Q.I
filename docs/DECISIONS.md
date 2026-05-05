@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Timestamps da fila são timezone-aware e normalizados para UTC
+
+Contexto:
+`load_queue_rows()` usava `datetime.fromisoformat()` diretamente. Datas inválidas escapavam como `ValueError` e timestamps sem timezone podiam quebrar a subtração em `normalize_queue_snapshot()` quando `reference_time` era aware.
+
+Decisão:
+Rejeitar `arrival_ts` inválido ou sem timezone com `PequiFluxError` explícito e normalizar todos os timestamps aceitos para UTC.
+
+Alternativas rejeitadas:
+Assumir timezone local ou aceitar timestamp naive silenciosamente.
+
+Impacto:
+Fixtures e inputs interativos precisam fornecer ISO-8601 com offset, por exemplo `2026-04-04T08:00:00+00:00`.
+
+Arquivos/módulos afetados:
+- `app/adapters/csv_adapter.py`
+- `tests/unit/test_csv_adapter.py`
+- `docs/contracts.md`
+- `docs/scenario-pack.md`
+
 ### 2026-05-05 — IDs de política centralizados em `PolicyRule`
 
 Contexto:

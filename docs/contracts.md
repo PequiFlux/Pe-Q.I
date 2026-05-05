@@ -174,15 +174,15 @@ Começou a chover e a moega aberta foi bloqueada. Priorizar rota coberta se houv
 
 ```csv
 truck_id,arrival_ts,vehicle_type,status,declared_destination
-TRK-001,2026-04-04T08:01:00,bitrem,waiting,DST-OPEN-01
-TRK-002,2026-04-04T08:06:00,truck,waiting,DST-COV-01
-TRK-003,2026-04-04T08:09:00,bitrem,waiting,DST-OPEN-01
+TRK-001,2026-04-04T08:01:00+00:00,bitrem,waiting,DST-OPEN-01
+TRK-002,2026-04-04T08:06:00+00:00,truck,waiting,DST-COV-01
+TRK-003,2026-04-04T08:09:00+00:00,bitrem,waiting,DST-OPEN-01
 ```
 
 Regras canônicas:
 - snapshot FIFO estável por `arrival_ts`;
 - `truck_id`, `arrival_ts`, `status` são indispensáveis no normalizador;
-- `arrival_ts` deve ser parseável em ISO-8601;
+- `arrival_ts` deve ser ISO-8601 com timezone explícito; o adapter normaliza para UTC e rejeita timestamp sem offset;
 - não pode haver `truck_id` duplicado no mesmo cenário.
 
 #### Exemplo 4 — clima (`weather_state.json`)

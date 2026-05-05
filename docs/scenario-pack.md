@@ -79,15 +79,15 @@ Snapshot FIFO estável e determinístico.
 
 ```csv
 truck_id,arrival_ts,vehicle_type,status,declared_destination
-TRK-001,2026-04-04T08:01:00,bitrem,waiting,DST-OPEN-01
-TRK-002,2026-04-04T08:06:00,truck,waiting,DST-COV-01
-TRK-003,2026-04-04T08:09:00,bitrem,waiting,DST-OPEN-01
+TRK-001,2026-04-04T08:01:00+00:00,bitrem,waiting,DST-OPEN-01
+TRK-002,2026-04-04T08:06:00+00:00,truck,waiting,DST-COV-01
+TRK-003,2026-04-04T08:09:00+00:00,bitrem,waiting,DST-OPEN-01
 ```
 
 Regras:
 - mínimo de campos do pack: `truck_id`, `arrival_ts`, `vehicle_type`, `status`, `declared_destination`;
 - no normalizador, indispensáveis: `truck_id`, `arrival_ts`, `status`;
-- `arrival_ts` precisa ser ISO-8601 parseável;
+- `arrival_ts` precisa ser ISO-8601 com timezone explícito; timestamps sem offset são rejeitados;
 - IDs de caminhão únicos por cenário.
 
 ### `weather_state.json`

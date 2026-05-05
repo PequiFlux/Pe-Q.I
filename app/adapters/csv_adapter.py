@@ -24,13 +24,14 @@ def load_queue_rows(path: str) -> list[RawQueueRow]:
             )
 
         rows: list[RawQueueRow] = []
-        for raw in reader:
+        for line_number, raw in enumerate(reader, start=2):
             if not raw.get("truck_id"):
-                raise PequiFluxError("EMPTY_TRUCK_ID", "Queue row has an empty truck_id.")
+                raise PequiFluxError("EMPTY_TRUCK_ID", f"Queue row {line_number} has an empty truck_id.")
+            arrival_ts = _parse_arrival_ts(raw.get("arrival_ts"), line_number)
             rows.append(
                 RawQueueRow(
                     truck_id=raw["truck_id"].strip(),
-                    arrival_ts=datetime.fromisoformat(raw["arrival_ts"]),
+                    arrival_ts=arrival_ts,
                     status=(raw.get("status") or "waiting").strip(),
                     vehicle_type=(raw.get("vehicle_type") or "unknown").strip(),
                     contract_priority_flag=str(raw.get("contract_priority_flag", "false")).lower()
@@ -51,16 +52,19 @@ def normalize_queue_snapshot(
 
     seen: set[str] = set()
     normalized: list[QueueRow] = []
-    reference = reference_time or datetime.now(timezone.utc)
+    reference = _ensure_utc(reference_time or datetime.now(timezone.utc), "reference_time")
 
     for raw in sorted(rows, key=lambda row: (row.arrival_ts, row.truck_id)):
         if raw.truck_id in seen:
             raise PequiFluxError("DUPLICATE_TRUCK_ID", f"Duplicated truck_id: {raw.truck_id}")
         seen.add(raw.truck_id)
-        wait_minutes = max(int((reference - raw.arrival_ts).total_seconds() // 60), 0)
+        arrival_ts = _ensure_utc(raw.arrival_ts, f"arrival_ts for truck_id={raw.truck_id}")
+        wait_minutes = max(int((reference - arrival_ts).total_seconds() // 60), 0)
+        row_data = raw.model_dump()
+        row_data["arrival_ts"] = arrival_ts
         normalized.append(
             QueueRow(
-                **raw.model_dump(),
+                **row_data,
                 queue_position=len(normalized) + 1,
                 wait_minutes=wait_minutes,
             )
@@ -68,3 +72,25 @@ def normalize_queue_snapshot(
 
     return QueueSnapshot(request_id=request_id, rows=normalized, snapshot_at=reference)
 
+
+def _parse_arrival_ts(value: str | None, line_number: int) -> datetime:
+    if not value or not value.strip():
+        raise PequiFluxError("INVALID_ARRIVAL_TS", f"Queue row {line_number} has an empty arrival_ts.")
+    raw_value = value.strip()
+    try:
+        parsed = datetime.fromisoformat(raw_value)
+    except ValueError as exc:
+        raise PequiFluxError(
+            "INVALID_ARRIVAL_TS",
+            f"Queue row {line_number} has invalid ISO-8601 arrival_ts: {raw_value}",
+        ) from exc
+    return _ensure_utc(parsed, f"arrival_ts on queue row {line_number}")
+
+
+def _ensure_utc(value: datetime, field_name: str) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise PequiFluxError(
+            "NAIVE_TIMESTAMP",
+            f"{field_name} must include timezone information; use an ISO-8601 UTC offset such as +00:00.",
+        )
+    return value.astimezone(timezone.utc)
