@@ -33,6 +33,8 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.storage.sqlite_store` | module | `app/storage/sqlite_store.py` | Persistência SQLite local | Payloads auditáveis | Registros persistidos | Usar migrations versionadas |
 | `bench.runner` | module | `bench/runner.py` | Executa suíte de cenários | Manifest/fixtures | Resultados agregados | Usado por Compose benchmark |
 | `bench.metrics` | module | `bench/metrics.py` | Calcula métricas de benchmark | Resultados de casos | Métricas | Evitar métrica paralela sem decisão |
+| `bench.validation.validate_payload` | function | `bench/validation.py` | Valida payload contra `expected_decision.json` | `FrontEndPayload`, expected de cenário | Sucesso ou `SystemExit` com erros | Reutilizado por `run_scenario`, `run_benchmark` e testes; não importar validação privada de CLI |
+| `bench.reporting.render_summary_csv` | function | `bench/reporting.py` | Renderiza `summary.csv` do benchmark | Linhas por cenário/variante | CSV escapado via `csv.DictWriter` | Evita quebra quando mensagem, erro ou exceção contêm vírgula |
 | `Makefile` | command surface | `Makefile` | Atalhos avaliáveis para demo, UI, testes, benchmark e auditoria | `make demo`, `make ui`, `make test`, `make bench`, `make audit` | Comandos Docker/Compose | Não substitui scripts existentes; apenas agrega entrada amigável |
 | `scripts/check-quality.sh` | script | `scripts/check-quality.sh` | Executa testes, auditoria de blueprint e Sonar opcional | `--sonar`, `SONAR_HOST_URL`, `SONAR_TOKEN` | Status de checks | Usa pytest/python locais quando existem; senão usa Docker |
 

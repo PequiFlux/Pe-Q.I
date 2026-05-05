@@ -6,12 +6,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from app.cli.run_scenario import _validate_payload
 from app.domain.models import DecisionRequest
 from app.gemma.runtime_factory import build_gemma_adapter
 from app.orchestration.orchestrator import DecisionOrchestrator
 from app.services.structured_ticket_parser import parse_structured_ticket_document
 from bench.metrics import compute_variant_metrics
+from bench.reporting import render_summary_csv
+from bench.validation import validate_payload
 
 
 def main() -> None:
@@ -64,7 +65,7 @@ def main() -> None:
 
             try:
                 if not args.no_validate and variant == "full":
-                    _validate_payload(payload, expected)
+                    validate_payload(payload, expected)
                 if variant == "full" and constraint_violation:
                     raise SystemExit("Recommended pair violates a hard constraint.")
                 passed = True
@@ -129,37 +130,11 @@ def main() -> None:
         json.dumps(metrics, indent=2, sort_keys=True),
         encoding="utf-8",
     )
-    (output_dir / "summary.csv").write_text(_summary_csv(per_scenario), encoding="utf-8")
+    (output_dir / "summary.csv").write_text(render_summary_csv(per_scenario), encoding="utf-8")
 
     print(json.dumps({"run_id": run_id, "output_dir": str(output_dir), **metrics}, indent=2))
     if failures:
         raise SystemExit("Benchmark validation failed: " + "; ".join(failures))
-
-
-def _summary_csv(rows: list[dict[str, Any]]) -> str:
-    header = [
-        "scenario_id",
-        "variant",
-        "passed",
-        "decision_match_at_1",
-        "constraint_violation",
-        "ticket_field_accuracy",
-        "observed_primary_exception",
-        "expected_primary_exception",
-        "exception_match",
-        "fifo_break_justified",
-        "audit_complete",
-        "decision_status",
-        "recommended_truck",
-        "recommended_destination",
-        "fifo_break",
-        "rejected_count",
-        "latency_ms_total",
-    ]
-    lines = [",".join(header)]
-    for row in rows:
-        lines.append(",".join(str(row[column]) for column in header))
-    return "\n".join(lines) + "\n"
 
 
 def _matches_expected(payload, expected: dict[str, Any]) -> bool:

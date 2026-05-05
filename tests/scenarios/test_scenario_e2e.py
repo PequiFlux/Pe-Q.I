@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from app.cli.run_scenario import _validate_payload
 from app.domain.models import DecisionRequest
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
 from app.orchestration.orchestrator import DecisionOrchestrator
+from bench.validation import validate_payload
 
 
 def test_all_manifest_scenarios_run_end_to_end() -> None:
@@ -21,4 +21,4 @@ def test_all_manifest_scenarios_run_end_to_end() -> None:
         payload = orchestrator.run_decision(request)
         expected = json.loads(Path(case["files"]["expected_decision"]).read_text(encoding="utf-8"))
 
-        _validate_payload(payload, expected)
+        validate_payload(payload, expected)

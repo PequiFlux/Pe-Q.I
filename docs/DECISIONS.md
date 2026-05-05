@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Benchmark usa validação e relatório públicos
+
+Contexto:
+`run_benchmark.py` importava `_validate_payload` de `run_scenario.py`, acoplando benchmark a helper privado do CLI. O `summary.csv` também era montado com `",".join(...)`, quebrando campos com vírgula.
+
+Decisão:
+Mover validação para `bench.validation.validate_payload` e renderização CSV para `bench.reporting.render_summary_csv` com `csv.DictWriter`.
+
+Alternativas rejeitadas:
+Manter função privada em CLI ou escapar CSV manualmente.
+
+Impacto:
+`run_scenario`, `run_benchmark` e testes usam contrato público compartilhado; `summary.csv` fica robusto para erros, justificativas e mensagens com vírgula.
+
+Arquivos/módulos afetados:
+- `app/cli/run_benchmark.py`
+- `app/cli/run_scenario.py`
+- `bench/validation.py`
+- `bench/reporting.py`
+
 ### 2026-05-05 — Runtime textual não depende de frase do prompt
 
 Contexto:

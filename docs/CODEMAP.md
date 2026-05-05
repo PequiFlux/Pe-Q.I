@@ -15,7 +15,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Adapters | `app/adapters` | Leitura de CSV, estados, notas e documentos | `app/domain`, arquivos de cenário | Entrada de dados sintéticos e públicos |
 | Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável |
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |
-| Benchmarks | `bench` | Runner e métricas do pacote de cenários | `scenarios`, `app/cli` | Evidência para regressão e comparação |
+| Benchmarks | `bench` | Runner, validação, relatórios e métricas do pacote de cenários | `scenarios`, `app/cli` | `bench.validation` valida payload esperado; `bench.reporting` renderiza `summary.csv` com `csv.DictWriter`; evidência para regressão e comparação |
 | Evidências | `assets/screenshots`, `bench/reports/sample`, `docs/DEMO_SCRIPT.md`, `docs/HACKATHON_SUBMISSION.md`, `docs/LIMITATIONS.md`, `docs/UI_DECISIONS.md` | Artefatos de avaliação para GitHub/hackathon | `app/ui`, `bench`, `docs` | Mantém demo, benchmark, limites e decisões de UI encontráveis em até dois minutos |
 | Scenarios | `scenarios` | Fixtures sintéticas, manifest, schemas JSON e README narrativo por cenário | `tests/scenarios`, `bench` | Fonte de casos de validação; `scenarios/README.md` deve explicar os casos em linguagem humana para vídeo e avaliação |
 | Tests | `tests` | Testes unitários e de cenário | `app`, `bench`, `scenarios` | Cobrem constraints, auditoria, runtime e E2E |
