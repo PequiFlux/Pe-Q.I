@@ -7,7 +7,11 @@ __pycache__/
 .code-review-graph/graph.db
 checker
 third_party/
-bench/reports/
+bench/reports/*
+!bench/reports/sample/
+!bench/reports/sample/metrics.json
+!bench/reports/sample/per_scenario.json
+!bench/reports/sample/summary.csv
 logs/
 var/
 

@@ -6,7 +6,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 
 | Módulo | Caminho | Responsabilidade | Dependências principais | Observações |
 |---|---|---|---|---|
-| UI | `app/ui` | Interface Streamlit para operar cenários, visualizar entradas, ticket, decisões e auditoria | `app/orchestration`, `app/adapters` | Entrada visual, sem regra de domínio duplicada |
+| UI | `app/ui` | Interface Streamlit em Judge Mode para demonstrar cenários narrativos e a legitimidade da quebra de FIFO antes dos detalhes técnicos | `app/orchestration`, `app/adapters`, `bench/reports` | Primeira dobra abre com faixa de benchmark `fifo`/`heuristic`/`full` do scenario pack, lendo relatório quando disponível ou snapshot explícito quando o container exclui `bench/reports`; depois mostra três casos executáveis, comparação FIFO puro vs Pe-Q.I, fila empilhada dos 5 primeiros caminhões, documento interpretado, regra aplicada e ação do operador; validação técnica usa heatmap de `AuditRecord`; CSV/JSON ficam no Modo técnico |
 | CLI | `app/cli` | Entrypoints para cenário, benchmark, prewarm e auditoria de blueprint | `app/orchestration`, `bench`, `scenarios` | Deve continuar executável via Docker |
 | Orquestração | `app/orchestration` | Fluxo de decisão, resolução de verdade e máquina de estados | `app/domain`, `app/services`, `app/audit` | Coordena camadas sem substituir regras determinísticas |
 | Domínio | `app/domain` | Modelos, enums, constraints, ranking e política determinística | `scenarios/common` | Regras hard-constraint vivem aqui |
@@ -16,6 +16,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável |
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |
 | Benchmarks | `bench` | Runner e métricas do pacote de cenários | `scenarios`, `app/cli` | Evidência para regressão e comparação |
+| Evidências | `assets/screenshots`, `bench/reports/sample`, `docs/DEMO_SCRIPT.md`, `docs/HACKATHON_SUBMISSION.md`, `docs/LIMITATIONS.md`, `docs/UI_DECISIONS.md` | Artefatos de avaliação para GitHub/hackathon | `app/ui`, `bench`, `docs` | Mantém demo, benchmark, limites e decisões de UI encontráveis em até dois minutos |
 | Scenarios | `scenarios` | Fixtures sintéticas, manifest e schemas JSON | `tests/scenarios`, `bench` | Fonte de casos de validação |
 | Tests | `tests` | Testes unitários e de cenário | `app`, `bench`, `scenarios` | Cobrem constraints, auditoria, runtime e E2E |
 

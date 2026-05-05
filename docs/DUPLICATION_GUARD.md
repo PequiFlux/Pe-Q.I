@@ -41,3 +41,7 @@ Procurar:
 - Não criar novo parser de ticket sem verificar `app/services/parser.py`, `app/services/structured_ticket_parser.py` e `app/adapters/document_adapter.py`.
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
 - Notas operacionais com termos de revisão (`revisar`, `conferir`) devem prevalecer sobre classificações automáticas como `WET_LOAD`.
+- Judge Mode da UI deve reutilizar cenários do manifest e `DecisionOrchestrator`; não criar regra de decisão paralela para explicar FIFO vs Pe-Q.I.
+- Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
+- Faixas de benchmark na UI devem ler `bench/reports`, reutilizar `bench/metrics.py` ou mostrar snapshot explícito do relatório versionado; não criar métrica de comparação paralela.
+- Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.

@@ -1,0 +1,52 @@
+{
+  "failed_count": 0,
+  "passed_count": 10,
+  "scenario_count": 10,
+  "variant_metrics": {
+    "fifo": {
+      "audit_completeness": 0.8,
+      "constraint_violation_rate": 0.0,
+      "decision_match_at_1": 0.7,
+      "exception_f1": 0.5,
+      "failed_count": 0,
+      "fifo_break_justified_precision": 1.0,
+      "latency_p50": 0,
+      "latency_p95": 0,
+      "p50_latency_ms": 0,
+      "p95_latency_ms": 0,
+      "passed_count": 10,
+      "scenario_count": 10,
+      "ticket_field_accuracy": 0.0
+    },
+    "full": {
+      "audit_completeness": 1.0,
+      "constraint_violation_rate": 0.0,
+      "decision_match_at_1": 1.0,
+      "exception_f1": 1.0,
+      "failed_count": 0,
+      "fifo_break_justified_precision": 1.0,
+      "latency_p50": 0,
+      "latency_p95": 0,
+      "p50_latency_ms": 0,
+      "p95_latency_ms": 0,
+      "passed_count": 10,
+      "scenario_count": 10,
+      "ticket_field_accuracy": 1.0
+    },
+    "heuristic": {
+      "audit_completeness": 1.0,
+      "constraint_violation_rate": 0.0,
+      "decision_match_at_1": 1.0,
+      "exception_f1": 1.0,
+      "failed_count": 0,
+      "fifo_break_justified_precision": 1.0,
+      "latency_p50": 0,
+      "latency_p95": 0,
+      "p50_latency_ms": 0,
+      "p95_latency_ms": 0,
+      "passed_count": 10,
+      "scenario_count": 10,
+      "ticket_field_accuracy": 1.0
+    }
+  }
+}

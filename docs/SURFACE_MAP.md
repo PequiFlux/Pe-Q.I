@@ -10,7 +10,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.cli.run_benchmark` | CLI module | `app/cli/run_benchmark.py` | Executa benchmark de cenários | Manifest e fixtures | Métricas/relatório | Usado por Docker/Compose |
 | `app.cli.prewarm_gemma` | CLI module | `app/cli/prewarm_gemma.py` | Preaquece runtime Gemma/Ollama | Configuração de runtime | Status de prewarm | Não deve substituir runtime ausente |
 | `app.cli.blueprint_audit` | CLI module | `app/cli/blueprint_audit.py` | Audita alinhamento com blueprint | Blueprint/docs | Relatório de auditoria | Apoia checks públicos |
-| `app.ui.streamlit_app` | UI module | `app/ui/streamlit_app.py` | Interface Streamlit | Inputs de cenário | Payloads visuais com pacote operacional, ticket, recomendação e auditoria | Deve chamar orquestração, não duplicar domínio |
+| `app.ui.streamlit_app` | UI module | `app/ui/streamlit_app.py` | Interface Streamlit em Judge Mode, orientada à avaliação rápida da legitimidade operacional | Três cenários narrativos, relatório de benchmark versionado ou inputs técnicos de cenário | Faixa de benchmark `full`/`fifo`/`heuristic`, casos executáveis, comparação FIFO puro vs Pe-Q.I, fila empilhada com promoção/bloqueio/espera, documento interpretado, regra aplicada, ação humana e heatmap de hard constraints; CSV/JSON em Modo técnico | Deve chamar orquestração, não duplicar domínio |
 | `app.orchestration.orchestrator` | module | `app/orchestration/orchestrator.py` | Coordena fluxo de decisão e finalização auditável | Contexto interpretado, estados, política | Decisão final/review/error com payload auditável | Núcleo de execução; estados terminais usam finalização comum |
 | `app.orchestration.truth_resolver` | module | `app/orchestration/truth_resolver.py` | Resolve divergências entre fontes | Ticket, nota, estados | Contexto reconciliado | Falhas devem ser explícitas |
 | `app.orchestration.state_machine` | module | `app/orchestration/state_machine.py` | Controla estados terminais e transições | Estado atual, evento | Novo estado/erro | Coberto por testes unitários |
@@ -24,6 +24,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.storage.sqlite_store` | module | `app/storage/sqlite_store.py` | Persistência SQLite local | Payloads auditáveis | Registros persistidos | Usar migrations versionadas |
 | `bench.runner` | module | `bench/runner.py` | Executa suíte de cenários | Manifest/fixtures | Resultados agregados | Usado por Compose benchmark |
 | `bench.metrics` | module | `bench/metrics.py` | Calcula métricas de benchmark | Resultados de casos | Métricas | Evitar métrica paralela sem decisão |
+| `Makefile` | command surface | `Makefile` | Atalhos avaliáveis para demo, UI, testes, benchmark e auditoria | `make demo`, `make ui`, `make test`, `make bench`, `make audit` | Comandos Docker/Compose | Não substitui scripts existentes; apenas agrega entrada amigável |
 | `scripts/check-quality.sh` | script | `scripts/check-quality.sh` | Executa testes, auditoria de blueprint e Sonar opcional | `--sonar`, `SONAR_HOST_URL`, `SONAR_TOKEN` | Status de checks | Usa pytest/python locais quando existem; senão usa Docker |
 
 ## Regras

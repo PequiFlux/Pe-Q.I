@@ -8,6 +8,27 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 
 ![PequiFlux Yard Copilot UI](docs/writeup_assets/pequiflux-ui.png)
 
+## Para avaliadores
+
+| Em dois minutos | Onde ver |
+|---|---|
+| Tese | Pe-Q.I recomenda quem chamar, para qual moega, por que o FIFO puro falharia e qual regra sustenta a decisão |
+| Demo executável | `make ui` para a interface; `make demo` para o cenário padrão |
+| Benchmark | `make bench` gera relatório; [`bench/reports/sample/`](bench/reports/sample/) traz uma amostra versionada |
+| Evidência visual | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) e imagem acima |
+| Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
+| Critérios e limites | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) e [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) |
+
+Atalhos principais:
+
+```bash
+make demo
+make ui
+make test
+make bench
+make audit
+```
+
 ---
 
 ## Sumário
@@ -28,6 +49,7 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Testes](#testes)
 - [Documentação](#documentação)
+- [Evidências de submissão](#evidências-de-submissão)
 - [Convenções de código](#convenções-de-código)
 - [Segurança do repositório](#segurança-do-repositório)
 - [Licença](#licença)
@@ -72,6 +94,12 @@ docker build -t pequiflux-yard-copilot:local .
 docker run --rm pequiflux-yard-copilot:local
 ```
 
+Atalho:
+
+```bash
+make demo
+```
+
 Isso executa o cenário **S10_FIFO_BREAK_JUSTIFIED** com o runtime Ollama Gemma.
 
 ### Suite de testes
@@ -79,6 +107,12 @@ Isso executa o cenário **S10_FIFO_BREAK_JUSTIFIED** com o runtime Ollama Gemma.
 ```bash
 docker build --target test -t pequiflux-yard-copilot:test .
 docker run --rm pequiflux-yard-copilot:test
+```
+
+Atalho:
+
+```bash
+make test
 ```
 
 O target `test` usa `PEQUIFLUX_GEMMA_RUNTIME=text` — não requer GPU nem Ollama.
@@ -89,12 +123,24 @@ O target `test` usa `PEQUIFLUX_GEMMA_RUNTIME=text` — não requer GPU nem Ollam
 docker compose --profile ui up ui
 ```
 
+Atalho:
+
+```bash
+make ui
+```
+
 Abra [http://localhost:8501](http://localhost:8501).
 
 ### Benchmark completo
 
 ```bash
 docker compose run --rm benchmark
+```
+
+Atalho:
+
+```bash
+make bench
 ```
 
 Relatórios em `bench/reports/`.
@@ -406,6 +452,8 @@ Cada cenário contém: `ticket.txt`, `queue.csv`, `operator_note.txt`, `weather_
 
 Toda configuração é por variáveis de ambiente Docker Compose ou inputs explícitos de runtime. **Nenhum `.env` é comitado.**
 
+Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório evita `.env.example` na raiz porque a política local bloqueia qualquer `.env.*` no diretório principal.
+
 | Variável | Default | Propósito |
 |----------|---------|-----------|
 | `PEQUIFLUX_GEMMA_RUNTIME` | `ollama` | Backend Gemma: `ollama`, `text` ou `none` |
@@ -504,8 +552,28 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | [`docs/scenario-pack.md`](docs/scenario-pack.md) | Estrutura dos cenários, benchmark e relatórios |
 | [`docs/docker.md`](docs/docker.md) | Uso Docker/Compose, variáveis, GPU |
 | [`docs/public-repo.md`](docs/public-repo.md) | Sanitização e checklist de publicação |
+| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Roteiro de vídeo/demo de 3 minutos |
+| [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) | Critérios da hackathon mapeados para evidências do repo |
+| [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) | Limites explícitos do protótipo |
+| [`docs/UI_DECISIONS.md`](docs/UI_DECISIONS.md) | Decisões de interface para operador, FIFO e auditoria |
+| [`docs/CODEMAP.md`](docs/CODEMAP.md) | Mapa vivo dos módulos |
+| [`docs/SURFACE_MAP.md`](docs/SURFACE_MAP.md) | Contratos públicos/exportados |
+| [`docs/DUPLICATION_GUARD.md`](docs/DUPLICATION_GUARD.md) | Pontos de reutilização e anti-duplicação |
+| [`docs/SETUP_STATUS.md`](docs/SETUP_STATUS.md) | Estado de setup, checks e comandos disponíveis |
 | [`docs/technical_blueprint.md`](docs/technical_blueprint.md) | Blueprint original completo |
 | [`technical_blueprint.md`](technical_blueprint.md) | Cópia raiz (fonte primária) |
+
+---
+
+## Evidências de submissão
+
+| Evidência | Caminho |
+|---|---|
+| Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
+| Screenshot usada no README | [`docs/writeup_assets/pequiflux-ui.png`](docs/writeup_assets/pequiflux-ui.png) |
+| Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
+| Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
+| Mapa da submissão | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
 
 ---
 
