@@ -114,13 +114,13 @@ def inject_styles() -> None:
             grid-template-columns: minmax(0, 1fr) minmax(340px, 0.45fr);
             gap: 14px;
             align-items: center;
-            padding: 14px 18px;
+            padding: 18px 20px;
             margin-bottom: 10px;
-            border-radius: 18px;
+            border-radius: 16px;
             color: #fff;
             background:
-              linear-gradient(135deg, #063d31, #0f172a);
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10);
+              linear-gradient(135deg, rgba(6,61,49,0.98), rgba(15,23,42,0.98));
+            box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
           }
           .eyebrow {
             color: rgba(255,255,255,0.66);
@@ -132,7 +132,7 @@ def inject_styles() -> None:
           .hero h1 {
             margin: 6px 0 0;
             max-width: 760px;
-            font-size: 28px;
+            font-size: 31px;
             line-height: 1.06;
             letter-spacing: 0;
           }
@@ -151,7 +151,7 @@ def inject_styles() -> None:
           .hero-proof div {
             min-height: 62px;
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 10px;
             background: rgba(255,255,255,0.08);
             border: 1px solid rgba(255,255,255,0.12);
           }
@@ -185,7 +185,7 @@ def inject_styles() -> None:
             align-items: stretch;
             margin: 0 0 10px;
             padding: 10px;
-            border-radius: 18px;
+            border-radius: 16px;
             background: rgba(255,255,255,0.88);
             border: 1px solid var(--line);
             box-shadow: 0 8px 22px rgba(15,23,42,0.05);
@@ -193,7 +193,7 @@ def inject_styles() -> None:
           .benchmark-strip div {
             min-width: 0;
             padding: 11px 12px;
-            border-radius: 14px;
+            border-radius: 10px;
             background: #fff;
             border: 1px solid var(--line);
           }
@@ -246,10 +246,10 @@ def inject_styles() -> None:
             margin-top: 4px;
           }
           .judge-card {
-            min-height: 276px;
+            min-height: 258px;
             margin-bottom: 10px;
-            padding: 17px;
-            border-radius: 18px;
+            padding: 16px;
+            border-radius: 14px;
             background: rgba(255,255,255,0.90);
             border: 1px solid var(--line);
             box-shadow: 0 8px 22px rgba(15,23,42,0.06);
@@ -290,7 +290,7 @@ def inject_styles() -> None:
           }
           .judge-facts div {
             padding: 10px;
-            border-radius: 14px;
+            border-radius: 10px;
             background: #fff;
             border: 1px solid var(--line);
           }
@@ -430,7 +430,7 @@ def inject_styles() -> None:
           .queue-focus {
             margin: 2px 0 10px;
             padding: 14px;
-            border-radius: 18px;
+            border-radius: 14px;
             background: rgba(255,255,255,0.88);
             border: 1px solid var(--line);
             box-shadow: 0 8px 22px rgba(15,23,42,0.06);
@@ -446,7 +446,7 @@ def inject_styles() -> None:
             align-items: center;
             min-height: 62px;
             padding: 11px 13px;
-            border-radius: 16px;
+            border-radius: 12px;
             background: #fff;
             border: 1px solid var(--line);
             box-shadow: 0 8px 18px rgba(15,23,42,0.04);
@@ -516,26 +516,29 @@ def inject_styles() -> None:
           }
           .judge-comparison {
             display: grid;
-            grid-template-columns: minmax(0, 0.92fr) 54px minmax(0, 0.92fr) minmax(300px, 1fr);
-            gap: 10px;
+            grid-template-columns: minmax(0, 0.95fr) 50px minmax(0, 1fr) minmax(320px, 1.08fr);
+            gap: 12px;
             align-items: stretch;
             margin: 2px 0 10px;
           }
           .comparison-tile,
           .comparison-proof {
             min-width: 0;
-            padding: 15px;
-            border-radius: 18px;
+            padding: 16px;
+            border-radius: 14px;
             border: 1px solid var(--line);
             background: rgba(255,255,255,0.90);
             box-shadow: 0 8px 22px rgba(15,23,42,0.06);
           }
           .comparison-tile.fifo {
             background: linear-gradient(145deg, var(--red-50), #fff);
+            border-color: rgba(220,38,38,0.26);
           }
           .comparison-tile.peqi {
-            background: linear-gradient(145deg, var(--green-50), #fff);
-            border-color: rgba(34,201,139,0.30);
+            color: #fff;
+            background: linear-gradient(145deg, var(--green-800), var(--slate-900));
+            border-color: rgba(34,201,139,0.34);
+            box-shadow: 0 18px 34px rgba(7,95,69,0.18);
           }
           .comparison-tile strong {
             display: block;
@@ -544,6 +547,14 @@ def inject_styles() -> None:
             color: var(--ink);
             font-size: 26px;
             line-height: 1.05;
+          }
+          .comparison-tile.peqi span,
+          .comparison-tile.peqi strong,
+          .comparison-tile.peqi p {
+            color: #fff;
+          }
+          .comparison-tile.peqi p {
+            color: rgba(255,255,255,0.72);
           }
           .comparison-tile p {
             margin: 8px 0 0;
@@ -554,7 +565,7 @@ def inject_styles() -> None:
           .comparison-arrow {
             display: grid;
             place-items: center;
-            border-radius: 18px;
+            border-radius: 999px;
             color: var(--green-800);
             background: #fff;
             border: 1px solid var(--line);
@@ -570,7 +581,7 @@ def inject_styles() -> None:
           .comparison-proof div {
             min-width: 0;
             padding: 10px;
-            border-radius: 14px;
+            border-radius: 10px;
             background: #fff;
             border: 1px solid var(--line);
           }
@@ -587,7 +598,7 @@ def inject_styles() -> None:
           }
           .story-main {
             padding: 18px;
-            border-radius: 18px;
+            border-radius: 14px;
             color: #fff;
             background: linear-gradient(135deg, #063d31, #0f172a);
             box-shadow: 0 18px 38px rgba(15,23,42,0.16);
@@ -623,7 +634,7 @@ def inject_styles() -> None:
             min-width: 0;
             min-height: 154px;
             padding: 14px;
-            border-radius: 18px;
+            border-radius: 14px;
             border: 1px solid var(--line);
             background: rgba(255,255,255,0.90);
             box-shadow: 0 10px 24px rgba(15,23,42,0.06);

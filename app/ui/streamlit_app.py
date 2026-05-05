@@ -135,6 +135,12 @@ def main() -> None:
     payload = st.session_state.get("last_payload")
     request = st.session_state.get("last_request")
     fifo_payload = st.session_state.get("last_fifo_payload")
+    if payload is None and _ui_autorun_enabled():
+        request = judge_request(case)
+        payload, fifo_payload = run_payload_pair(request)
+        st.session_state["last_payload"] = payload
+        st.session_state["last_request"] = request
+        st.session_state["last_fifo_payload"] = fifo_payload
     if payload is None or request is None:
         _render_judge_empty_state()
         return
@@ -423,9 +429,9 @@ def _render_outputs(
         unsafe_allow_html=True,
     )
 
-    st.markdown(_queue_stack_card(payload, request), unsafe_allow_html=True)
     st.markdown(_judge_comparison_card(payload, request, fifo_payload), unsafe_allow_html=True)
     st.markdown(_recommended_decision_card(payload), unsafe_allow_html=True)
+    st.markdown(_queue_stack_card(payload, request), unsafe_allow_html=True)
     first_left, first_right = st.columns([1, 1], gap="large")
     with first_left:
         st.markdown(_why_not_fifo_card(payload), unsafe_allow_html=True)
@@ -599,6 +605,10 @@ def _runtime_label() -> str:
     if runtime == "ollama":
         return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:latest')}"
     return runtime
+
+
+def _ui_autorun_enabled() -> bool:
+    return os.getenv("PEQUIFLUX_UI_AUTORUN", "").strip().lower() in {"1", "true", "yes"}
 
 
 

@@ -6,7 +6,7 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 
 **Princípio central:** Gemma interpreta; regras determinísticas decidem; o operador humano aprova, bloqueia ou faz override; tudo fica auditável.
 
-![PequiFlux Yard Copilot UI](docs/writeup_assets/pequiflux-ui.png)
+![PequiFlux Yard Copilot UI](assets/screenshots/pequiflux-ui.png)
 
 ## Para avaliadores
 
@@ -571,7 +571,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Evidência | Caminho |
 |---|---|
 | Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
-| Screenshot usada no README | [`docs/writeup_assets/pequiflux-ui.png`](docs/writeup_assets/pequiflux-ui.png) |
+| Screenshot usada no README | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
 | Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
 | Mapa da submissão | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |

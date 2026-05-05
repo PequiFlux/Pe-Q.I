@@ -4,6 +4,25 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Screenshot canonico mostra a prova FIFO vs Pe-Q.I
+
+Contexto:
+O README ja exibia imagem da UI, mas apontava para `docs/writeup_assets/pequiflux-ui.png`. Para avaliacao, o artefato canonico versionado fica em `assets/screenshots/pequiflux-ui.png`.
+
+Decisão:
+Fazer o README embutir `assets/screenshots/pequiflux-ui.png`, manter o asset de writeup sincronizado e trazer a comparacao `FIFO chamaria` versus `Pe-Q.I recomenda` antes da fila nos resultados. A UI tambem aceita `PEQUIFLUX_UI_AUTORUN=1` para capturas de demo.
+
+Alternativas rejeitadas:
+Adicionar uma segunda imagem no README ou deixar o screenshot principal apontando para caminho secundario.
+
+Impacto:
+A primeira imagem do GitHub fica alinhada ao asset de evidencia da submissao e privilegia o conflito de legitimidade da decisao.
+
+Arquivos/módulos afetados:
+- `README.md`
+- `app/ui/streamlit_app.py`
+- `app/ui/styles.py`
+
 ### 2026-05-05 — Finalização humana é persistida em transação única
 
 Contexto:
