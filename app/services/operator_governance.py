@@ -54,9 +54,7 @@ def finalize_operator_decision(
 
     if sqlite_store is not None:
         sqlite_store.initialize()
-        sqlite_store.save_operator_action(finalized.decision_id, action)
-        sqlite_store.save_decision_finalized(finalized)
-        sqlite_store.save_audit_record(updated_audit)
+        sqlite_store.save_operator_finalization(finalized=finalized, audit=updated_audit)
 
     return finalized, updated_audit
 

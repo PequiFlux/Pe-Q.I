@@ -8,7 +8,7 @@ import pytest
 
 from app.domain.enums import DecisionStatus, OperatorAction, PolicyRule
 from app.domain.errors import PequiFluxError
-from app.domain.models import FrontEndPayload
+from app.domain.models import AuditRecord, FrontEndPayload
 from app.services.operator_governance import finalize_operator_decision
 from app.storage.sqlite_store import SQLiteStore
 
@@ -84,6 +84,11 @@ def _payload() -> FrontEndPayload:
     return FrontEndPayload.model_validate(data)
 
 
+class FailingAuditStore(SQLiteStore):
+    def _insert_audit_record(self, connection: sqlite3.Connection, audit: AuditRecord) -> None:
+        raise RuntimeError("audit write failed")
+
+
 def test_finalize_approve_persists_domain_objects_and_audit_update(tmp_path: Path) -> None:
     db_path = tmp_path / "pequiflux.db"
     store = SQLiteStore(path=str(db_path))
@@ -119,6 +124,31 @@ def test_finalize_approve_persists_domain_objects_and_audit_update(tmp_path: Pat
     assert json.loads(finalization[1])["reason"] == "Supervisor approved the preview."
     assert action == ("approve", "OP-DEMO-01")
     assert json.loads(audit_json)["operator_action"]["final_status"] == "APPROVED"
+
+
+def test_finalize_operator_decision_rolls_back_partial_storage_on_failure(tmp_path: Path) -> None:
+    db_path = tmp_path / "pequiflux.db"
+    store = FailingAuditStore(path=str(db_path))
+
+    with pytest.raises(RuntimeError, match="audit write failed"):
+        finalize_operator_decision(
+            payload=_payload(),
+            action_type=OperatorAction.APPROVE,
+            reason="Supervisor approved the preview.",
+            actor_id="OP-DEMO-01",
+            sqlite_store=store,
+        )
+
+    with sqlite3.connect(db_path) as connection:
+        action_count = connection.execute("SELECT COUNT(*) FROM operator_actions").fetchone()[0]
+        finalization_count = connection.execute(
+            "SELECT COUNT(*) FROM decision_finalizations"
+        ).fetchone()[0]
+        audit_count = connection.execute("SELECT COUNT(*) FROM audit_records").fetchone()[0]
+
+    assert action_count == 0
+    assert finalization_count == 0
+    assert audit_count == 0
 
 
 def test_finalize_override_uses_hard_constraint_validation() -> None:

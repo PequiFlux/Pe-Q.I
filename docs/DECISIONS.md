@@ -4,6 +4,25 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Finalização humana é persistida em transação única
+
+Contexto:
+`finalize_operator_decision()` gravava ação do operador, decisão finalizada e auditoria atualizada por chamadas separadas do `SQLiteStore`, cada uma com seu próprio commit. Uma falha no meio podia deixar estado parcial.
+
+Decisão:
+Adicionar `SQLiteStore.save_operator_finalization()` para gravar os três efeitos em uma única transação SQLite e chamar esse método na governança do operador.
+
+Alternativas rejeitadas:
+Manter commits separados ou mover transação para a UI.
+
+Impacto:
+Finalização humana passa a ser atômica: se a auditoria atualizada falhar, ação e finalização também são revertidas.
+
+Arquivos/módulos afetados:
+- `app/storage/sqlite_store.py`
+- `app/services/operator_governance.py`
+- `tests/unit/test_operator_governance.py`
+
 ### 2026-05-05 — Benchmark usa validação e relatório públicos
 
 Contexto:

@@ -13,7 +13,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Serviços | `app/services` | Builders, parsers, governança operacional, classificação de exceções e mensagens | `app/domain`, `app/gemma` | Adaptam dados para decisão sem fallback silencioso |
 | Gemma | `app/gemma` | Runtime, adapter, schemas, prompts e gateway da camada LLM | `app/domain`, runtime externo | Interpretação deve falhar fechado quando inválida; `TextTicketRuntime` consome texto de fixture por metadata, não por frase do prompt |
 | Adapters | `app/adapters` | Leitura de CSV, estados, notas e documentos | `app/domain`, arquivos de cenário | Entrada de dados sintéticos e públicos |
-| Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável |
+| Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável; finalização humana usa transação única em `SQLiteStore.save_operator_finalization` |
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |
 | Benchmarks | `bench` | Runner, validação, relatórios e métricas do pacote de cenários | `scenarios`, `app/cli` | `bench.validation` valida payload esperado; `bench.reporting` renderiza `summary.csv` com `csv.DictWriter`; evidência para regressão e comparação |
 | Evidências | `assets/screenshots`, `bench/reports/sample`, `docs/DEMO_SCRIPT.md`, `docs/HACKATHON_SUBMISSION.md`, `docs/LIMITATIONS.md`, `docs/UI_DECISIONS.md` | Artefatos de avaliação para GitHub/hackathon | `app/ui`, `bench`, `docs` | Mantém demo, benchmark, limites e decisões de UI encontráveis em até dois minutos |
