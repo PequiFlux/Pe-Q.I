@@ -28,7 +28,7 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-all.txt
 
       - name: Black format check
-        run: python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
+        run: python -m black --check app bench tests scripts
 
       - name: Pytest
         run: pytest -q
