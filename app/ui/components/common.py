@@ -155,10 +155,14 @@ def _reason_detail_label(text: str) -> str:
 
 
 def _first_skipped_truck(payload: FrontEndPayload) -> str | None:
-    skipped = [entry for entry in payload.queue_diff if entry.decision == "skipped"]
-    if not skipped:
+    held = [
+        entry
+        for entry in payload.queue_diff
+        if entry.decision in {"blocked", "unchanged"} and entry.position_before == 1
+    ]
+    if not held:
         return None
-    return min(skipped, key=lambda entry: entry.position_before).truck_id
+    return min(held, key=lambda entry: entry.position_before).truck_id
 
 
 def _story_tile(label: str, value: str, detail: str, kind: str = "muted") -> str:

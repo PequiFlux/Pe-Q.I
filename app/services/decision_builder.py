@@ -24,13 +24,16 @@ def _build_queue_diff(
     queue_snapshot: QueueSnapshot,
     top_candidate_truck_id: str | None,
     reason_summary: str,
+    blocked_truck_ids: set[str] | None = None,
 ) -> list[QueueDiffEntry]:
+    blocked_truck_ids = blocked_truck_ids or set()
     diff: list[QueueDiffEntry] = []
-    selected_position: int | None = None
-    for row in queue_snapshot.waiting_rows:
-        if row.truck_id == top_candidate_truck_id:
-            selected_position = row.queue_position
-            break
+    selected = next(
+        (row for row in queue_snapshot.waiting_rows if row.truck_id == top_candidate_truck_id),
+        None,
+    )
+    selected_position = selected.queue_position if selected else None
+
     for row in queue_snapshot.waiting_rows:
         is_selected = row.truck_id == top_candidate_truck_id
         if is_selected:
@@ -38,19 +41,24 @@ def _build_queue_diff(
                 QueueDiffEntry(
                     truck_id=row.truck_id,
                     position_before=row.queue_position,
-                    position_after=1,
-                    decision="recommended",
+                    position_after=None,
+                    decision="called",
                     reason=reason_summary,
                 )
             )
         elif selected_position is not None and row.queue_position < selected_position:
+            is_blocked = row.truck_id in blocked_truck_ids
             diff.append(
                 QueueDiffEntry(
                     truck_id=row.truck_id,
                     position_before=row.queue_position,
-                    position_after=None,
-                    decision="skipped",
-                    reason="ranked_below_recommended",
+                    position_after=row.queue_position,
+                    decision="blocked" if is_blocked else "unchanged",
+                    reason=(
+                        "blocked_by_hard_constraint"
+                        if is_blocked
+                        else "fifo_break_kept_waiting_ahead_of_called_truck"
+                    ),
                 )
             )
         else:
@@ -60,11 +68,26 @@ def _build_queue_diff(
                     truck_id=row.truck_id,
                     position_before=row.queue_position,
                     position_after=new_position,
-                    decision="shifted",
-                    reason="displaced_by_recommended_selection",
+                    decision="shifted" if selected_position is not None else "unchanged",
+                    reason=(
+                        "shifted_after_called_truck_left_queue"
+                        if selected_position is not None
+                        else "no_dispatch_kept_queue_position"
+                    ),
                 )
             )
     return diff
+
+
+def _blocked_truck_ids(validation: ValidationResult, selected_truck_id: str) -> set[str]:
+    eligible_by_truck: dict[str, bool] = {}
+    for entry in validation.validation_matrix:
+        eligible_by_truck[entry.truck_id] = eligible_by_truck.get(entry.truck_id, False) or entry.eligible
+    return {
+        truck_id
+        for truck_id, has_eligible_destination in eligible_by_truck.items()
+        if truck_id != selected_truck_id and not has_eligible_destination
+    }
 
 
 def build_decision_preview(
@@ -132,7 +155,12 @@ def build_decision_preview(
             OperatorAction.BLOCK,
             OperatorAction.OVERRIDE,
         ],
-        queue_diff=_build_queue_diff(queue_snapshot, top.truck_id, reason_summary),
+        queue_diff=_build_queue_diff(
+            queue_snapshot,
+            top.truck_id,
+            reason_summary,
+            _blocked_truck_ids(validation, top.truck_id),
+        ),
         fired_rules=top.fired_rules,
     )
 

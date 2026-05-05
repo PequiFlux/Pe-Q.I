@@ -150,19 +150,22 @@ def _queue_stack_state(
     first_id: str | None,
     recommended_id: str | None,
 ) -> tuple[str, str, str]:
-    if truck_id == recommended_id:
+    if diff_entry and diff_entry.decision == "called":
         before = diff_entry.position_before if diff_entry else "-"
-        after = diff_entry.position_after if diff_entry else "chamada"
-        return "promoted", "subiu para chamada", f"antes #{before}; agora #{after}"
+        return "promoted", "chamado agora", f"antes #{before}; saiu da fila"
+    if diff_entry and diff_entry.decision == "blocked":
+        rules = _truck_failure_rules(payload, truck_id)
+        detail = ", ".join(rules[:3]) if rules else diff_entry.reason
+        return "blocked", "bloqueado por restricao", detail
     if truck_id == first_id and truck_id != recommended_id:
         rules = _truck_failure_rules(payload, truck_id)
         if rules:
             return "blocked", "bloqueado por restricao", ", ".join(rules[:3])
         return "waiting", "mantido aguardando", "sem criterio suficiente para chamada automatica"
-    if diff_entry and diff_entry.decision == "skipped":
-        rules = _truck_failure_rules(payload, truck_id)
-        detail = ", ".join(rules[:3]) if rules else diff_entry.reason
-        return "waiting", "mantido aguardando", detail
+    if diff_entry and diff_entry.decision == "unchanged":
+        return "waiting", "mantido aguardando", diff_entry.reason
+    if diff_entry and diff_entry.decision == "shifted":
+        return "neutral", "avancou na fila", diff_entry.reason
     return "neutral", "sem mudanca", "ordem preservada ate nova avaliacao"
 
 

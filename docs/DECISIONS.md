@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — `queue_diff` representa fila pós-chamada
+
+Contexto:
+O diff antigo marcava o caminhão selecionado como posição 1 e removia semanticamente caminhões acima dele, gerando uma fila depois da decisão impossível em que a chamada parecia promoção artificial.
+
+Decisão:
+Modelar `queue_diff` como estado pós-chamada: `called` para o caminhão que sai da fila com `position_after=None`; `unchanged` para quem permanece na mesma posição; `shifted` para quem avança após a saída; `blocked` para quem fica aguardando por restrição dura.
+
+Alternativas rejeitadas:
+Manter `recommended/skipped` como estados de fila operacional.
+
+Impacto:
+UI e auditoria passam a falar a mesma linguagem operacional da fila, sem simular uma posição 1 para caminhão já chamado.
+
+Arquivos/módulos afetados:
+- `app/services/decision_builder.py`
+- `app/ui/components/common.py`
+- `app/ui/components/decision_card.py`
+- `tests/unit/test_queue_diff.py`
+
 ### 2026-05-05 — Orquestrador como pipeline nomeado
 
 Contexto:

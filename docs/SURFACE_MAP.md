@@ -22,7 +22,7 @@ Mapa da superfície pública/exportada do PequiFlux Yard Copilot.
 | `app.domain.constraints` | module | `app/domain/constraints.py` | Aplica hard constraints | Decisão candidata, contexto | Bloqueios/revisões | Não duplicar em serviços/UI |
 | `app.domain.ranking` | module | `app/domain/ranking.py` | Ordena e pontua fila | Fila, política, contexto | Ranking | Reutilizar antes de criar scoring paralelo |
 | `app.domain.policy` | module | `app/domain/policy.py` | Carrega/aplica perfil de política | Policy profile | Política validada | Alinha scenarios/common |
-| `app.services.decision_builder` | module | `app/services/decision_builder.py` | Monta decisão e payload de saída | Resultado de domínio/orquestração | Front-end/audit payload | Reutilizado por todos os estados terminais |
+| `app.services.decision_builder` | module | `app/services/decision_builder.py` | Monta decisão e payload de saída | Resultado de domínio/orquestração | Front-end/audit payload | `queue_diff` usa semântica pós-chamada: `called`, `unchanged`, `shifted`, `blocked`, com `position_after=None` para caminhão chamado |
 | `app.gemma.adapter` | module | `app/gemma/adapter.py` | Adapta runtime LLM para contrato do sistema | Prompt/contexto | Contexto interpretado ou erro | Sem fallback silencioso |
 | `app.gemma.runtime_factory` | module | `app/gemma/runtime_factory.py` | Constrói runtime configurado | Configuração | Runtime | Deve falhar se dependência obrigatória faltar |
 | `app.adapters.document_adapter` | module | `app/adapters/document_adapter.py` | Ingestão de documento/ticket | Arquivo sintético | Dados extraídos | Testes cobrem caminhos de documento |
