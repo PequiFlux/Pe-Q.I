@@ -1,5 +1,7 @@
 # PequiFlux Yard Copilot
 
+[![CI](https://github.com/PequiFlux/Pe-Q.I/actions/workflows/ci.yml/badge.svg)](https://github.com/PequiFlux/Pe-Q.I/actions/workflows/ci.yml)
+
 > Copiloto multimodal, local-first e auditável para decisões de despacho de pátio.
 
 O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino despachar** quando o FIFO puro já não é suficiente. É um **working proof-of-concept técnico** — reproduzível, auditável e benchmarkável — construído para a Gemma 4 Good Hackathon.
@@ -24,6 +26,7 @@ Atalhos principais:
 ```bash
 make demo-text
 make ui-text
+make quality
 make test
 make bench
 make audit
@@ -250,7 +253,7 @@ O adapter retorna `None` e o orquestrador falha fechado com `MODEL_RUNTIME_UNAVA
 
 ## Benchmark
 
-O benchmark executa **10 cenários × 4 linhas comparativas** e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
+O benchmark executa o pack versionado atual (**18 cenários × 4 linhas comparativas**) e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
 
 ### Variantes
 
@@ -270,7 +273,7 @@ O benchmark executa **10 cenários × 4 linhas comparativas** e computa métrica
 | `exception_f1` | Macro-F1 na classificação de exceção | > baseline |
 | `ticket_field_accuracy` | Acurácia campo-a-campo do ticket parseado | > baseline |
 | `fifo_break_justified_precision` | Precisão de quebras de FIFO justificadas | > baseline |
-| `latency_p50` / `latency_p95` | Latência de decisão (ms) | p50 ≤ 8s, p95 ≤ 15s |
+| `latency_p50` / `latency_p95` | Latência de decisão (ms) em execução Ollama/Gemma local | p50 ≤ 8s, p95 ≤ 15s no hardware de referência |
 | `audit_completeness` | Completude da trilha de auditoria | 100% |
 
 ### Critérios de sucesso
@@ -279,7 +282,7 @@ O benchmark executa **10 cenários × 4 linhas comparativas** e computa métrica
 - Ganho sobre baseline heurístico em `ticket_field_accuracy`, `exception_f1` e `decision_match_at_1`
 - O sample versionado precisa incluir ao menos um caso multimodal onde `heuristic` falha fechado ou perde acurácia e `full` acerta
 - 100% das quebras de FIFO e overrides com trilha reconstruível
-- 10/10 cenários executam sem edição manual
+- todos os cenários versionados executam sem edição manual
 
 ### Execução
 
@@ -291,13 +294,14 @@ Saída: `bench/reports/<run_id>/` com `metrics.json`, `per_scenario.json` e `sum
 
 ### Snapshot versionado
 
-O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` como ticket em `image/png`.
+O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` e `S11_IMAGE_ROTATED_WET_LOAD` como tickets em `image/png`, além de `S12_PDF_SCANNED_DOCUMENT_BLOCK` como PDF escaneado sem texto extraível.
+Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma.
 
-- `full`: `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 1.0`
-- `heuristic`: `decision_match_at_1 = 0.9`, `exception_f1 = 0.667`, `ticket_field_accuracy = 0.925`
-- `fifo_safe`: `decision_match_at_1 = 0.8`, `constraint_violation_rate = 0.0`
-- `raw_fifo`: `decision_match_at_1 = 0.3`, `constraint_violation_rate = 0.4`
-- `S03_WET_LOAD`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao `REVIEW_REQUIRED` correto com `ticket_field_accuracy = 1.0`
+- `full`: `18/18`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.965`
+- `heuristic`: `decision_match_at_1 = 0.833`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.833`
+- `fifo_safe`: `decision_match_at_1 = 0.667`, `constraint_violation_rate = 0.0`
+- `raw_fifo`: `decision_match_at_1 = 0.167`, `constraint_violation_rate = 0.222`
+- `S03_WET_LOAD`, `S11_IMAGE_ROTATED_WET_LOAD` e `S12_PDF_SCANNED_DOCUMENT_BLOCK`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao resultado esperado via sidecar multimodal de CI.
 
 ### Setup do Gemma (necessário para `make demo`, `make ui` e benchmark com runtime Ollama)
 
@@ -454,7 +458,7 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
 ## Scenario Pack
 
-10 cenários sintéticos obrigatórios em `scenarios/cases/`:
+18 cenários sintéticos em `scenarios/cases/`:
 
 | ID | Nome | O que testa |
 |----|------|-------------|
@@ -468,6 +472,14 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 | S08 | REDUCED_CAPACITY | Capacidade entre mínimo e conforto (HC-06) |
 | S09 | HUMAN_OVERRIDE | Governança de override (HC-07) |
 | S10 | FIFO_BREAK_JUSTIFIED | Chuva + compatibilidade justificam quebra de FIFO (narrativa principal) |
+| S11 | IMAGE_ROTATED_WET_LOAD | Imagem rotacionada reforça parsing multimodal de carga úmida |
+| S12 | PDF_SCANNED_DOCUMENT_BLOCK | PDF escaneado sem texto extraível reforça parsing multimodal de bloqueio documental |
+| S13 | TRUCK_ID_NOT_IN_QUEUE | Ticket diverge da fila; fila local prevalece e exige revisão |
+| S14 | NOTE_RAIN_WEATHER_NONE_CONFLICT | Nota e `weather_state` entram em conflito material |
+| S15 | UNKNOWN_DESTINATION_IN_TICKET | Ticket aponta destino ausente no `resource_state` |
+| S16 | ALL_DESTINATIONS_BLOCKED | Nenhum par elegível gera `BLOCKED` fail-closed |
+| S19 | TIE_BREAK_EQUAL_SCORE | Desempate determinístico para scores iguais |
+| S20 | LARGE_QUEUE_100_TRUCKS | Stress sintético com 100 caminhões |
 
 Cada cenário contém: `ticket.(txt|pdf|png|jpg|jpeg)`, `queue.csv`, `operator_note.txt`, `weather_state.json`, `resource_state.json` e `expected_decision.json`. Casos multimodais podem adicionar `expected_ticket.json` como sidecar canônico de benchmark/CI.
 
@@ -512,9 +524,9 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 ├── data/                     # Diretório de dados runtime
 ├── docs/                     # Documentação modular
 ├── scenarios/                # Fixtures sintéticas de benchmark
-│   ├── cases/                # Diretórios S01–S10
+│   ├── cases/                # Diretórios S01–S20 versionados
 │   ├── common/               # Policy profile e catálogo de destinos
-│   ├── manifest.json         # Payloads completos dos 10 cenários
+│   ├── manifest.json         # Payloads completos do pack de cenários
 │   └── schemas/              # JSON schemas dos contratos
 ├── scripts/                  # Shell scripts (bootstrap, demo, benchmark, prepublish)
 ├── tests/                    # Suite de testes

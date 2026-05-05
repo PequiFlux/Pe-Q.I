@@ -163,6 +163,30 @@ def test_finalize_override_uses_hard_constraint_validation() -> None:
         )
 
 
+def test_s17_override_ineligible_pair_fails_closed() -> None:
+    with pytest.raises(PequiFluxError, match="HC_07_OVERRIDE"):
+        finalize_operator_decision(
+            payload=_payload(),
+            action_type=OperatorAction.OVERRIDE,
+            reason="S17 attempts an ineligible pair.",
+            actor_id="OP-DEMO-01",
+            requested_truck_id="TRK-003",
+            requested_destination_id="DST-OPEN-01",
+        )
+
+
+def test_override_without_reason_fails_with_formal_error() -> None:
+    with pytest.raises(PequiFluxError, match="OPERATOR_REASON_REQUIRED"):
+        finalize_operator_decision(
+            payload=_payload(),
+            action_type=OperatorAction.OVERRIDE,
+            reason="",
+            actor_id="OP-DEMO-01",
+            requested_truck_id="TRK-002",
+            requested_destination_id="DST-COV-01",
+        )
+
+
 def test_finalize_override_allows_eligible_pair() -> None:
     finalized, updated_audit = finalize_operator_decision(
         payload=_payload(),
@@ -175,3 +199,18 @@ def test_finalize_override_allows_eligible_pair() -> None:
 
     assert finalized.final_status == DecisionStatus.OVERRIDDEN
     assert updated_audit.operator_action["requested_truck_id"] == "TRK-002"
+
+
+def test_s18_override_eligible_non_top_pair_is_audited() -> None:
+    finalized, updated_audit = finalize_operator_decision(
+        payload=_payload(),
+        action_type=OperatorAction.OVERRIDE,
+        reason="S18 selects another eligible non-top pair with explicit reason.",
+        actor_id="OP-DEMO-01",
+        requested_truck_id="TRK-002",
+        requested_destination_id="DST-COV-01",
+    )
+
+    assert finalized.final_status == DecisionStatus.OVERRIDDEN
+    assert updated_audit.operator_action["requested_truck_id"] == "TRK-002"
+    assert updated_audit.operator_action["requested_destination_id"] == "DST-COV-01"

@@ -39,7 +39,7 @@ A submissão não é uma plataforma logística ampla. Ela é um **artefato verti
 - um **fluxo ponta a ponta** com entradas multimodais;
 - um **rules engine determinístico**;
 - um **Gemma 4** central, porém delimitado;
-- um **Scenario Pack sintético** com 10 cenários obrigatórios;
+- um **Scenario Pack sintético** com S01-S10 obrigatórios e expansão versionada S11+;
 - um **benchmark** contra FIFO puro e baseline heurístico sem Gemma;
 - um **repositório público sanitizado**, reproduzível e offline após setup/cache.
 
@@ -180,7 +180,7 @@ o sistema deve devolver:
 
 A submissão só é considerada pronta quando todos os itens abaixo forem verdadeiros ao mesmo tempo:
 
-1. os 10 cenários obrigatórios executam em lote sem edição manual;
+1. o pack versionado executa em lote sem edição manual;
 2. o fluxo completo roda localmente após setup/cache;
 3. o benchmark exporta relatório comparando `raw_fifo`, `fifo_safe`, `heuristic` e `full`;
 4. a UI mostra acima da dobra a recomendação, as restrições, a ação humana e um painel curto que torne a centralidade do Gemma visível;
@@ -232,7 +232,7 @@ As regras abaixo são publicadas como política versionada. Elas podem justifica
 | RF-08 | Gerar justificativa auditável e `reason_summary` | Toda decisão inclui regras disparadas, rejeitados e proveniência |
 | RF-09 | Gerar mensagem curta ao motorista | Mensagem <= 220 caracteres e coerente com `decision_status` |
 | RF-10 | Persistir decisão, evidência, regras e ação humana | Cada fluxo recebe `decision_id` e registro imutável correspondente |
-| RF-11 | Rodar Scenario Pack completo por CLI | Um comando único executa os 10 cenários e exporta relatório |
+| RF-11 | Rodar Scenario Pack completo por CLI | Um comando único executa o pack versionado e exporta relatório |
 
 ### 3.4 Requisitos não funcionais
 
@@ -606,7 +606,7 @@ Sem depender de APM externo, o sistema deve expor e gravar pelo menos:
 |---|---|
 | Unitário | cada HC, ranking, tie-break, truth resolver, driver message templates |
 | Contract | JSON Schemas, enums, tool payloads, serialização Pydantic |
-| Golden | parsing de ticket e classificação nos 10 cenários |
+| Golden | parsing de ticket e classificação no pack versionado |
 | Integração | fluxo e2e com SQLite, JSONL e UI payload |
 | Falha induzida | timeout, tool call inválida, documento ilegível, conflito material |
 | Benchmark | rerun das variantes e export de métricas |
@@ -1606,7 +1606,7 @@ Classificar a exceção operacional dominante com abordagem híbrida: regra simp
 - `LOW_CONFIDENCE_AMBIGUITY`
 
 **Testes essenciais**  
-- os 10 cenários obrigatórios;
+- o pack obrigatório S01-S10 e expansões versionadas;
 - conflito entre nota e estado local;
 - caso sem exceção;
 - múltiplos sinais simultâneos.
@@ -2211,10 +2211,10 @@ fifo_break_justified_precision
 ### 7.9 Protocolo experimental reproduzível
 
 1. validar `manifest.json` e schemas do pack;
-2. calcular `raw_fifo` em todos os 10 cenários;
-3. rodar `fifo_safe` em todos os 10 cenários;
-4. rodar `heuristic` em todos os 10 cenários;
-5. rodar `full` em todos os 10 cenários;
+2. calcular `raw_fifo` em todo o pack versionado;
+3. rodar `fifo_safe` em todo o pack versionado;
+4. rodar `heuristic` em todo o pack versionado;
+5. rodar `full` em todo o pack versionado;
 6. exportar `report.json`, `summary.csv` e gráficos;
 7. persistir logs e audit payloads;
 8. opcionalmente rodar ablações `--no_multimodal` e `--no_tools`.
@@ -2674,9 +2674,9 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 
 | Semana | Backlog principal | Definition of Done |
 |---|---|---|
-| Semana 1 | congelar escopo, schemas, ADRs, policy profile, Scenario Pack v0, wireframe da UI | schemas versionados, 10 cenários definidos, política de verdade fechada, wireframe aprovado |
+| Semana 1 | congelar escopo, schemas, ADRs, policy profile, Scenario Pack v0, wireframe da UI | schemas versionados, pack S01-S10 definido, política de verdade fechada, wireframe aprovado |
 | Semana 2 | implementar fluxo e2e mínimo, parser multimodal, classificação, rules engine, tool gateway | um cenário roda ponta a ponta por CLI; HC-01..HC-07 implementadas; adapter Gemma retorna schema válido |
-| Semana 3 | fechar UI, auditoria, logs, benchmark, override, fail-closed | os 10 cenários rodam em lote; UI exibe preview e trilha; falhas induzidas cobertas |
+| Semana 3 | fechar UI, auditoria, logs, benchmark, override, fail-closed | o pack versionado roda em lote; UI exibe preview e trilha; falhas induzidas cobertas |
 | Semana 4 | hardening, rerun final, gravação, writeup, sanitização, submissão | benchmark final exportado; vídeo pronto; repo sanitizado; checklist pré-publicação concluído |
 
 ### 12.2 Ordem de implementação recomendada
@@ -3039,7 +3039,7 @@ Em ordem de corte:
 
 O que **não** deve ser simplificado:
 
-- os 10 cenários obrigatórios;
+- o pack obrigatório S01-S10 e expansões versionadas;
 - hard constraints;
 - trilha auditável;
 - fail-closed;

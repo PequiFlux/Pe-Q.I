@@ -151,8 +151,8 @@ Campos mínimos recomendados: `expected_status`, `acceptable_trucks`, `acceptabl
 ### Regra de integridade entre arquivos
 
 - IDs sintéticos e estáveis: `TRK-001`, `DST-COV-01`, `TCK-003`;
-- `truck_id` no ticket coincide com linha da fila;
-- `resource_id` em `resource_state` e na decisão/expected devem ser compatíveis.
+- `truck_id` no ticket coincide com linha da fila, exceto cenários explícitos de conflito de verdade como `S13_TRUCK_ID_NOT_IN_QUEUE`;
+- `resource_id` em `resource_state` e na decisão/expected devem ser compatíveis, exceto cenários explícitos de destino desconhecido como `S15_UNKNOWN_DESTINATION_IN_TICKET`.
 
 ## Cenários obrigatórios
 
@@ -168,6 +168,16 @@ Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.
 - `S08_REDUCED_CAPACITY`: separa bloqueio duro de penalidade
 - `S09_HUMAN_OVERRIDE`: prova governança e trilha de override
 - `S10_FIFO_BREAK_JUSTIFIED`: cenário narrativo principal da submissão
+- `S11_IMAGE_ROTATED_WET_LOAD`: robustez multimodal com imagem rotacionada
+- `S12_PDF_SCANNED_DOCUMENT_BLOCK`: robustez multimodal com PDF escaneado sem texto extraível
+- `S13_TRUCK_ID_NOT_IN_QUEUE`: conflito entre documento e fila local
+- `S14_NOTE_RAIN_WEATHER_NONE_CONFLICT`: conflito entre nota operacional e `weather_state`
+- `S15_UNKNOWN_DESTINATION_IN_TICKET`: conflito entre documento e `resource_state`
+- `S16_ALL_DESTINATIONS_BLOCKED`: fail-closed sem par elegível
+- `S17_OVERRIDE_INELIGIBLE_PAIR`: coberto por teste unitário de governança de override
+- `S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR`: coberto por teste unitário de governança de override
+- `S19_TIE_BREAK_EQUAL_SCORE`: desempate determinístico de ranking
+- `S20_LARGE_QUEUE_100_TRUCKS`: stress sintético com 100 caminhões
 
 ## Variantes de benchmark
 

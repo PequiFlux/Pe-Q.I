@@ -15,16 +15,16 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 | Adapters | `app/adapters` | Leitura de CSV, estados, notas e documentos | `app/domain`, arquivos de cenário | Entrada de dados sintéticos e públicos |
 | Storage | `app/storage` | SQLite, migrations e log JSONL | `app/audit`, `app/domain` | Persistência local e auditável; finalização humana usa transação única em `SQLiteStore.save_operator_finalization` |
 | Audit | `app/audit` | Payloads e serviço de auditoria | `app/domain`, `app/orchestration` | Preserva rastreabilidade de decisões |
-| Benchmarks | `bench` | Runner, validação, relatórios e métricas do pacote de cenários | `scenarios`, `app/cli` | `bench.validation` valida payload esperado; `bench.reporting` renderiza `summary.csv` com `csv.DictWriter`; reporta `raw_fifo`, `fifo_safe`, `heuristic` e `full`; casos multimodais podem fixar `expected_ticket.json`; evidência para regressão e comparação |
-| CI | `.github/workflows`, `Makefile`, `scripts/check-quality.sh` | Quality gate público e reprodutível | `requirements-all.txt`, `app/cli`, `tests`, `bench` | GitHub Actions roda Black no escopo formatado, `pytest -q`, blueprint audit e benchmark smoke com `PEQUIFLUX_GEMMA_RUNTIME=text`; `make quality` espelha Black/test/audit via Docker |
+| Benchmarks | `bench` | Validação, montagem de linhas, relatórios, nomes públicos de variantes e métricas do pacote de cenários | `scenarios`, `app/cli` | `app.cli.run_benchmark` orquestra a execução chamada por Compose/CI; `bench.rows` monta linhas `raw_fifo`/`fifo_safe`/payload, match esperado e violação de constraint; `bench.variants` normaliza `fifo` para `fifo_safe`; `bench.validation` valida payload esperado; `bench.reporting` renderiza `summary.csv` com `csv.DictWriter`; reporta `raw_fifo`, `fifo_safe`, `heuristic` e `full`; casos multimodais podem fixar `expected_ticket.json` |
+| CI | `.github/workflows`, `Makefile`, `scripts/check-quality.sh` | Quality gate público e reprodutível | `requirements-all.txt`, `app/cli`, `tests`, `bench` | GitHub Actions roda Black no escopo formatado, `pytest -q`, blueprint audit e benchmark smoke com `PEQUIFLUX_GEMMA_RUNTIME=text`; `make quality` espelha Black/test/audit/benchmark smoke via Docker |
 | Evidências | `assets/screenshots`, `bench/reports/sample`, `docs/DEMO_SCRIPT.md`, `docs/HACKATHON_SUBMISSION.md`, `docs/LIMITATIONS.md`, `docs/UI_DECISIONS.md` | Artefatos de avaliação para GitHub/hackathon | `app/ui`, `bench`, `docs` | Mantém demo, benchmark, limites e decisões de UI encontráveis em até dois minutos |
-| Scenarios | `scenarios` | Fixtures sintéticas, manifest, schemas JSON e README narrativo por cenário | `tests/scenarios`, `bench` | Fonte de casos de validação; casos `pdf/png/jpg/jpeg` podem carregar `expected_ticket.json` sidecar; `scenarios/README.md` deve explicar os casos em linguagem humana para vídeo e avaliação |
+| Scenarios | `scenarios` | Fixtures sintéticas, manifest, schemas JSON e README narrativo por cenário | `tests/scenarios`, `bench` | Fonte de casos de validação; S01-S10 formam o pack obrigatório original e S11+ ampliam robustez multimodal, conflitos de verdade e stress; casos `pdf/png/jpg/jpeg` podem carregar `expected_ticket.json` sidecar |
 | Tests | `tests` | Testes unitários e de cenário | `app`, `bench`, `scenarios` | Cobrem constraints, auditoria, runtime e E2E |
 
 ## Fluxos importantes
 
 - Cenário CLI/UI: adapters carregam fixtures; `DecisionOrchestrator` executa `load_inputs -> interpret_context -> validate_and_rank -> build_payload -> persist_and_log`; domínio aplica constraints/ranking quando há verdade suficiente; serviços constroem decisão; auditoria registra resultado terminal.
-- Benchmark: `bench/runner.py` executa casos de `scenarios/manifest.json` e compara decisões esperadas.
+- Benchmark: `app.cli.run_benchmark` executa casos de `scenarios/manifest.json`; `bench.rows`, `bench.variants`, `bench.validation`, `bench.reporting` e `bench.metrics` concentram montagem, nomes públicos, validação, CSV e métricas.
 - LLM: `app/gemma` interpreta contexto; saída ausente ou inválida deve gerar erro/revisão explícita, nunca fallback de decisão.
 
 ## Áreas sensíveis

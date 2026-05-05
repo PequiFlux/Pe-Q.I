@@ -42,4 +42,4 @@ Fala:
 Voltar para a faixa superior.
 
 Fala:
-> O scenario pack sintetico compara full, heuristic, fifo seguro e FIFO bruto. O sistema completo roda 10 de 10 cenarios e zero violacoes de regra; o FIFO bruto fica fora do alvo em cenarios documentais e de politica operacional. O projeto e reproduzivel por Docker e deixa evidencias no repositorio.
+> O scenario pack sintetico compara full, heuristic, fifo seguro e FIFO bruto. O sistema completo roda o pack versionado com zero violacoes de regra; o FIFO bruto fica fora do alvo em cenarios documentais, multimodais e de politica operacional. O projeto e reproduzivel por Docker e deixa evidencias no repositorio.

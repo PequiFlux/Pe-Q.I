@@ -41,7 +41,7 @@ O sistema existe para resolver exceções operacionais sem transferir a autorida
 
 ## Definição de pronto
 
-- os 10 cenários obrigatórios executam em lote
+- o pack sintético versionado executa em lote
 - o benchmark exporta comparação entre variantes
 - a UI mostra recomendação, restrições e ação humana acima da dobra
 - o repositório permanece 100% sintético e publicável

@@ -43,6 +43,7 @@ Procurar:
 - Não criar novo parser de ticket sem verificar `app/services/parser.py`, `app/services/structured_ticket_parser.py` e `app/adapters/document_adapter.py`.
 - Fixtures textuais de ticket devem reutilizar `app/services/structured_ticket_parser.py`; `TextTicketRuntime` não deve extrair dados de frases do prompt.
 - Casos multimodais do benchmark devem reutilizar o sidecar `expected_ticket.json`; não criar formato paralelo de fixture esperado por cenário.
+- Expansões do scenario pack devem reutilizar `scenarios/manifest.json`, `tests/scenarios/test_scenario_pack.py` e `scenarios/README.md`; não criar manifest paralelo para robustez multimodal, conflitos ou stress.
 - Não parsear `arrival_ts` fora de `app/adapters/csv_adapter.py`; timestamps de fila precisam ter timezone explícito e serem normalizados para UTC.
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
 - Notas operacionais com termos de revisão (`revisar`, `conferir`) devem prevalecer sobre classificações automáticas como `WET_LOAD`.
@@ -51,8 +52,10 @@ Procurar:
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.
 - Toda contribuição de score em `app/domain/ranking.py` deve adicionar `PolicyRule` correspondente em `fired_rules`; não deixar bônus/penalidade só em `reason_details`.
-- Faixas de benchmark na UI devem ler `bench/reports`, reutilizar `bench/metrics.py` ou mostrar snapshot explícito do relatório versionado; não criar métrica de comparação paralela.
+- Faixas de benchmark na UI devem usar `app.ui.benchmark_summary.load_benchmark_summary`; não recriar `_benchmark_summary`, `_latest_benchmark_report_dir` ou métrica de comparação dentro de `streamlit_app.py`.
 - O benchmark deve distinguir `raw_fifo` de `fifo_safe`; não chamar a variante operacional `fifo` de FIFO puro em relatório público.
+- Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
+- Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
 - Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.
@@ -61,6 +64,7 @@ Procurar:
 - Finalização de ação humana deve reutilizar `SQLiteStore.save_operator_finalization`; não encadear `save_operator_action`, `save_decision_finalized` e `save_audit_record` com commits separados.
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.
 - Renderizadores e helpers compartilhados entre módulos de UI devem ser importados por nomes públicos sem `_`; prefixo `_` fica reservado para helpers internos do próprio arquivo.
+- Comparação FIFO bruta da UI deve importar `raw_fifo_call` e `raw_queue_rows` de `app.services.raw_fifo`; não recriar wrappers ou leitura de CSV em `app/ui/components/common.py`.
 - A UI deve obter `DecisionOrchestrator` via `app/ui/ui_runner.py` e `st.cache_resource`; não chamar `build_gemma_adapter()` diretamente em componente ou composição de tela.
 - Novas mudanças no fluxo de decisão devem encaixar nas etapas `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` ou `persist_and_log`; não voltar a concentrar o pipeline inteiro em `run_decision()`.
 - Estados de orquestração só podem mudar por `WorkflowStateMachine.transition_to` ou `WorkflowStateMachine.force_terminal`; não atribuir `current_state` diretamente fora da máquina de estados.

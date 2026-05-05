@@ -520,6 +520,409 @@
         "run_mode": "benchmark",
         "received_at": "2026-04-04T10:45:00+00:00"
       }
+    },
+    {
+      "scenario_id": "S11_IMAGE_ROTATED_WET_LOAD",
+      "description": "Rotated image ticket keeps wet-load review dependent on multimodal parsing.",
+      "files": {
+        "ticket": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/ticket.png",
+        "queue": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/queue.csv",
+        "operator_note": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/operator_note.txt",
+        "weather_state": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/weather_state.json",
+        "resource_state": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/resource_state.json",
+        "expected_decision": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S11-0001",
+        "scenario_id": "S11_IMAGE_ROTATED_WET_LOAD",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/queue.csv",
+        "ticket_ref": "scenarios/cases/S11_IMAGE_ROTATED_WET_LOAD/ticket.png",
+        "ticket_content_type": "image/png",
+        "operator_note": "Imagem rotacionada; verificar campo de umidade antes de liberar.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-DRY-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "resource_id": "DST-WET-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "wet_load_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry",
+              "wet"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S12_PDF_SCANNED_DOCUMENT_BLOCK",
+      "description": "Scanned PDF without extractable text requires multimodal document-block parsing.",
+      "files": {
+        "ticket": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/ticket.pdf",
+        "queue": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/queue.csv",
+        "operator_note": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/operator_note.txt",
+        "weather_state": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/weather_state.json",
+        "resource_state": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/resource_state.json",
+        "expected_decision": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S12-0001",
+        "scenario_id": "S12_PDF_SCANNED_DOCUMENT_BLOCK",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/queue.csv",
+        "ticket_ref": "scenarios/cases/S12_PDF_SCANNED_DOCUMENT_BLOCK/ticket.pdf",
+        "ticket_content_type": "application/pdf",
+        "operator_note": "Documento escaneado recebido sem texto extraivel; validar bloqueio documental.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S13_TRUCK_ID_NOT_IN_QUEUE",
+      "description": "Ticket references a truck absent from the queue; queue snapshot must prevail and trigger review.",
+      "files": {
+        "ticket": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/ticket.txt",
+        "queue": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/queue.csv",
+        "operator_note": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/operator_note.txt",
+        "weather_state": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/weather_state.json",
+        "resource_state": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/resource_state.json",
+        "expected_decision": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S13-0001",
+        "scenario_id": "S13_TRUCK_ID_NOT_IN_QUEUE",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/queue.csv",
+        "ticket_ref": "scenarios/cases/S13_TRUCK_ID_NOT_IN_QUEUE/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Documento claro, mas placa nao aparece na fila operacional.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+      "description": "Operator note mentions rain while local weather says none; local weather is authoritative but conflict requires review.",
+      "files": {
+        "ticket": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/ticket.txt",
+        "queue": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/queue.csv",
+        "operator_note": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/operator_note.txt",
+        "weather_state": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/weather_state.json",
+        "resource_state": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/resource_state.json",
+        "expected_decision": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S14-0001",
+        "scenario_id": "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/queue.csv",
+        "ticket_ref": "scenarios/cases/S14_NOTE_RAIN_WEATHER_NONE_CONFLICT/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Operador mencionou chuva no patio, mas sensor local ainda marca tempo seco.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-OPEN-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S15_UNKNOWN_DESTINATION_IN_TICKET",
+      "description": "Ticket names a destination absent from resource_state; resource_state must prevail and require review.",
+      "files": {
+        "ticket": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/ticket.txt",
+        "queue": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/queue.csv",
+        "operator_note": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/operator_note.txt",
+        "weather_state": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/weather_state.json",
+        "resource_state": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/resource_state.json",
+        "expected_decision": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S15-0001",
+        "scenario_id": "S15_UNKNOWN_DESTINATION_IN_TICKET",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/queue.csv",
+        "ticket_ref": "scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Ticket aponta destino que nao existe no estado local de recursos.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S16_ALL_DESTINATIONS_BLOCKED",
+      "description": "Every destination is blocked or below capacity; system must fail closed with BLOCKED.",
+      "files": {
+        "ticket": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "queue": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "operator_note": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/operator_note.txt",
+        "weather_state": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/weather_state.json",
+        "resource_state": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/resource_state.json",
+        "expected_decision": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S16-0001",
+        "scenario_id": "S16_ALL_DESTINATIONS_BLOCKED",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "ticket_ref": "scenarios/cases/S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Todos os destinos tecnicos estao indisponiveis.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-BLOCK-01",
+            "status": "blocked",
+            "capacity_pct": 0,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "resource_id": "DST-BLOCK-02",
+            "status": "down",
+            "capacity_pct": 0,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S19_TIE_BREAK_EQUAL_SCORE",
+      "description": "Equal score for two destinations must resolve through deterministic lexicographic destination tie-break.",
+      "files": {
+        "ticket": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "queue": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "operator_note": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/operator_note.txt",
+        "weather_state": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/weather_state.json",
+        "resource_state": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/resource_state.json",
+        "expected_decision": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S19-0001",
+        "scenario_id": "S19_TIE_BREAK_EQUAL_SCORE",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "ticket_ref": "scenarios/cases/S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Dois destinos equivalentes; aplicar desempate deterministico.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-A-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "resource_id": "DST-B-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
+    },
+    {
+      "scenario_id": "S20_LARGE_QUEUE_100_TRUCKS",
+      "description": "Stress fixture with 100 waiting trucks and deterministic FIFO-preserving recommendation.",
+      "files": {
+        "ticket": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "queue": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "operator_note": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/operator_note.txt",
+        "weather_state": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/weather_state.json",
+        "resource_state": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/resource_state.json",
+        "expected_decision": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/expected_decision.json"
+      },
+      "request": {
+        "request_id": "REQ-S20-0001",
+        "scenario_id": "S20_LARGE_QUEUE_100_TRUCKS",
+        "variant": "full",
+        "queue_csv_ref": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "ticket_ref": "scenarios/cases/S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "ticket_content_type": "text/plain",
+        "operator_note": "Fila grande sintetica para testar estabilidade do ranking e da validacao.",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        },
+        "resource_state": [
+          {
+            "resource_id": "DST-COV-01",
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "policy_profile_version": "v1-demo",
+        "run_mode": "benchmark",
+        "received_at": "2026-04-04T11:00:00+00:00"
+      }
     }
   ]
 }

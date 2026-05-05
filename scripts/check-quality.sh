@@ -26,9 +26,9 @@ fi
 
 echo "==> black"
 if command -v black >/dev/null 2>&1; then
-  black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
+  black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py bench/rows.py bench/variants.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py tests/unit/test_benchmark_rows.py tests/unit/test_benchmark_variants_names.py tests/unit/test_decision_builder.py app/cli/blueprint_audit.py tests/scenarios/test_scenario_pack.py tests/unit/test_operator_governance.py
 elif command -v docker >/dev/null 2>&1; then
-  docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
+  docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py bench/rows.py bench/variants.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py tests/unit/test_benchmark_rows.py tests/unit/test_benchmark_variants_names.py tests/unit/test_decision_builder.py app/cli/blueprint_audit.py tests/scenarios/test_scenario_pack.py tests/unit/test_operator_governance.py
 else
   echo "black e docker não encontrados. Não foi possível executar format check." >&2
   exit 1
@@ -41,6 +41,16 @@ elif command -v docker >/dev/null 2>&1; then
   docker run --rm pequiflux-yard-copilot:test python -m app.cli.blueprint_audit
 else
   echo "python e docker não encontrados. Não foi possível executar blueprint audit." >&2
+  exit 1
+fi
+
+echo "==> text-runtime benchmark smoke"
+if command -v python >/dev/null 2>&1; then
+  PEQUIFLUX_GEMMA_RUNTIME=text python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+elif command -v docker >/dev/null 2>&1; then
+  docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+else
+  echo "python e docker não encontrados. Não foi possível executar benchmark smoke." >&2
   exit 1
 fi
 

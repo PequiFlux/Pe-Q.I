@@ -6,9 +6,11 @@ from pathlib import Path
 from typing import Any
 
 from app.ui.components.common import percent_label
+from bench.variants import FIFO_SAFE_VARIANT, OPERATIONAL_FIFO_VARIANT, RAW_FIFO_VARIANT
+from bench.variants import report_variant_name
 
 BENCHMARK_STRIP_FALLBACK = {
-    "full": "10/10 cenarios | 0% violacoes de regra",
+    "full": "pack versionado | 0% violacoes de regra",
     "fifo": "raw FIFO vs FIFO seguro separados no benchmark",
     "heuristic": "sem leitura Gemma multimodal | 92.5% no parse e falha em S03_WET_LOAD",
     "source": "Scenario pack sintetico · snapshot 20260505T172342Z",
@@ -48,9 +50,12 @@ def _load_metrics(metrics_path: Path) -> dict[str, dict[str, Any]]:
 
     full = _variant_metric(variant_metrics, "full")
     heuristic = _variant_metric(variant_metrics, "heuristic")
-    raw_fifo = _optional_variant_metric(variant_metrics, "raw_fifo")
-    fifo_safe = _optional_variant_metric(variant_metrics, "fifo_safe")
-    legacy_fifo = _optional_variant_metric(variant_metrics, "fifo")
+    raw_fifo = _optional_variant_metric(variant_metrics, RAW_FIFO_VARIANT)
+    fifo_safe = _optional_variant_metric(
+        variant_metrics,
+        report_variant_name(OPERATIONAL_FIFO_VARIANT),
+    )
+    legacy_fifo = _optional_variant_metric(variant_metrics, OPERATIONAL_FIFO_VARIANT)
     for key in ("passed_count", "scenario_count", "constraint_violation_rate"):
         _required_metric_number(full, key)
     _required_metric_number(heuristic, "ticket_field_accuracy")
@@ -60,9 +65,9 @@ def _load_metrics(metrics_path: Path) -> dict[str, dict[str, Any]]:
     return {
         "full": full,
         "heuristic": heuristic,
-        "raw_fifo": raw_fifo,
-        "fifo_safe": fifo_safe,
-        "fifo": legacy_fifo,
+        RAW_FIFO_VARIANT: raw_fifo,
+        FIFO_SAFE_VARIANT: fifo_safe,
+        OPERATIONAL_FIFO_VARIANT: legacy_fifo,
     }
 
 
@@ -83,10 +88,10 @@ def _build_summary(
 ) -> dict[str, str]:
     full = metrics["full"]
     heuristic = metrics["heuristic"]
-    raw_fifo = metrics["raw_fifo"]
-    fifo_safe = metrics["fifo_safe"]
-    legacy_fifo = metrics["fifo"]
-    fifo_variant = "raw_fifo" if raw_fifo or fifo_safe else "fifo"
+    raw_fifo = metrics[RAW_FIFO_VARIANT]
+    fifo_safe = metrics[FIFO_SAFE_VARIANT]
+    legacy_fifo = metrics[OPERATIONAL_FIFO_VARIANT]
+    fifo_variant = RAW_FIFO_VARIANT if raw_fifo or fifo_safe else OPERATIONAL_FIFO_VARIANT
     fifo_misses = [
         row["scenario_id"]
         for row in rows

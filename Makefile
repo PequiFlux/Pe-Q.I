@@ -1,4 +1,4 @@
-.PHONY: help demo demo-text ui ui-text test bench audit format-check quality prewarm
+.PHONY: help demo demo-text ui ui-text test bench audit format-check benchmark-smoke quality prewarm
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 
@@ -11,7 +11,7 @@ help:
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make audit      Run blueprint audit inside Docker"
-	@echo "  make quality    Run format check, tests and blueprint audit"
+	@echo "  make quality    Run the same Black, pytest, audit and text benchmark smoke gates as CI"
 
 demo:
 	docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
@@ -38,9 +38,13 @@ audit:
 
 format-check:
 	docker build --target test -t pequiflux-yard-copilot:test .
-	docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py
+	docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui app/cli/run_benchmark.py app/services/raw_fifo.py app/services/structured_ticket_parser.py bench/rows.py bench/variants.py tests/unit/test_raw_fifo.py tests/unit/test_structured_ticket_parser.py tests/unit/test_ui_benchmark_summary.py tests/unit/test_benchmark_rows.py tests/unit/test_benchmark_variants_names.py tests/unit/test_decision_builder.py app/cli/blueprint_audit.py tests/scenarios/test_scenario_pack.py tests/unit/test_operator_governance.py
 
-quality: format-check test audit
+benchmark-smoke:
+	docker build --target test -t pequiflux-yard-copilot:test .
+	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+
+quality: format-check test audit benchmark-smoke
 
 prewarm:
 	docker compose --profile gemma-setup run --rm gemma-init

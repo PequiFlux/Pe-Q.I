@@ -4,13 +4,34 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Scenario Pack expande robustez além de S01-S10
+
+Contexto:
+O sample já tinha um caso multimodal (`S03_WET_LOAD`), mas a tese de valor do Gemma fica mais forte quando o benchmark cobre variações multimodais, conflitos de verdade e invariantes operacionais.
+
+Decisão:
+Manter S01-S10 como pack obrigatório original e adicionar cenários versionados S11-S16, S19 e S20 ao mesmo `scenarios/manifest.json`. Cobrir S17/S18 como testes unitários de governança de override, porque o manifest atual executa decisão, não finalização humana pós-preview.
+
+Alternativas rejeitadas:
+Criar um manifest paralelo de robustez ou tratar override como fixture de benchmark sem o fluxo de finalização do operador.
+
+Impacto:
+O benchmark passa a exercitar imagem rotacionada, PDF escaneado, conflitos entre documento/fila/nota/estado local, ausência de par elegível, desempate determinístico e fila com 100 caminhões sem alterar o contrato público de cenário.
+
+Arquivos/módulos afetados:
+- `scenarios/manifest.json`
+- `scenarios/cases/S11_*`..`S20_*`
+- `tests/scenarios`
+- `tests/unit/test_operator_governance.py`
+- `docs`
+
 ### 2026-05-05 — CI público usa runtime textual e quality gate mínimo
 
 Contexto:
 O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível.
 
 Decisão:
-Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check` no escopo já formatado, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir `format-check` antes de testes e auditoria.
+Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check` no escopo já formatado, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo smoke textual.
 
 Alternativas rejeitadas:
 Rodar `black --check .` agora, porque o legado ainda exige reformatar dezenas de arquivos e isso misturaria uma mudança mecânica grande com o ajuste de CI. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.

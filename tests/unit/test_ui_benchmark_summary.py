@@ -61,5 +61,5 @@ def test_load_benchmark_summary_returns_explicit_fallback_for_invalid_schema(
 
     summary = load_benchmark_summary(tmp_path)
 
-    assert summary["full"] == "10/10 cenarios | 0% violacoes de regra"
+    assert summary["full"] == "pack versionado | 0% violacoes de regra"
     assert "fallback explicito: schema invalido em 20260505T000000Z" in summary["source"]

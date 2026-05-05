@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from app.domain.models import DecisionRequest, FrontEndPayload
+from app.services.raw_fifo import raw_fifo_call, raw_queue_rows
 
 from app.ui.components.common import (
     chip,
@@ -14,8 +15,6 @@ from app.ui.components.common import (
     gemma_short_summary,
     operator_actions_label,
     primary_rule,
-    raw_fifo_call,
-    raw_queue_rows,
     reason_detail_label,
     story_tile,
     truck_failure_rules,
@@ -28,10 +27,12 @@ def judge_comparison_card(
     fifo_payload: FrontEndPayload | None,
 ) -> str:
     fifo_truck, fifo_destination = raw_fifo_call(request)
-    if fifo_truck == "sem chamada" and fifo_payload and fifo_payload.recommended_truck:
+    if fifo_truck is None and fifo_payload and fifo_payload.recommended_truck:
         fifo_truck = fifo_payload.recommended_truck.truck_id
-    if fifo_destination == "sem destino" and fifo_payload and fifo_payload.recommended_destination:
+    if fifo_destination is None and fifo_payload and fifo_payload.recommended_destination:
         fifo_destination = fifo_payload.recommended_destination.destination_id
+    fifo_truck_label = fifo_truck or "sem chamada"
+    fifo_destination_label = fifo_destination or "sem destino"
     recommended_truck = (
         payload.recommended_truck.truck_id if payload.recommended_truck else "revisao humana"
     )
@@ -46,8 +47,8 @@ def judge_comparison_card(
     <section class="judge-comparison">
       <div class="comparison-tile fifo">
         <span>FIFO chamaria</span>
-        <strong>{escape(fifo_truck)}</strong>
-        <p>Destino provavel: {escape(fifo_destination)}</p>
+        <strong>{escape(fifo_truck_label)}</strong>
+        <p>Destino provavel: {escape(fifo_destination_label)}</p>
       </div>
       <div class="comparison-arrow">vs</div>
       <div class="comparison-tile peqi">

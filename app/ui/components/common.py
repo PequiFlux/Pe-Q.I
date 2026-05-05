@@ -3,9 +3,7 @@ from __future__ import annotations
 import html
 from typing import Any
 
-from app.domain.models import DecisionRequest, FrontEndPayload
-from app.services.raw_fifo import raw_fifo_call as _raw_fifo_call
-from app.services.raw_fifo import raw_queue_rows
+from app.domain.models import FrontEndPayload
 
 
 def step_status(payload: FrontEndPayload, latency_key: str) -> str:
@@ -47,11 +45,6 @@ def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]
     if not failures:
         return [("nenhuma", "Nenhuma alternativa foi bloqueada por restricao dura.")]
     return list(failures.items())
-
-
-def raw_fifo_call(request: DecisionRequest) -> tuple[str, str]:
-    truck_id, destination_id = _raw_fifo_call(request)
-    return truck_id or "sem chamada", destination_id or "sem destino"
 
 
 def truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:

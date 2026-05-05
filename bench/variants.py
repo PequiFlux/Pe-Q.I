@@ -1,0 +1,15 @@
+from __future__ import annotations
+
+OPERATIONAL_FIFO_VARIANT = "fifo"
+RAW_FIFO_VARIANT = "raw_fifo"
+FIFO_SAFE_VARIANT = "fifo_safe"
+HEURISTIC_VARIANT = "heuristic"
+FULL_VARIANT = "full"
+OPERATIONAL_VARIANTS = (OPERATIONAL_FIFO_VARIANT, HEURISTIC_VARIANT, FULL_VARIANT)
+REPORT_VARIANTS = (RAW_FIFO_VARIANT, FIFO_SAFE_VARIANT, HEURISTIC_VARIANT, FULL_VARIANT)
+
+
+def report_variant_name(variant: str) -> str:
+    if variant == OPERATIONAL_FIFO_VARIANT:
+        return FIFO_SAFE_VARIANT
+    return variant

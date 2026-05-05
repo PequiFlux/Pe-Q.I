@@ -38,6 +38,19 @@ REQUIRED_PATHS = (
     "compose.yaml",
 )
 
+REQUIRED_SCENARIO_IDS = {
+    "S01_BASELINE",
+    "S02_RAIN_OPEN",
+    "S03_WET_LOAD",
+    "S04_CONVEYOR_DOWN",
+    "S05_CONTRACT_PRIORITY",
+    "S06_DOCUMENT_BLOCK",
+    "S07_VEHICLE_INCOMPAT",
+    "S08_REDUCED_CAPACITY",
+    "S09_HUMAN_OVERRIDE",
+    "S10_FIFO_BREAK_JUSTIFIED",
+}
+
 DEPRECATED_BLUEPRINT_PHRASES = (
     "Fallback controlado | Sim",
     "fallback heurístico",
@@ -111,7 +124,14 @@ def _check_manifest(manifest_path: Path) -> AuditCheck:
 
     cases = manifest.get("cases", [])
     case_ids = [case.get("scenario_id") for case in cases]
-    required_files = ("ticket", "queue", "operator_note", "weather_state", "resource_state", "expected_decision")
+    required_files = (
+        "ticket",
+        "queue",
+        "operator_note",
+        "weather_state",
+        "resource_state",
+        "expected_decision",
+    )
     missing_files = []
     for case in cases:
         files: dict[str, Any] = case.get("files", {})
@@ -120,9 +140,21 @@ def _check_manifest(manifest_path: Path) -> AuditCheck:
             if not path or not Path(path).exists():
                 missing_files.append(f"{case.get('scenario_id')}:{key}")
 
-    passed = len(cases) == 10 and len(set(case_ids)) == 10 and not missing_files
-    detail = "10 unique scenarios with all required files" if passed else (
-        f"case_count={len(cases)} unique={len(set(case_ids))} missing_files={missing_files}"
+    unique_case_ids = set(case_ids)
+    missing_required = sorted(REQUIRED_SCENARIO_IDS - unique_case_ids)
+    passed = (
+        len(cases) >= len(REQUIRED_SCENARIO_IDS)
+        and len(unique_case_ids) == len(cases)
+        and not missing_files
+        and not missing_required
+    )
+    detail = (
+        f"{len(cases)} unique scenarios with required baseline pack and all required files"
+        if passed
+        else (
+            f"case_count={len(cases)} unique={len(unique_case_ids)} "
+            f"missing_required={missing_required} missing_files={missing_files}"
+        )
     )
     return AuditCheck("scenario_manifest", passed, detail)
 
@@ -160,10 +192,9 @@ def _check_streamlit_demo() -> AuditCheck:
 
 
 def _check_benchmark_cli() -> AuditCheck:
-    source = (
-        Path("app/cli/run_benchmark.py").read_text(encoding="utf-8")
-        + Path("bench/metrics.py").read_text(encoding="utf-8")
-    )
+    source = Path("app/cli/run_benchmark.py").read_text(encoding="utf-8") + Path(
+        "bench/metrics.py"
+    ).read_text(encoding="utf-8")
     required_tokens = (
         "variant_metrics",
         "decision_match_at_1",
@@ -197,7 +228,11 @@ def _check_fail_closed_docs() -> AuditCheck:
     return AuditCheck(
         "fail_closed_blueprint_docs",
         not findings,
-        "blueprint docs do not promise operational fallback" if not findings else f"findings={findings[:12]}",
+        (
+            "blueprint docs do not promise operational fallback"
+            if not findings
+            else f"findings={findings[:12]}"
+        ),
     )
 
 

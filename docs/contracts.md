@@ -116,7 +116,7 @@ Observações contratuais:
 
 Observação prática:
 
-- templates sintéticos robustos para os 10 cenários devem incluir, no mínimo, estes campos visíveis no documento: `TCK-xxx`, `TRK-xxx`, `vehicle_type`, `document_status`, `document_block_flags` quando houver, `load_condition`, `contract_priority_flag` e `destination_constraints`.
+- templates sintéticos robustos para o pack versionado devem incluir, no mínimo, estes campos visíveis no documento: `TCK-xxx`, `TRK-xxx`, `vehicle_type`, `document_status`, `document_block_flags` quando houver, `load_condition`, `contract_priority_flag` e `destination_constraints`.
 
 ### O que o operador pode escrever (`operator_note`)
 
