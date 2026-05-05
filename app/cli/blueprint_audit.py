@@ -18,6 +18,11 @@ class AuditCheck:
 
 REQUIRED_PATHS = (
     "app/ui/streamlit_app.py",
+    "app/ui/scenario_loader.py",
+    "app/ui/ui_runner.py",
+    "app/ui/components/decision_card.py",
+    "app/ui/components/validation_matrix.py",
+    "app/ui/components/audit_panel.py",
     "app/orchestration/orchestrator.py",
     "app/domain/constraints.py",
     "app/gemma/adapter.py",
@@ -134,7 +139,14 @@ def _check_frontend_contract() -> AuditCheck:
 
 
 def _check_streamlit_demo() -> AuditCheck:
-    source = Path("app/ui/streamlit_app.py").read_text(encoding="utf-8")
+    source = "\n".join(
+        Path(path).read_text(encoding="utf-8")
+        for path in (
+            "app/ui/streamlit_app.py",
+            "app/ui/ui_runner.py",
+            "app/ui/components/audit_panel.py",
+        )
+    )
     required_tokens = ("DecisionOrchestrator", "selectbox", "run_decision", "operator_actions")
     missing = [token for token in required_tokens if token not in source]
     shell_markers = ("intentionally thin", "must be wired")

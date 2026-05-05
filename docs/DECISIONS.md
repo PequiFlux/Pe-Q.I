@@ -4,6 +4,27 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — UI Streamlit dividida por responsabilidade
+
+Contexto:
+`app/ui/streamlit_app.py` concentrava carregamento de cenário, preparação de arquivos temporários, montagem de `DecisionRequest`, execução do orquestrador, renderização visual, ação humana e persistência SQLite.
+
+Decisão:
+Manter `streamlit_app.py` como composição da tela e dividir responsabilidades em `scenario_loader.py`, `ui_runner.py`, `components/decision_card.py`, `components/validation_matrix.py`, `components/audit_panel.py` e `styles.py`.
+
+Alternativas rejeitadas:
+Continuar adicionando novos blocos no arquivo principal da UI.
+
+Impacto:
+Novas telas ou blocos reutilizáveis da UI devem entrar no módulo correspondente, sem duplicar regra de domínio nem instanciar orquestrador fora de `ui_runner.py`.
+
+Arquivos/módulos afetados:
+- `app/ui/streamlit_app.py`
+- `app/ui/scenario_loader.py`
+- `app/ui/ui_runner.py`
+- `app/ui/components`
+- `app/ui/styles.py`
+
 ### 2026-05-05 — Infraestrutura de agente versionada
 
 Contexto:
