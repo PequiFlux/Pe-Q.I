@@ -52,7 +52,7 @@ Não persistir:
 - `scripts/bootstrap.sh`: ambiente e dependências
 - `scripts/prewarm_models.sh`: warmup e identificação do runtime
 - `scripts/run_demo.sh`: fluxo de demo
-- `scripts/run_benchmark.sh`: execução das variantes
+- `app.cli.run_benchmark`: execução das variantes
 - `scripts/prepublish_check.sh`: checagens antes da publicação
 
 ## Checklist pré-publicação
@@ -63,4 +63,3 @@ Não persistir:
 - prompts e logs revisados
 - screenshots sanitizadas
 - claims alinhadas ao benchmark
-

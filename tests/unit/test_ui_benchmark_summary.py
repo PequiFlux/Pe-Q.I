@@ -17,8 +17,8 @@ def test_load_benchmark_summary_reads_current_schema(tmp_path: Path) -> None:
                     "fifo_safe": {"decision_match_at_1": 0.8},
                     "heuristic": {"ticket_field_accuracy": 0.925},
                     "full": {
-                        "passed_count": 10,
-                        "scenario_count": 10,
+                        "passed_count": 20,
+                        "scenario_count": 20,
                         "constraint_violation_rate": 0.0,
                     },
                 }
@@ -39,7 +39,7 @@ def test_load_benchmark_summary_reads_current_schema(tmp_path: Path) -> None:
 
     summary = load_benchmark_summary(tmp_path)
 
-    assert summary["full"] == "10/10 cenarios | 0% violacoes de regra"
+    assert summary["full"] == "20/20 cenarios | 0% violacoes de regra"
     assert summary["fifo"] == "raw 1 fora do alvo | seguro 80% | ex.: S02"
     assert summary["heuristic"] == "sem leitura Gemma multimodal | 92% no texto estruturado"
     assert summary["source"] == "Scenario pack sintetico · 20260505T000000Z"

@@ -154,30 +154,18 @@ Campos mínimos recomendados: `expected_status`, `acceptable_trucks`, `acceptabl
 - `truck_id` no ticket coincide com linha da fila, exceto cenários explícitos de conflito de verdade como `S13_TRUCK_ID_NOT_IN_QUEUE`;
 - `resource_id` em `resource_state` e na decisão/expected devem ser compatíveis, exceto cenários explícitos de destino desconhecido como `S15_UNKNOWN_DESTINATION_IN_TICKET`.
 
-## Cenários obrigatórios
+## Catálogo humano dos cenários
 
-Para leitura rapida em video ou avaliacao tecnica, use tambem `scenarios/README.md`, que descreve cada caso em linguagem humana.
+O catálogo humano canônico fica em `scenarios/README.md`.
 
-- `S01_BASELINE`: prova que o sistema preserva FIFO em regime nominal
-- `S02_RAIN_OPEN`: chuva bloqueia destino aberto e pode justificar quebra de FIFO
-- `S03_WET_LOAD`: ticket em imagem expõe carga úmida; sem leitura multimodal o baseline falha fechado, enquanto o sistema completo chega ao `REVIEW_REQUIRED` correto
-- `S04_CONVEYOR_DOWN`: estado local bloqueia recurso
-- `S05_CONTRACT_PRIORITY`: política publicada pode romper FIFO
-- `S06_DOCUMENT_BLOCK`: bloqueio documental torna caminhão inelegível
-- `S07_VEHICLE_INCOMPAT`: incompatibilidade física é binária
-- `S08_REDUCED_CAPACITY`: separa bloqueio duro de penalidade
-- `S09_HUMAN_OVERRIDE`: prova governança e trilha de override
-- `S10_FIFO_BREAK_JUSTIFIED`: cenário narrativo principal da submissão
-- `S11_IMAGE_ROTATED_WET_LOAD`: robustez multimodal com imagem rotacionada
-- `S12_PDF_SCANNED_DOCUMENT_BLOCK`: robustez multimodal com PDF escaneado sem texto extraível
-- `S13_TRUCK_ID_NOT_IN_QUEUE`: conflito entre documento e fila local
-- `S14_NOTE_RAIN_WEATHER_NONE_CONFLICT`: conflito entre nota operacional e `weather_state`
-- `S15_UNKNOWN_DESTINATION_IN_TICKET`: conflito entre documento/FIFO bruto e `resource_state`
-- `S16_ALL_DESTINATIONS_BLOCKED`: fail-closed sem par elegível
-- `S17_OVERRIDE_INELIGIBLE_PAIR`: cenário versionado e teste unitário de governança para override inelegível
-- `S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR`: cenário versionado e teste unitário de governança para override elegível não-top
-- `S19_TIE_BREAK_EQUAL_SCORE`: desempate determinístico de ranking
-- `S20_LARGE_QUEUE_100_TRUCKS`: stress sintético com 100 caminhões
+Use este documento para estrutura, contratos e integridade; use `scenarios/README.md` para a narrativa caso a caso.
+
+Cobertura esperada do pack atual:
+
+- `S01`-`S10`: base operacional e narrativa principal da submissão
+- `S11`-`S12`: robustez multimodal
+- `S13`-`S16`: conflitos de verdade e fail-closed
+- `S17`-`S20`: governança de override, desempate e stress
 
 ## Variantes de benchmark
 
@@ -201,7 +189,7 @@ Nota: a política atual do repositório remove o uso de fallback operacional. Se
 
 ## Saídas esperadas
 
-Em `bench/reports/<run_id>/`:
+Em `bench/reports/extended/<run_id>/`:
 
 - `summary.csv`
 - `per_scenario.json`

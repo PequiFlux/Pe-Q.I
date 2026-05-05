@@ -31,7 +31,7 @@ def main() -> None:
     manifest_path = Path(args.manifest)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output_dir = Path(args.output_dir or f"bench/reports/{run_id}")
+    output_dir = Path(args.output_dir or f"bench/reports/extended/{run_id}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     orchestrator = DecisionOrchestrator(gemma_adapter=build_gemma_adapter())

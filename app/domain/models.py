@@ -52,6 +52,7 @@ class RawQueueRow(StrictModel):
     status: str = "waiting"
     vehicle_type: VehicleType = VehicleType.UNKNOWN
     contract_priority_flag: bool = False
+    declared_destination: str | None = None
 
 
 class QueueRow(RawQueueRow):

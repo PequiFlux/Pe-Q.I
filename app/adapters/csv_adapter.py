@@ -38,6 +38,7 @@ def load_queue_rows(path: str) -> list[RawQueueRow]:
                     vehicle_type=(raw.get("vehicle_type") or "unknown").strip(),
                     contract_priority_flag=str(raw.get("contract_priority_flag", "false")).lower()
                     == "true",
+                    declared_destination=(raw.get("declared_destination") or "").strip() or None,
                 )
             )
     return rows

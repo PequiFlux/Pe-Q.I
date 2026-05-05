@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import csv
-from pathlib import Path
-
+from app.adapters.csv_adapter import load_queue_rows
+from app.domain.errors import PequiFluxError
 from app.domain.models import DecisionRequest
 
 
@@ -21,12 +20,17 @@ def raw_fifo_call(request: DecisionRequest) -> tuple[str | None, str | None]:
 
 def raw_queue_rows(request: DecisionRequest) -> list[dict[str, str]]:
     try:
-        rows = list(
-            csv.DictReader(Path(request.queue_csv_ref).read_text(encoding="utf-8").splitlines())
-        )
-    except (OSError, csv.Error):
+        rows = sorted(load_queue_rows(request.queue_csv_ref), key=lambda row: row.arrival_ts)
+    except PequiFluxError:
         return []
-    rows = sorted(rows, key=lambda row: row.get("arrival_ts") or "")
-    for position, row in enumerate(rows, start=1):
-        row["position"] = str(position)
-    return rows
+    return [
+        {
+            "truck_id": row.truck_id,
+            "arrival_ts": row.arrival_ts.isoformat(),
+            "status": row.status,
+            "vehicle_type": str(row.vehicle_type),
+            "declared_destination": row.declared_destination or "",
+            "position": str(position),
+        }
+        for position, row in enumerate(rows, start=1)
+    ]

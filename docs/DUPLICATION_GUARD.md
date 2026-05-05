@@ -47,6 +47,7 @@ Procurar:
 - Casos multimodais do benchmark devem reutilizar o sidecar `expected_ticket.json`; não criar formato paralelo de fixture esperado por cenário.
 - Expansões do scenario pack devem reutilizar `scenarios/manifest.json`, `tests/scenarios/test_scenario_pack.py` e `scenarios/README.md`; não criar manifest paralelo para robustez multimodal, conflitos ou stress.
 - Não parsear `arrival_ts` fora de `app/adapters/csv_adapter.py`; timestamps de fila precisam ter timezone explícito e serem normalizados para UTC.
+- Leitura canônica de `queue.csv` deve passar por `app/adapters/csv_adapter.load_queue_rows`; não manter leitor paralelo de fila para UI ou FIFO bruto.
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
 - Notas operacionais com termos de revisão (`revisar`, `conferir`) devem prevalecer sobre classificações automáticas como `WET_LOAD`.
 - Judge Mode da UI deve reutilizar cenários do manifest e `DecisionOrchestrator`; não criar regra de decisão paralela para explicar FIFO vs Pe-Q.I.
@@ -68,6 +69,8 @@ Procurar:
 - Format check público deve rodar `black --check app bench tests scripts`; não voltar a listas manuais de arquivos em CI, Makefile ou `scripts/check-quality.sh`.
 - Consistência do sample público deve ficar em `tests/unit/test_public_sample_consistency.py`; não criar validação paralela entre README, `metrics.json` e `summary.csv`.
 - A imagem de teste deve incluir apenas `bench/reports/sample/` entre relatórios versionados; não remover as exceções correspondentes em `.dockerignore` sem mover o teste de contrato público.
+- O benchmark público congelado deve continuar em `bench/reports/sample/` com 20 cenários; runs maiores ou exploratórios devem ir para `bench/reports/extended/`, não para novos snapshots públicos.
+- O catálogo humano canônico do scenario pack deve ficar em `scenarios/README.md`; `README.md` e `docs/scenario-pack.md` devem resumir e apontar para ele, não repetir a lista completa.
 - Finalização de ação humana deve reutilizar `SQLiteStore.save_operator_finalization`; não encadear `save_operator_action`, `save_decision_finalized` e `save_audit_record` com commits separados.
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.
 - Renderizadores e helpers compartilhados entre módulos de UI devem ser importados por nomes públicos sem `_`; prefixo `_` fica reservado para helpers internos do próprio arquivo.

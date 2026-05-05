@@ -160,9 +160,10 @@ def audit_complete(payload: FrontEndPayload) -> bool:
     audit = payload.audit_record
     if audit is None:
         return False
+    status = str(payload.decision_status)
     has_terminal_context = bool(
         payload.reason_summary
-        and payload.decision_status
+        and status
         and payload.benchmark_observed.get("primary_exception")
         and payload.gemma_visible_summary.exception_label
     )
@@ -176,13 +177,19 @@ def audit_complete(payload: FrontEndPayload) -> bool:
             audit.variant == payload.variant,
         ]
     )
-    if payload.decision_status in {"BLOCKED", "REVIEW_REQUIRED"}:
+    if status in {"BLOCKED", "REVIEW_REQUIRED"}:
         return has_base_audit and has_terminal_context
 
-    has_recommendation = payload.recommended_truck is None or audit.recommended_pair is not None
+    has_recommendation = all(
+        [
+            payload.recommended_truck is not None,
+            payload.recommended_destination is not None,
+            audit.recommended_pair is not None,
+        ]
+    )
     return all(
         [
-            payload.decision_status == "PREVIEW_READY",
+            status == "PREVIEW_READY",
             bool(audit.hard_constraints_checked),
             has_base_audit,
             has_recommendation,

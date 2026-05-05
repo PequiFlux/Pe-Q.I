@@ -16,7 +16,7 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 |---|---|
 | Tese | Pe-Q.I recomenda quem chamar, para qual moega, por que o FIFO puro falharia e qual regra sustenta a decisão |
 | Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo |
-| Benchmark | `make bench` gera relatório; [`bench/reports/sample/`](bench/reports/sample/) traz uma amostra versionada |
+| Benchmark | `make bench` gera relatório interno em `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) permanece como snapshot público congelado |
 | Evidência visual | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) e imagem acima |
 | Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
 | Critérios e limites | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) e [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) |
@@ -150,7 +150,7 @@ Atalho:
 make bench
 ```
 
-Relatórios em `bench/reports/`.
+Relatórios em `bench/reports/extended/` por padrão. O snapshot público congelado continua em `bench/reports/sample/`.
 
 ### Checklist local (Docker indisponível, emergência apenas)
 
@@ -255,6 +255,11 @@ O adapter retorna `None` e o orquestrador falha fechado com `MODEL_RUNTIME_UNAVA
 
 O benchmark executa o pack versionado atual (**20 cenários × 4 linhas comparativas**) e computa métricas comparativas. A variante operacional `fifo` continua existindo internamente, mas o relatório a nomeia como `fifo_safe` porque ela ainda passa por hard constraints.
 
+Há dois artefatos conceitualmente distintos:
+
+- `bench/reports/sample/`: snapshot público congelado em 20 cenários para README, CI e evidência de submissão.
+- `bench/reports/extended/<run_id>/`: runs de desenvolvimento interno, livres para crescer sem inflar a página pública.
+
 ### Variantes
 
 | Variante | Gemma? | Comportamento |
@@ -290,18 +295,32 @@ O benchmark executa o pack versionado atual (**20 cenários × 4 linhas comparat
 docker compose run --rm benchmark
 ```
 
-Saída: `bench/reports/<run_id>/` com `metrics.json`, `per_scenario.json` e `summary.csv`.
+Saída padrão: `bench/reports/extended/<run_id>/` com `metrics.json`, `per_scenario.json` e `summary.csv`.
 
-### Snapshot versionado
+### Snapshot público congelado
 
-O snapshot versionado em `bench/reports/sample/` agora inclui `S03_WET_LOAD` e `S11_IMAGE_ROTATED_WET_LOAD` como tickets em `image/png`, além de `S12_PDF_SCANNED_DOCUMENT_BLOCK` como PDF escaneado sem texto extraível.
-Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma.
+O snapshot versionado em `bench/reports/sample/` fica congelado em 20 cenários. Ele inclui `S03_WET_LOAD` e `S11_IMAGE_ROTATED_WET_LOAD` como tickets em `image/png`, além de `S12_PDF_SCANNED_DOCUMENT_BLOCK` como PDF escaneado sem texto extraível.
+Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma no trilho `extended`.
 
 - `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`
 - `heuristic`: `decision_match_at_1 = 0.85`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.85`, `audit_completeness = 0.85`
 - `fifo_safe`: `decision_match_at_1 = 0.7`, `constraint_violation_rate = 0.0`
 - `raw_fifo`: `decision_match_at_1 = 0.25`, `constraint_violation_rate = 0.35`
 - `S03_WET_LOAD`, `S11_IMAGE_ROTATED_WET_LOAD` e `S12_PDF_SCANNED_DOCUMENT_BLOCK`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao resultado esperado via sidecar multimodal de CI.
+
+### Benchmark extended interno
+
+Use o trilho `extended` para evoluir o scenario pack, latência real, ablações e comparativos maiores sem alterar o contrato público do sample.
+
+```bash
+make bench
+```
+
+Se precisar forçar um destino específico:
+
+```bash
+docker compose run --rm benchmark python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir bench/reports/extended/manual-run
+```
 
 ### Setup do Gemma (necessário para `make demo`, `make ui` e benchmark com runtime Ollama)
 
@@ -321,7 +340,7 @@ Estes são os únicos claims que podem ser feitos sobre esta submissão:
 
 | Claim permitido | Evidência |
 |----------------|-----------|
-| "O sistema é reproduzível, auditável e benchmarkável" | Comandos Docker únicos; relatórios em `bench/reports/`; trilha imutável em SQLite/JSONL |
+| "O sistema é reproduzível, auditável e benchmarkável" | Comandos Docker únicos; snapshot público em `bench/reports/sample/` e runs internas em `bench/reports/extended/`; trilha imutável em SQLite/JSONL |
 | "Gemma agrega valor sobre baseline heurístico" | Benchmark comparativo com métricas `ticket_field_accuracy`, `exception_f1`, `decision_match_at_1` |
 | "Nenhuma hard constraint é violada" | `constraint_violation_rate = 0` enforceado por testes unitários, failure tests e benchmark |
 | "O sistema falha fechado" | `app.gemma.fallback.forbid_fallback()` sempre levanta `FallbackForbiddenError`; testes em `tests/unit/test_no_fallbacks.py` |
@@ -458,32 +477,19 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
 ## Scenario Pack
 
-20 cenários sintéticos em `scenarios/cases/`:
+O pack atual tem 20 cenários sintéticos em `scenarios/cases/`.
 
-| ID | Nome | O que testa |
-|----|------|-------------|
-| S01 | BASELINE | Nominal; FIFO preservado |
-| S02 | RAIN_OPEN | Chuva bloqueia destino aberto (HC-01) |
-| S03 | WET_LOAD | Ticket em imagem força leitura multimodal; sem Gemma o fluxo fecha, com Gemma a revisão fica correta (HC-02) |
-| S04 | CONVEYOR_DOWN | Recurso indisponível (HC-03) |
-| S05 | CONTRACT_PRIORITY | Prioridade contratual quebra FIFO (PR-02) |
-| S06 | DOCUMENT_BLOCK | Bloqueio documental (HC-04) |
-| S07 | VEHICLE_INCOMPAT | Incompatibilidade de veículo (HC-05) |
-| S08 | REDUCED_CAPACITY | Capacidade entre mínimo e conforto (HC-06) |
-| S09 | HUMAN_OVERRIDE | Governança de override (HC-07) |
-| S10 | FIFO_BREAK_JUSTIFIED | Chuva + compatibilidade justificam quebra de FIFO (narrativa principal) |
-| S11 | IMAGE_ROTATED_WET_LOAD | Imagem rotacionada reforça parsing multimodal de carga úmida |
-| S12 | PDF_SCANNED_DOCUMENT_BLOCK | PDF escaneado sem texto extraível reforça parsing multimodal de bloqueio documental |
-| S13 | TRUCK_ID_NOT_IN_QUEUE | Ticket diverge da fila; fila local prevalece e exige revisão |
-| S14 | NOTE_RAIN_WEATHER_NONE_CONFLICT | Nota e `weather_state` entram em conflito material |
-| S15 | UNKNOWN_DESTINATION_IN_TICKET | Ticket aponta destino ausente no `resource_state` |
-| S16 | ALL_DESTINATIONS_BLOCKED | Nenhum par elegível gera `BLOCKED` fail-closed |
-| S17 | OVERRIDE_INELIGIBLE_PAIR | Override para par inelegível falha fechado |
-| S18 | OVERRIDE_ELIGIBLE_NON_TOP_PAIR | Override para par elegível não-top é auditável |
-| S19 | TIE_BREAK_EQUAL_SCORE | Desempate determinístico para scores iguais |
-| S20 | LARGE_QUEUE_100_TRUCKS | Stress sintético com 100 caminhões |
+Catálogo humano canônico:
+- [`scenarios/README.md`](scenarios/README.md)
 
-Cada cenário contém: `ticket.(txt|pdf|png|jpg|jpeg)`, `queue.csv`, `operator_note.txt`, `weather_state.json`, `resource_state.json` e `expected_decision.json`. Casos multimodais podem adicionar `expected_ticket.json` como sidecar canônico de benchmark/CI.
+Contrato estrutural e critérios de integridade:
+- [`docs/scenario-pack.md`](docs/scenario-pack.md)
+
+Para leitura rápida na página pública, os grupos principais são:
+- Base operacional e narrativa principal: `S01`-`S10`, com destaque para `S10_FIFO_BREAK_JUSTIFIED`
+- Robustez multimodal: `S03`, `S11`, `S12`
+- Conflitos de verdade e fail-closed: `S13`-`S16`
+- Governança, desempate e stress: `S17`-`S20`
 
 ---
 
@@ -611,6 +617,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
 | Screenshot usada no README | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
+| Relatórios extended internos | `bench/reports/extended/<run_id>/` |
 | Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
 | Mapa da submissão | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
 

@@ -91,6 +91,33 @@ def test_build_payload_row_and_expected_match_for_full_payload() -> None:
     assert row["audit_complete"] is True
 
 
+def test_audit_complete_is_status_aware_for_preview_ready_payload() -> None:
+    scenario_id = "S10_FIFO_BREAK_JUSTIFIED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+
+    assert payload.decision_status == "PREVIEW_READY"
+    assert payload.audit_record is not None
+    assert payload.audit_record.hard_constraints_checked
+    assert payload.audit_record.recommended_pair is not None
+    assert audit_complete(payload) is True
+
+
+def test_audit_complete_requires_recommendation_for_preview_ready_payload() -> None:
+    scenario_id = "S10_FIFO_BREAK_JUSTIFIED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+    assert payload.audit_record is not None
+
+    payload_without_recommendation = payload.model_copy(
+        update={
+            "recommended_truck": None,
+            "recommended_destination": None,
+            "audit_record": payload.audit_record.model_copy(update={"recommended_pair": None}),
+        }
+    )
+
+    assert audit_complete(payload_without_recommendation) is False
+
+
 def test_audit_complete_is_status_aware_for_review_required_payload() -> None:
     scenario_id = "S03_WET_LOAD"
     payload = _orchestrator().run_decision(_request(scenario_id, "full"))
@@ -101,6 +128,15 @@ def test_audit_complete_is_status_aware_for_review_required_payload() -> None:
     assert audit_complete(payload) is True
 
 
+def test_audit_complete_requires_terminal_context_for_review_required_payload() -> None:
+    scenario_id = "S03_WET_LOAD"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+
+    payload_without_terminal_context = payload.model_copy(update={"reason_summary": ""})
+
+    assert audit_complete(payload_without_terminal_context) is False
+
+
 def test_audit_complete_is_status_aware_for_blocked_payload() -> None:
     scenario_id = "S16_ALL_DESTINATIONS_BLOCKED"
     payload = _orchestrator().run_decision(_request(scenario_id, "full"))
@@ -109,6 +145,15 @@ def test_audit_complete_is_status_aware_for_blocked_payload() -> None:
     assert payload.audit_record is not None
     assert payload.audit_record.hard_constraints_checked == []
     assert audit_complete(payload) is True
+
+
+def test_audit_complete_requires_terminal_context_for_blocked_payload() -> None:
+    scenario_id = "S16_ALL_DESTINATIONS_BLOCKED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+
+    payload_without_terminal_context = payload.model_copy(update={"reason_summary": ""})
+
+    assert audit_complete(payload_without_terminal_context) is False
 
 
 def test_ticket_field_accuracy_scores_declared_fields() -> None:

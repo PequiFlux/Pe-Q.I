@@ -37,7 +37,7 @@ Rotulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` fica
 
 ### Benchmark visivel
 
-A faixa superior mostra o comparativo `full`, `raw_fifo`/`fifo_safe` e `heuristic` sem abrir notebook. Os detalhes continuam em `bench/reports/sample/`.
+A faixa superior mostra o comparativo `full`, `raw_fifo`/`fifo_safe` e `heuristic` sem abrir notebook. Os detalhes públicos continuam em `bench/reports/sample/`, enquanto execuções maiores de desenvolvimento ficam em `bench/reports/extended/`.
 
 ### Screenshot do README
 

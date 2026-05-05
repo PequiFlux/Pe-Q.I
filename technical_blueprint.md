@@ -338,7 +338,6 @@ repo/
 │  ├─ bootstrap.sh
 │  ├─ prewarm_models.sh
 │  ├─ run_demo.sh
-│  ├─ run_benchmark.sh
 │  └─ prepublish_check.sh
 └─ docs/
    ├─ technical_blueprint.md
@@ -615,10 +614,10 @@ Princípio: todo módulo crítico precisa ter teste que prove tanto o caminho fe
 ### 4.9 Estratégia de reprodutibilidade
 
 1. fixar `manifest.json`, `policy_profile.json` e seeds não essenciais;
-2. manter scripts únicos para bootstrap, demo, benchmark e prepublish;
+2. manter entradas únicas para bootstrap, demo, benchmark e prepublish;
 3. separar pesos do modelo do Git;
 4. versionar os schemas do pack e do front-end;
-5. gerar relatórios reproduzíveis em `bench/reports/`;
+5. gerar relatórios reproduzíveis em `bench/reports/extended/`, preservando `bench/reports/sample/` como snapshot público;
 6. garantir que o repositório rode offline após setup/cache.
 
 ---
@@ -2236,7 +2235,7 @@ O valor **não** está provado se:
 
 ### 7.11 O que precisa aparecer nos relatórios
 
-Arquivos recomendados em `bench/reports/<run_id>/`:
+Arquivos recomendados em `bench/reports/extended/<run_id>/`:
 
 ```text
 summary.csv
@@ -2358,7 +2357,6 @@ repo/
 │  ├─ bootstrap.sh
 │  ├─ prewarm_models.sh
 │  ├─ run_demo.sh
-│  ├─ run_benchmark.sh
 │  ├─ validate_scenarios.sh
 │  └─ prepublish_check.sh
 └─ .github/
@@ -2402,12 +2400,12 @@ Responsabilidades:
 - subir a UI ou executar fluxo CLI equivalente;
 - abrir a tela pronta para gravação.
 
-#### `scripts/run_benchmark.sh`
+#### `app.cli.run_benchmark`
 
 Exemplo de uso:
 
 ```bash
-./scripts/run_benchmark.sh --manifest scenarios/manifest.json
+python -m app.cli.run_benchmark --manifest scenarios/manifest.json
 ```
 
 Responsabilidades:
@@ -3106,7 +3104,7 @@ Este arquivo deve ser publicado como genérico e explicitamente sintético.
 ./scripts/run_demo.sh --scenario S02_RAIN_OPEN --variant full
 
 # benchmark completo
-./scripts/run_benchmark.sh --manifest scenarios/manifest.json
+python -m app.cli.run_benchmark --manifest scenarios/manifest.json
 
 # validação pré-publicação
 ./scripts/prepublish_check.sh

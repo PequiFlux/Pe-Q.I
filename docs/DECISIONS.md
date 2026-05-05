@@ -4,6 +4,45 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Benchmark público congelado e trilho extended interno
+
+Contexto:
+O sample público do benchmark cresceu para 20 cenários e já cobre a tese principal da submissão. Continuar expandindo esse mesmo snapshot aumentaria o peso da página pública e misturaria evidência de submissão com exploração interna.
+
+Decisão:
+Congelar `bench/reports/sample/` como snapshot público de 20 cenários usado por README, CI e evidência versionada. Fazer execuções normais de benchmark escreverem em `bench/reports/extended/<run_id>/` por padrão e tratar esse trilho como espaço de desenvolvimento interno.
+
+Alternativas rejeitadas:
+Continuar publicando todo crescimento em `sample/` ou manter novos runs diretamente em `bench/reports/<run_id>/` sem separar o contrato público do trilho exploratório.
+
+Impacto:
+A superfície pública fica estável e leve, enquanto o benchmark interno pode crescer sem alterar o contrato validado pelo teste de consistência do sample.
+
+Arquivos/módulos afetados:
+- `app/cli/run_benchmark.py`
+- `README.md`
+- `docs`
+
+### 2026-05-05 — Catálogo humano do scenario pack fica em `scenarios/README.md`
+
+Contexto:
+O repositório passou a repetir a lista completa de cenários no `README.md`, em `docs/scenario-pack.md` e em `scenarios/README.md`. Isso aumenta drift documental toda vez que o pack cresce.
+
+Decisão:
+Tratar `scenarios/README.md` como catálogo humano canônico do scenario pack. Manter `README.md` como resumo público curto e `docs/scenario-pack.md` focado em estrutura, contratos e integridade.
+
+Alternativas rejeitadas:
+Repetir a tabela/lista completa em múltiplos docs ou mover a descrição humana caso a caso para o `README.md`, inflando a superfície pública principal.
+
+Impacto:
+O pack pode evoluir sem exigir sincronização manual de uma lista completa em mais de um documento.
+
+Arquivos/módulos afetados:
+- `README.md`
+- `scenarios/README.md`
+- `docs/scenario-pack.md`
+- `docs`
+
 ### 2026-05-05 — Blueprint canônico fica na raiz
 
 Contexto:

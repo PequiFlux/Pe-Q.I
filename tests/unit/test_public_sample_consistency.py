@@ -8,6 +8,7 @@ from pathlib import Path
 
 EXPECTED_SCENARIO_COUNT = 20
 EXPECTED_VARIANTS = {"raw_fifo", "fifo_safe", "heuristic", "full"}
+EXPECTED_SUMMARY_DATA_ROWS = 80
 EXPECTED_README_METRICS = {
     "full": {
         "decision_match_at_1": 1.0,
@@ -45,7 +46,8 @@ def test_public_sample_metrics_summary_and_readme_stay_consistent() -> None:
     assert metrics["passed_count"] == EXPECTED_SCENARIO_COUNT
     assert set(metrics["variant_metrics"]) == EXPECTED_VARIANTS
 
-    assert len(summary_rows) == EXPECTED_SCENARIO_COUNT * len(EXPECTED_VARIANTS)
+    assert len(summary_rows) == EXPECTED_SUMMARY_DATA_ROWS
+    assert EXPECTED_SUMMARY_DATA_ROWS == EXPECTED_SCENARIO_COUNT * len(EXPECTED_VARIANTS)
     assert {row["variant"] for row in summary_rows} == EXPECTED_VARIANTS
 
     rows_by_scenario: dict[str, set[str]] = defaultdict(set)
