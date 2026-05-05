@@ -76,22 +76,25 @@ def build_request_from_inputs(
             ticket_path = run_dir / "ticket.txt"
             ticket_path.write_text(inputs["ticket_text"], encoding="utf-8")
 
-        return DecisionRequest.model_validate(
-            {
-                "request_id": request_id,
-                "scenario_id": scenario_id,
-                "variant": variant,
-                "queue_csv_ref": str(queue_path),
-                "ticket_ref": str(ticket_path),
-                "ticket_content_type": content_type,
-                "operator_note": inputs["operator_note"],
-                "weather_state": weather_payload,
-                "resource_state": resource_payload,
-                "policy_profile_version": "v1-demo",
-                "run_mode": "interactive",
-                "received_at": datetime.now(timezone.utc).isoformat(),
-            }
-        ), None
+        return (
+            DecisionRequest.model_validate(
+                {
+                    "request_id": request_id,
+                    "scenario_id": scenario_id,
+                    "variant": variant,
+                    "queue_csv_ref": str(queue_path),
+                    "ticket_ref": str(ticket_path),
+                    "ticket_content_type": content_type,
+                    "operator_note": inputs["operator_note"],
+                    "weather_state": weather_payload,
+                    "resource_state": resource_payload,
+                    "policy_profile_version": "v1-demo",
+                    "run_mode": "interactive",
+                    "received_at": datetime.now(timezone.utc).isoformat(),
+                }
+            ),
+            None,
+        )
     except json.JSONDecodeError as exc:
         return None, f"JSON invalido: {exc}"
     except ValidationError as exc:

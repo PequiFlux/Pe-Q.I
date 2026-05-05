@@ -11,23 +11,23 @@ from app.domain.models import DecisionRequest, FrontEndPayload
 from app.services.operator_governance import finalize_operator_decision
 from app.storage.sqlite_store import SQLiteStore
 from app.ui.components.common import (
-    _chip,
-    _confidence_value,
-    _constraints_summary,
-    _display_status,
-    _escape,
-    _mini_metric,
-    _operator_action_label,
-    _operator_actions_label,
-    _ranking_summary,
-    _status_card,
-    _step_status,
-    _timeline_item,
-    _tool_status,
+    chip,
+    confidence_value,
+    constraints_summary,
+    display_status,
+    escape,
+    mini_metric,
+    operator_action_label,
+    operator_actions_label,
+    ranking_summary,
+    status_card,
+    step_status,
+    timeline_item,
+    tool_status,
 )
 
 
-def _render_input_evidence(
+def render_input_evidence(
     payload: FrontEndPayload,
     request: DecisionRequest,
     case: dict[str, Any],
@@ -39,7 +39,7 @@ def _render_input_evidence(
         st.markdown(_ticket_preview_card(request), unsafe_allow_html=True)
 
 
-def _render_status_bar(payload: FrontEndPayload) -> None:
+def render_status_bar(payload: FrontEndPayload) -> None:
     truck = payload.recommended_truck.truck_id if payload.recommended_truck else "-"
     destination = (
         payload.recommended_destination.destination_id if payload.recommended_destination else "-"
@@ -50,7 +50,7 @@ def _render_status_bar(payload: FrontEndPayload) -> None:
         payload.recommended_truck and payload.recommended_truck.queue_position_before != 1
     )
     cards = [
-        ("Status", _display_status(str(payload.decision_status)), "estado final da previa"),
+        ("Status", display_status(str(payload.decision_status)), "estado final da previa"),
         ("Caminhao", truck, "proxima chamada"),
         ("Destino", destination, "recurso recomendado"),
         ("FIFO", "quebrado" if fifo_break else "preservado", "justificavel e auditado"),
@@ -59,15 +59,14 @@ def _render_status_bar(payload: FrontEndPayload) -> None:
     ]
     for column, (label, value, note) in zip(st.columns(6), cards):
         with column:
-            st.markdown(_status_card(label, value, note), unsafe_allow_html=True)
+            st.markdown(status_card(label, value, note), unsafe_allow_html=True)
 
 
-def _render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> None:
+def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> None:
     fields = "".join(
-        f"<span>{_escape(field)}</span>"
-        for field in payload.gemma_visible_summary.parsed_fields
+        f"<span>{escape(field)}</span>" for field in payload.gemma_visible_summary.parsed_fields
     )
-    notes = "".join(f"<li>{_escape(note)}</li>" for note in payload.confidence_notes)
+    notes = "".join(f"<li>{escape(note)}</li>" for note in payload.confidence_notes)
     preview = json.dumps(
         {
             "exception": payload.gemma_visible_summary.exception_label,
@@ -83,15 +82,15 @@ def _render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) ->
         <article class="card">
           <div class="card-head">
             <div><h3>Documento interpretado</h3><p>Resultado avancado da leitura estruturada, sem chat nem chain-of-thought.</p></div>
-            {_chip("avancado", "purple")}
+            {chip("avancado", "purple")}
           </div>
           <div class="field-cloud">{fields}</div>
           <div class="mini-metrics">
-            {_mini_metric("Excecao", payload.gemma_visible_summary.exception_label)}
-            {_mini_metric("Documento", request.ticket_content_type)}
-            {_mini_metric("Confianca", _confidence_value(payload))}
+            {mini_metric("Excecao", payload.gemma_visible_summary.exception_label)}
+            {mini_metric("Documento", request.ticket_content_type)}
+            {mini_metric("Confianca", confidence_value(payload))}
           </div>
-          <pre class="json-preview">{_escape(preview)}</pre>
+          <pre class="json-preview">{escape(preview)}</pre>
           <ul class="note-list">{notes}</ul>
         </article>
         """,
@@ -99,19 +98,24 @@ def _render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) ->
     )
 
 
-def _render_operator_action(payload: FrontEndPayload) -> None:
-    st.markdown('<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>5. Acao do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restricao dura.</p></div></div>', unsafe_allow_html=True)
+def render_operator_action(payload: FrontEndPayload) -> None:
+    st.markdown(
+        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>5. Acao do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restricao dura.</p></div></div>',
+        unsafe_allow_html=True,
+    )
     action = st.radio(
         "Acao",
         options=[str(item) for item in payload.operator_actions],
-        format_func=_operator_action_label,
+        format_func=operator_action_label,
         horizontal=True,
     )
     reason = st.text_input("Motivo", value="OP-DEMO-01 revisou a decisao.")
     requested_truck = None
     requested_destination = None
     if action.endswith("override"):
-        requested_truck = st.selectbox("Caminhao solicitado", [item.truck_id for item in payload.queue_diff])
+        requested_truck = st.selectbox(
+            "Caminhao solicitado", [item.truck_id for item in payload.queue_diff]
+        )
         destination_options = sorted(
             {
                 entry["destination_id"]
@@ -143,7 +147,7 @@ def _render_operator_action(payload: FrontEndPayload) -> None:
     st.markdown("</article>", unsafe_allow_html=True)
 
 
-def _render_audit(payload: FrontEndPayload) -> None:
+def render_audit(payload: FrontEndPayload) -> None:
     steps = [
         ("request", payload.request_id),
         ("scenario", payload.scenario_id),
@@ -152,7 +156,7 @@ def _render_audit(payload: FrontEndPayload) -> None:
         ("tags", ", ".join(payload.benchmark_tags)),
     ]
     items = "".join(
-        f"<div class=\"audit-step\"><strong>{_escape(label)}</strong><span>{_escape(value)}</span></div>"
+        f'<div class="audit-step"><strong>{escape(label)}</strong><span>{escape(value)}</span></div>'
         for label, value in steps
     )
     st.markdown(
@@ -160,7 +164,7 @@ def _render_audit(payload: FrontEndPayload) -> None:
         <article class="card">
           <div class="card-head">
             <div><h3>Trilha auditavel</h3><p>Campos minimos para reconstruir a decisao.</p></div>
-            {_chip("XAI", "green")}
+            {chip("XAI", "green")}
           </div>
           <div class="audit-list">{items}</div>
         </article>
@@ -169,14 +173,14 @@ def _render_audit(payload: FrontEndPayload) -> None:
     )
 
 
-def _render_driver_message(payload: FrontEndPayload) -> None:
+def render_driver_message(payload: FrontEndPayload) -> None:
     st.markdown(
         f"""
         <article class="card phone-card">
           <div class="phone">
             <div class="phone-head"><strong>PequiFlux</strong><span>Mensagem ao motorista</span></div>
             <div class="bubble">Seu check-in foi processado.</div>
-            <div class="bubble me">{_escape(payload.driver_message.message)}</div>
+            <div class="bubble me">{escape(payload.driver_message.message)}</div>
             <div class="phone-input">Mensagem</div>
           </div>
         </article>
@@ -203,14 +207,14 @@ def _input_package_card(request: DecisionRequest, case: dict[str, Any]) -> str:
         ("ticket", Path(request.ticket_ref).name),
     ]
     items = "".join(
-        f"<div><span>{_escape(label)}</span><strong>{_escape(value)}</strong></div>"
+        f"<div><span>{escape(label)}</span><strong>{escape(value)}</strong></div>"
         for label, value in package_items
     )
     return f"""
     <article class="card input-package">
       <div class="card-head">
         <div><h3>Pacote operacional</h3><p>Entradas que alimentam Gemma, regras e auditoria.</p></div>
-        {_chip("I/O", "green")}
+        {chip("I/O", "green")}
       </div>
       <div class="package-grid">{items}</div>
     </article>
@@ -224,13 +228,13 @@ def _ticket_preview_card(request: DecisionRequest) -> str:
     <article class="card ticket-preview">
       <div class="card-head">
         <div><h3>Ticket recebido</h3><p>Documento bruto ao lado do resumo estruturado do Gemma.</p></div>
-        {_chip(request.ticket_content_type, "purple")}
+        {chip(request.ticket_content_type, "purple")}
       </div>
       <div class="document-tile">
         <div class="document-icon">{_document_icon(request.ticket_content_type)}</div>
         <div>
-          <strong>{_escape(ticket_path.name)}</strong>
-          <span>{_escape(preview)}</span>
+          <strong>{escape(ticket_path.name)}</strong>
+          <span>{escape(preview)}</span>
         </div>
       </div>
     </article>
@@ -257,67 +261,75 @@ def _document_icon(content_type: str) -> str:
     return "TXT"
 
 
-def _copilot_timeline_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
+def copilot_timeline_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
     steps = [
         (
             "1. Documento interpretado",
-            _step_status(payload, "parse_ticket_document"),
+            step_status(payload, "parse_ticket_document"),
             f"Campos: {', '.join(payload.gemma_visible_summary.parsed_fields[:5])}.",
         ),
         (
             "2. Regras conferidas",
-            _step_status(payload, "resolve_truth"),
+            step_status(payload, "resolve_truth"),
             "Conflitos materiais e necessidade de revisao foram avaliados.",
         ),
         (
             "3. Alternativas bloqueadas",
-            "ok" if payload.audit_record and payload.audit_record.hard_constraints_checked else "review",
-            _constraints_summary(payload),
+            (
+                "ok"
+                if payload.audit_record and payload.audit_record.hard_constraints_checked
+                else "review"
+            ),
+            constraints_summary(payload),
         ),
         (
             "4. Fila recalculada",
-            _step_status(payload, "rank_candidates"),
-            _ranking_summary(payload),
+            step_status(payload, "rank_candidates"),
+            ranking_summary(payload),
         ),
         (
             "5. Operador decide",
             "ready" if payload.operator_actions else "review",
-            f"Acoes disponiveis: {_operator_actions_label(payload.operator_actions)}.",
+            f"Acoes disponiveis: {operator_actions_label(payload.operator_actions)}.",
         ),
     ]
-    items = "".join(_timeline_item(*step) for step in steps)
+    items = "".join(timeline_item(*step) for step in steps)
     return f"""
     <article class="card copilot-timeline">
       <div class="card-head">
         <div><h3>Linha do Copilot</h3><p>Leitura guiada do raciocinio operacional, sem chat livre.</p></div>
-        {_chip(str(payload.decision_status), "blue")}
+        {chip(str(payload.decision_status), "blue")}
       </div>
       <div class="timeline">{items}</div>
     </article>
     """
 
 
-def _tool_badges_card(payload: FrontEndPayload) -> str:
+def tool_badges_card(payload: FrontEndPayload) -> str:
     badges = [
-        ("Documento interpretado", "parse_ticket_document", _tool_status(payload, "parse_ticket_document")),
-        ("Regras conferidas", "resolve_truth", _tool_status(payload, "resolve_truth")),
+        (
+            "Documento interpretado",
+            "parse_ticket_document",
+            tool_status(payload, "parse_ticket_document"),
+        ),
+        ("Regras conferidas", "resolve_truth", tool_status(payload, "resolve_truth")),
         (
             "Alternativas bloqueadas",
             "validate_hard_constraints",
-            _tool_status(payload, "validate_hard_constraints"),
+            tool_status(payload, "validate_hard_constraints"),
         ),
-        ("Fila recalculada", "rank_candidates", _tool_status(payload, "rank_candidates")),
+        ("Fila recalculada", "rank_candidates", tool_status(payload, "rank_candidates")),
         ("Auditoria gerada", "generate_audit_payload", "ok" if payload.audit_record else "blocked"),
     ]
     items = "".join(
-        f"<div class=\"tool-badge {status}\" title=\"{_escape(technical)}\"><strong>{_escape(name)}</strong><span>{_escape(status)}</span></div>"
+        f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status)}</span></div>'
         for name, technical, status in badges
     )
     return f"""
     <article class="card tools-card">
       <div class="card-head">
         <div><h3>Painel avancado</h3><p>Status das etapas internas permitidas pelo blueprint.</p></div>
-        {_chip("auditoria", "green")}
+        {chip("auditoria", "green")}
       </div>
       <div class="tool-grid">{items}</div>
     </article>

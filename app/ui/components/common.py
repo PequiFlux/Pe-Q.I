@@ -8,15 +8,17 @@ from typing import Any
 from app.domain.models import DecisionRequest, FrontEndPayload
 
 
-def _step_status(payload: FrontEndPayload, latency_key: str) -> str:
+def step_status(payload: FrontEndPayload, latency_key: str) -> str:
     if latency_key in payload.latency_ms:
         return "ok"
-    if payload.decision_status.endswith("BLOCKED") or str(payload.decision_status).endswith("REVIEW_REQUIRED"):
+    if payload.decision_status.endswith("BLOCKED") or str(payload.decision_status).endswith(
+        "REVIEW_REQUIRED"
+    ):
         return "review"
     return "pending"
 
 
-def _tool_status(payload: FrontEndPayload, latency_key: str) -> str:
+def tool_status(payload: FrontEndPayload, latency_key: str) -> str:
     if latency_key in payload.latency_ms:
         return "ok"
     if payload.audit_record is None:
@@ -24,7 +26,7 @@ def _tool_status(payload: FrontEndPayload, latency_key: str) -> str:
     return "skipped"
 
 
-def _constraints_summary(payload: FrontEndPayload) -> str:
+def constraints_summary(payload: FrontEndPayload) -> str:
     if payload.audit_record is None:
         return "Auditoria indisponivel porque o fluxo fechou antes da validacao."
     checked = len(payload.audit_record.hard_constraints_checked)
@@ -32,7 +34,7 @@ def _constraints_summary(payload: FrontEndPayload) -> str:
     return f"{checked} pares avaliados; {rejected} rejeitados por restricao dura."
 
 
-def _constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]]:
+def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]]:
     if payload.audit_record is None:
         return [("auditoria", "Fluxo fechou antes da matriz de restricoes.")]
     failures: dict[str, str] = {}
@@ -47,8 +49,8 @@ def _constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str
     return list(failures.items())
 
 
-def _raw_fifo_call(request: DecisionRequest) -> tuple[str, str]:
-    rows = _raw_queue_rows(request)
+def raw_fifo_call(request: DecisionRequest) -> tuple[str, str]:
+    rows = raw_queue_rows(request)
     waiting = [
         row
         for row in rows
@@ -60,9 +62,11 @@ def _raw_fifo_call(request: DecisionRequest) -> tuple[str, str]:
     return first["truck_id"], first.get("declared_destination") or "sem destino"
 
 
-def _raw_queue_rows(request: DecisionRequest) -> list[dict[str, str]]:
+def raw_queue_rows(request: DecisionRequest) -> list[dict[str, str]]:
     try:
-        rows = list(csv.DictReader(Path(request.queue_csv_ref).read_text(encoding="utf-8").splitlines()))
+        rows = list(
+            csv.DictReader(Path(request.queue_csv_ref).read_text(encoding="utf-8").splitlines())
+        )
     except (OSError, csv.Error):
         return []
     rows = sorted(rows, key=lambda row: row.get("arrival_ts") or "")
@@ -71,7 +75,7 @@ def _raw_queue_rows(request: DecisionRequest) -> list[dict[str, str]]:
     return rows
 
 
-def _truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:
+def truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:
     if payload.audit_record is None:
         return []
     rules: list[str] = []
@@ -85,8 +89,8 @@ def _truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:
     return rules
 
 
-def _primary_rule(payload: FrontEndPayload) -> str:
-    failures = _constraint_failure_summary(payload)
+def primary_rule(payload: FrontEndPayload) -> str:
+    failures = constraint_failure_summary(payload)
     if failures and failures[0][0] != "nenhuma":
         return failures[0][0]
     if payload.audit_record and payload.audit_record.fired_rules:
@@ -94,7 +98,7 @@ def _primary_rule(payload: FrontEndPayload) -> str:
     return str(payload.decision_status)
 
 
-def _gemma_short_summary(payload: FrontEndPayload) -> str:
+def gemma_short_summary(payload: FrontEndPayload) -> str:
     parsed = payload.benchmark_observed.get("parsed_ticket", {})
     parts = [
         parsed.get("load_condition"),
@@ -118,7 +122,7 @@ def _exception_label_short(label: str) -> str:
     return labels.get(label, label.lower().replace("_", " "))
 
 
-def _ranking_summary(payload: FrontEndPayload) -> str:
+def ranking_summary(payload: FrontEndPayload) -> str:
     if payload.recommended_truck and payload.recommended_destination:
         return (
             f"{payload.recommended_truck.truck_id} -> "
@@ -128,11 +132,11 @@ def _ranking_summary(payload: FrontEndPayload) -> str:
     return "Sem par recomendado; decisao exige bloqueio ou revisao."
 
 
-def _operator_actions_label(actions: list[Any]) -> str:
-    return ", ".join(_operator_action_label(str(action)) for action in actions)
+def operator_actions_label(actions: list[Any]) -> str:
+    return ", ".join(operator_action_label(str(action)) for action in actions)
 
 
-def _operator_action_label(action: str) -> str:
+def operator_action_label(action: str) -> str:
     labels = {
         "approve": "aprovar",
         "block": "bloquear",
@@ -141,7 +145,7 @@ def _operator_action_label(action: str) -> str:
     return labels.get(action, action)
 
 
-def _reason_detail_label(text: str) -> str:
+def reason_detail_label(text: str) -> str:
     translations = {
         "FIFO ordering preserved when possible.": "Ordem de chegada preservada quando possivel.",
         "Long wait time increased ranking priority.": "Tempo de espera elevou a prioridade na fila.",
@@ -154,7 +158,7 @@ def _reason_detail_label(text: str) -> str:
     return text
 
 
-def _first_skipped_truck(payload: FrontEndPayload) -> str | None:
+def first_skipped_truck(payload: FrontEndPayload) -> str | None:
     held = [
         entry
         for entry in payload.queue_diff
@@ -165,41 +169,41 @@ def _first_skipped_truck(payload: FrontEndPayload) -> str | None:
     return min(held, key=lambda entry: entry.position_before).truck_id
 
 
-def _story_tile(label: str, value: str, detail: str, kind: str = "muted") -> str:
+def story_tile(label: str, value: str, detail: str, kind: str = "muted") -> str:
     return f"""
     <div class="story-tile {kind}">
-      <span>{_escape(label)}</span>
-      <strong>{_escape(value)}</strong>
-      <p>{_escape(detail)}</p>
+      <span>{escape(label)}</span>
+      <strong>{escape(value)}</strong>
+      <p>{escape(detail)}</p>
     </div>
     """
 
 
-def _timeline_item(label: str, status: str, detail: str) -> str:
+def timeline_item(label: str, status: str, detail: str) -> str:
     return f"""
     <div class="timeline-item {status}">
       <div class="timeline-dot"></div>
       <div>
-        <strong>{_escape(label)}</strong>
-        <p>{_escape(detail)}</p>
+        <strong>{escape(label)}</strong>
+        <p>{escape(detail)}</p>
       </div>
-      {_chip(status, _status_color(status))}
+      {chip(status, _status_color(status))}
     </div>
     """
 
 
-def _mini_metric(label: str, value: str) -> str:
-    return f"<div><span>{_escape(label)}</span><strong>{_escape(value)}</strong></div>"
+def mini_metric(label: str, value: str) -> str:
+    return f"<div><span>{escape(label)}</span><strong>{escape(value)}</strong></div>"
 
 
-def _confidence_value(payload: FrontEndPayload) -> str:
+def confidence_value(payload: FrontEndPayload) -> str:
     for note in payload.confidence_notes:
         if note.startswith("parse_confidence="):
             return note.split("=", 1)[1]
     return "n/a"
 
 
-def _percent_label(value: float | int) -> str:
+def percent_label(value: float | int) -> str:
     return f"{round(float(value) * 100):.0f}%"
 
 
@@ -211,24 +215,24 @@ def _status_color(status: str) -> str:
     return "blue"
 
 
-def _display_status(status: str) -> str:
+def display_status(status: str) -> str:
     return status.replace("_", " ")
 
 
-def _status_card(label: str, value: str, note: str) -> str:
+def status_card(label: str, value: str, note: str) -> str:
     return f"""
     <div class="status-card">
-      <span>{_escape(label)}</span>
-      <strong>{_escape(value)}</strong>
-      <p>{_escape(note)}</p>
+      <span>{escape(label)}</span>
+      <strong>{escape(value)}</strong>
+      <p>{escape(note)}</p>
     </div>
     """
 
 
-def _chip(text: str, color: str = "") -> str:
+def chip(text: str, color: str = "") -> str:
     suffix = f" {color}" if color else ""
-    return f'<span class="chip{suffix}">{_escape(text)}</span>'
+    return f'<span class="chip{suffix}">{escape(text)}</span>'
 
 
-def _escape(value: Any) -> str:
+def escape(value: Any) -> str:
     return html.escape(str(value), quote=True)

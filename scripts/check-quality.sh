@@ -24,6 +24,16 @@ else
   exit 1
 fi
 
+echo "==> black"
+if command -v black >/dev/null 2>&1; then
+  black --check app/ui
+elif command -v docker >/dev/null 2>&1; then
+  docker run --rm pequiflux-yard-copilot:test python -m black --check app/ui
+else
+  echo "black e docker não encontrados. Não foi possível executar format check." >&2
+  exit 1
+fi
+
 echo "==> blueprint audit"
 if command -v python >/dev/null 2>&1; then
   python -m app.cli.blueprint_audit

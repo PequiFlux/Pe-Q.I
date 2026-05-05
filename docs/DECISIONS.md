@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Componentes da UI expõem renderizadores públicos
+
+Contexto:
+`streamlit_app.py` importava renderizadores de componentes com prefixo `_`, e parte dos helpers compartilhados de `components/common.py` também era importada como se fosse privada. A demo funcionava, mas a superfície parecia menos madura para avaliação pública.
+
+Decisão:
+Renomear renderizadores e helpers compartilhados de UI para nomes públicos sem underscore e reservar `_` para funções internas ao próprio módulo. Adicionar Black ao ambiente dev e ao check de qualidade.
+
+Alternativas rejeitadas:
+Manter imports privados apenas por convenção local ou criar novos wrappers duplicados para preservar os nomes antigos.
+
+Impacto:
+`streamlit_app.py` fica mais limpo como composição de tela, componentes têm superfície reutilizável explícita e `scripts/check-quality.sh` passa a validar formatação.
+
+Arquivos/módulos afetados:
+- `app/ui/streamlit_app.py`
+- `app/ui/components`
+- `pyproject.toml`
+- `scripts/check-quality.sh`
+
 ### 2026-05-05 — Resource fit vira regra auditável `PR-06`
 
 Contexto:

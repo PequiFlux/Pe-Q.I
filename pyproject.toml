@@ -10,6 +10,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "black>=25.1,<26.0",
     "pytest>=8.4,<9.0",
 ]
 ui = [
@@ -19,3 +20,7 @@ ui = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]

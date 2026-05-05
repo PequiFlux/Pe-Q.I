@@ -5,17 +5,17 @@ from typing import Any
 import streamlit as st
 
 from app.domain.models import FrontEndPayload
-from app.ui.components.common import _chip, _escape
+from app.ui.components.common import chip, escape
 
 
-def _render_validation_matrix(payload: FrontEndPayload) -> None:
+def render_validation_matrix(payload: FrontEndPayload) -> None:
     heatmap = _validation_heatmap(payload)
     st.markdown(
         f"""
         <article class="card">
           <div class="card-head">
             <div><h3>Heatmap de validacao</h3><p>Caminhoes nas linhas, destinos nas colunas: verde elegivel, vermelho bloqueado.</p></div>
-            {_chip("HC-01..HC-07", "green")}
+            {chip("HC-01..HC-07", "green")}
           </div>
           {heatmap}
         </article>
@@ -41,11 +41,10 @@ def _validation_heatmap(payload: FrontEndPayload) -> str:
     )
     destinations = sorted({entry["destination_id"] for entry in checks})
     by_pair = {(entry["truck_id"], entry["destination_id"]): entry for entry in checks}
-    header = "".join(f"<div class=\"heatmap-head\">{_escape(destination)}</div>" for destination in destinations)
-    rows = "".join(
-        _heatmap_row(truck, destinations, by_pair, selected_pair)
-        for truck in trucks
+    header = "".join(
+        f'<div class="heatmap-head">{escape(destination)}</div>' for destination in destinations
     )
+    rows = "".join(_heatmap_row(truck, destinations, by_pair, selected_pair) for truck in trucks)
     return f"""
     <div class="heatmap-wrap">
       <div class="heatmap-grid" style="grid-template-columns: 112px repeat({len(destinations)}, minmax(118px, 1fr));">
@@ -70,8 +69,7 @@ def _heatmap_row(
             cells.append('<div class="heat-cell empty">-</div>')
             continue
         failures = [
-            failure.get("constraint_id", "HC")
-            for failure in entry.get("failed_constraints", [])
+            failure.get("constraint_id", "HC") for failure in entry.get("failed_constraints", [])
         ]
         is_selected = selected_pair == (truck, destination)
         if is_selected:
@@ -83,8 +81,8 @@ def _heatmap_row(
         else:
             state = "blocked"
             label = ", ".join(failures) or "bloqueado"
-        cells.append(f'<div class="heat-cell {state}">{_escape(label)}</div>')
+        cells.append(f'<div class="heat-cell {state}">{escape(label)}</div>')
     return f"""
-    <div class="heatmap-truck">{_escape(truck)}</div>
+    <div class="heatmap-truck">{escape(truck)}</div>
     {''.join(cells)}
     """

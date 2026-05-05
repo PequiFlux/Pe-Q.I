@@ -9,6 +9,7 @@ Atualizado em: 2026-05-05
 | Serena | parcial | CLI encontrada em `/home/marcusvinicius/.local/bin/serena`; `serena project health-check` gerou `.serena/project.yml`, mas falhou ao tentar gravar `/home/marcusvinicius/.serena/serena_config.yml` fora do sandbox |
 | Graphify | ok | CLI encontrada em `/home/marcusvinicius/.local/bin/graphify` |
 | code-review-graph | ok | CLI encontrada em `/home/marcusvinicius/.local/bin/code-review-graph`; build executado com 91 arquivos, 497 nodes e 2937 edges |
+| Black | ok | Declarado em `requirements-dev.txt`/`pyproject.toml`; formatador executado em `app/ui` e integrado ao `scripts/check-quality.sh` com escopo de UI |
 | SonarScanner | parcial | CLI encontrada em `/home/marcusvinicius/.local/bin/sonar-scanner`; SonarQube local disponível em `http://127.0.0.1:9000`; não executado nesta rodada porque `SONAR_TOKEN` não foi fornecido |
 
 ## Pendências

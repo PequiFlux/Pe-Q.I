@@ -11,25 +11,25 @@ import streamlit as st
 
 from app.domain.models import DecisionRequest, FrontEndPayload
 from app.ui.components.audit_panel import (
-    _copilot_timeline_card,
-    _render_audit,
-    _render_driver_message,
-    _render_gemma_context,
-    _render_input_evidence,
-    _render_operator_action,
-    _render_status_bar,
-    _tool_badges_card,
+    copilot_timeline_card,
+    render_audit,
+    render_driver_message,
+    render_gemma_context,
+    render_input_evidence,
+    render_operator_action,
+    render_status_bar,
+    tool_badges_card,
 )
-from app.ui.components.common import _chip, _display_status, _escape, _percent_label
+from app.ui.components.common import escape, percent_label
 from app.ui.components.decision_card import (
-    _blocked_constraints_card,
-    _gemma_extraction_card,
-    _judge_comparison_card,
-    _queue_stack_card,
-    _recommended_decision_card,
-    _why_not_fifo_card,
+    blocked_constraints_card,
+    gemma_extraction_card,
+    judge_comparison_card,
+    queue_stack_card,
+    recommended_decision_card,
+    why_not_fifo_card,
 )
-from app.ui.components.validation_matrix import _render_validation_matrix
+from app.ui.components.validation_matrix import render_validation_matrix
 from app.ui.scenario_loader import (
     build_request_from_inputs,
     judge_request,
@@ -38,7 +38,6 @@ from app.ui.scenario_loader import (
 )
 from app.ui.styles import inject_styles
 from app.ui.ui_runner import run_payload_pair
-
 
 BENCHMARK_REPORTS_DIR = Path("bench/reports")
 BENCHMARK_STRIP_FALLBACK = {
@@ -94,7 +93,7 @@ def main() -> None:
             </div>
             <div class="side-card compact">
               <div class="side-kicker">Leitura do documento</div>
-              <p>{_escape(_runtime_label())}</p>
+              <p>{escape(_runtime_label())}</p>
               <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
             </div>
             """,
@@ -148,12 +147,6 @@ def main() -> None:
     _render_outputs(payload, request, case, fifo_payload)
 
 
-
-
-
-
-
-
 def _render_intro() -> None:
     st.markdown(
         """
@@ -181,17 +174,17 @@ def _render_benchmark_strip() -> None:
         <section class="benchmark-strip">
           <div>
             <span>Full</span>
-            <strong>{_escape(summary["full"])}</strong>
+            <strong>{escape(summary["full"])}</strong>
           </div>
           <div>
             <span>FIFO</span>
-            <strong>{_escape(summary["fifo"])}</strong>
+            <strong>{escape(summary["fifo"])}</strong>
           </div>
           <div>
             <span>Heuristico</span>
-            <strong>{_escape(summary["heuristic"])}</strong>
+            <strong>{escape(summary["heuristic"])}</strong>
           </div>
-          <small>{_escape(summary["source"])}</small>
+          <small>{escape(summary["source"])}</small>
         </section>
         """,
         unsafe_allow_html=True,
@@ -204,7 +197,9 @@ def _benchmark_summary() -> dict[str, str]:
         return BENCHMARK_STRIP_FALLBACK
     try:
         metrics = json.loads((report_dir / "metrics.json").read_text(encoding="utf-8"))
-        rows = list(csv.DictReader((report_dir / "summary.csv").read_text(encoding="utf-8").splitlines()))
+        rows = list(
+            csv.DictReader((report_dir / "summary.csv").read_text(encoding="utf-8").splitlines())
+        )
     except (OSError, json.JSONDecodeError, csv.Error):
         return BENCHMARK_STRIP_FALLBACK
     full = metrics["variant_metrics"]["full"]
@@ -219,15 +214,12 @@ def _benchmark_summary() -> dict[str, str]:
     return {
         "full": (
             f"{int(full['passed_count'])}/{int(full['scenario_count'])} cenarios | "
-            f"{_percent_label(full['constraint_violation_rate'])} violacoes de regra"
+            f"{percent_label(full['constraint_violation_rate'])} violacoes de regra"
         ),
-        "fifo": (
-            f"{len(fifo_misses)} cenarios fora do alvo"
-            f" | ex.: {first_miss}"
-        ),
+        "fifo": (f"{len(fifo_misses)} cenarios fora do alvo" f" | ex.: {first_miss}"),
         "heuristic": (
             "sem leitura Gemma multimodal"
-            f" | {_percent_label(heuristic['ticket_field_accuracy'])} no texto estruturado"
+            f" | {percent_label(heuristic['ticket_field_accuracy'])} no texto estruturado"
         ),
         "source": f"Scenario pack sintetico · {report_dir.name}",
     }
@@ -279,12 +271,12 @@ def _judge_case_card(scenario: dict[str, str], selected: bool) -> str:
     state = " selected" if selected else ""
     return f"""
     <article class="judge-card{state}">
-      <span>{_escape(scenario["scenario_id"])}</span>
-      <h3>{_escape(scenario["title"])}</h3>
-      <p>{_escape(scenario["story"])}</p>
+      <span>{escape(scenario["scenario_id"])}</span>
+      <h3>{escape(scenario["title"])}</h3>
+      <p>{escape(scenario["story"])}</p>
       <div class="judge-facts">
-        <div><strong>Documento interpretado</strong><em>{_escape(scenario["gemma"])}</em></div>
-        <div><strong>Regra em foco</strong><em>{_escape(scenario["rule"])}</em></div>
+        <div><strong>Documento interpretado</strong><em>{escape(scenario["gemma"])}</em></div>
+        <div><strong>Regra em foco</strong><em>{escape(scenario["rule"])}</em></div>
       </div>
     </article>
     """
@@ -309,9 +301,18 @@ def _render_technical_mode(
     variant: str,
 ) -> dict[str, Any]:
     with st.expander("Modo tecnico: escolher variante e editar CSV/JSON", expanded=False):
-        selected = st.selectbox("Cenario base", list(case_by_id), index=list(case_by_id).index(scenario_id))
-        selected_variant = st.radio("Variante", ["full", "heuristic", "fifo"], index=["full", "heuristic", "fifo"].index(variant), horizontal=True)
-        selected_defaults = defaults if selected == scenario_id else load_case_defaults(case_by_id[selected])
+        selected = st.selectbox(
+            "Cenario base", list(case_by_id), index=list(case_by_id).index(scenario_id)
+        )
+        selected_variant = st.radio(
+            "Variante",
+            ["full", "heuristic", "fifo"],
+            index=["full", "heuristic", "fifo"].index(variant),
+            horizontal=True,
+        )
+        selected_defaults = (
+            defaults if selected == scenario_id else load_case_defaults(case_by_id[selected])
+        )
         inputs = _render_inputs(
             selected_defaults,
             case_by_id[selected],
@@ -351,7 +352,9 @@ def _render_inputs(
         top_a, top_b = st.columns([1.08, 0.92], gap="large")
         with st.form("yard_inputs", border=False):
             with top_a:
-                st.markdown('<div class="panel-title">1 · Fila de caminhoes</div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="panel-title">1 · Fila de caminhoes</div>', unsafe_allow_html=True
+                )
                 queue_csv = st.text_area(
                     "queue.csv",
                     value=defaults["queue_csv"],
@@ -361,7 +364,9 @@ def _render_inputs(
                 st.markdown(_queue_preview(queue_csv), unsafe_allow_html=True)
 
             with top_b:
-                st.markdown('<div class="panel-title">2 · Ticket ou documento</div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="panel-title">2 · Ticket ou documento</div>', unsafe_allow_html=True
+                )
                 uploaded_ticket = st.file_uploader(
                     "Ticket PDF, imagem ou TXT",
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
@@ -375,21 +380,29 @@ def _render_inputs(
 
             mid_a, mid_b, mid_c = st.columns([1, 1, 1], gap="large")
             with mid_a:
-                st.markdown('<div class="panel-title">3 · Nota do operador</div>', unsafe_allow_html=True)
-                operator_note = st.text_area("operator_note", value=defaults["operator_note"], height=140)
+                st.markdown(
+                    '<div class="panel-title">3 · Nota do operador</div>', unsafe_allow_html=True
+                )
+                operator_note = st.text_area(
+                    "operator_note", value=defaults["operator_note"], height=140
+                )
             with mid_b:
                 st.markdown('<div class="panel-title">4 · Clima</div>', unsafe_allow_html=True)
-                weather_json = st.text_area("weather_state.json", value=defaults["weather_json"], height=140)
+                weather_json = st.text_area(
+                    "weather_state.json", value=defaults["weather_json"], height=140
+                )
             with mid_c:
                 st.markdown('<div class="panel-title">5 · Recursos</div>', unsafe_allow_html=True)
-                resource_json = st.text_area("resource_state.json", value=defaults["resource_json"], height=140)
+                resource_json = st.text_area(
+                    "resource_state.json", value=defaults["resource_json"], height=140
+                )
 
             st.markdown(
                 f"""
                 <div class="run-strip">
                   <div>
-                    <strong>Cenario base:</strong> {_escape(case["scenario_id"])}
-                    <span>Variante: {_escape(variant)}</span>
+                    <strong>Cenario base:</strong> {escape(case["scenario_id"])}
+                    <span>Variante: {escape(variant)}</span>
                   </div>
                   <div class="run-note">A execucao grava arquivos temporarios em cache/ui_sessions dentro do container.</div>
                 </div>
@@ -409,10 +422,6 @@ def _render_inputs(
     }
 
 
-
-
-
-
 def _render_outputs(
     payload: FrontEndPayload,
     request: DecisionRequest,
@@ -429,69 +438,35 @@ def _render_outputs(
         unsafe_allow_html=True,
     )
 
-    st.markdown(_judge_comparison_card(payload, request, fifo_payload), unsafe_allow_html=True)
-    st.markdown(_recommended_decision_card(payload), unsafe_allow_html=True)
-    st.markdown(_queue_stack_card(payload, request), unsafe_allow_html=True)
+    st.markdown(judge_comparison_card(payload, request, fifo_payload), unsafe_allow_html=True)
+    st.markdown(recommended_decision_card(payload), unsafe_allow_html=True)
+    st.markdown(queue_stack_card(payload, request), unsafe_allow_html=True)
     first_left, first_right = st.columns([1, 1], gap="large")
     with first_left:
-        st.markdown(_why_not_fifo_card(payload), unsafe_allow_html=True)
+        st.markdown(why_not_fifo_card(payload), unsafe_allow_html=True)
     with first_right:
-        st.markdown(_gemma_extraction_card(payload, request), unsafe_allow_html=True)
+        st.markdown(gemma_extraction_card(payload, request), unsafe_allow_html=True)
 
     second_left, second_right = st.columns([1, 1], gap="large")
     with second_left:
-        st.markdown(_blocked_constraints_card(payload), unsafe_allow_html=True)
+        st.markdown(blocked_constraints_card(payload), unsafe_allow_html=True)
     with second_right:
-        _render_operator_action(payload)
+        render_operator_action(payload)
 
     with st.expander("Ver evidencias tecnicas e auditoria", expanded=False):
-        _render_status_bar(payload)
-        _render_input_evidence(payload, request, case)
-        st.markdown(_copilot_timeline_card(payload, request), unsafe_allow_html=True)
-        _render_driver_message(payload)
+        render_status_bar(payload)
+        render_input_evidence(payload, request, case)
+        st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
+        render_driver_message(payload)
         left, right = st.columns([1.15, 0.85], gap="large")
         with left:
-            _render_validation_matrix(payload)
+            render_validation_matrix(payload)
         with right:
-            _render_gemma_context(payload, request)
-            st.markdown(_tool_badges_card(payload), unsafe_allow_html=True)
-        _render_audit(payload)
+            render_gemma_context(payload, request)
+            st.markdown(tool_badges_card(payload), unsafe_allow_html=True)
+        render_audit(payload)
     with st.expander("Painel avancado: payload JSON completo", expanded=False):
         st.json(payload.model_dump(mode="json"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _render_error(error: str) -> None:
@@ -499,13 +474,11 @@ def _render_error(error: str) -> None:
         f"""
         <article class="error-card">
           <strong>Entrada invalida</strong>
-          <p>{_escape(error)}</p>
+          <p>{escape(error)}</p>
         </article>
         """,
         unsafe_allow_html=True,
     )
-
-
 
 
 def _queue_preview(queue_csv: str) -> str:
@@ -522,70 +495,6 @@ def _queue_preview(queue_csv: str) -> str:
       <div><strong>{priority}</strong><span>prioridade</span></div>
     </div>
     """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _brand_block() -> str:
@@ -609,10 +518,6 @@ def _runtime_label() -> str:
 
 def _ui_autorun_enabled() -> bool:
     return os.getenv("PEQUIFLUX_UI_AUTORUN", "").strip().lower() in {"1", "true", "yes"}
-
-
-
-
 
 
 if __name__ == "__main__":
