@@ -56,3 +56,4 @@ Procurar:
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.
 - A UI deve obter `DecisionOrchestrator` via `app/ui/ui_runner.py` e `st.cache_resource`; não chamar `build_gemma_adapter()` diretamente em componente ou composição de tela.
 - Novas mudanças no fluxo de decisão devem encaixar nas etapas `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` ou `persist_and_log`; não voltar a concentrar o pipeline inteiro em `run_decision()`.
+- Estados de orquestração só podem mudar por `WorkflowStateMachine.transition_to` ou `WorkflowStateMachine.force_terminal`; não atribuir `current_state` diretamente fora da máquina de estados.

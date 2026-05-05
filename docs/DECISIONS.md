@@ -4,6 +4,25 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-05 — Bloqueio por erro usa terminal controlado da state machine
+
+Contexto:
+`DecisionOrchestrator._build_blocked_payload()` ainda atribuía `state_machine.current_state = FlowState.BLOCKED` diretamente, desviando do contrato da máquina de estados.
+
+Decisão:
+Adicionar `WorkflowStateMachine.force_terminal(terminal_state, reason=...)` para terminais excepcionais controlados e usar esse método no caminho de erro do orquestrador.
+
+Alternativas rejeitadas:
+Permitir qualquer terminal em `transition_to` ou manter atribuição direta no orquestrador.
+
+Impacto:
+Transições normais continuam restritas por `transition_to`; bloqueios fail-closed registram motivo e não burlam a máquina de estados.
+
+Arquivos/módulos afetados:
+- `app/orchestration/state_machine.py`
+- `app/orchestration/orchestrator.py`
+- `tests/unit/test_state_machine.py`
+
 ### 2026-05-05 — Screenshot canonico mostra a prova FIFO vs Pe-Q.I
 
 Contexto:

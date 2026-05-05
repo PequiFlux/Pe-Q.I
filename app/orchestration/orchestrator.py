@@ -322,7 +322,7 @@ class DecisionOrchestrator:
         timers: dict[str, int],
         source_hashes: dict[str, str],
     ) -> FrontEndPayload:
-        state_machine.current_state = FlowState.BLOCKED
+        state_machine.force_terminal(FlowState.BLOCKED, reason=exc.message)
         preview = build_blocked_preview(
             request_id=request.request_id,
             scenario_id=request.scenario_id,
