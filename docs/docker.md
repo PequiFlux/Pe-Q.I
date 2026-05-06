@@ -73,7 +73,7 @@ Then open `http://localhost:8501`.
 
 The standalone Docker image defaults to `PEQUIFLUX_GEMMA_RUNTIME=text` so the quickstart works without model setup.
 
-The full Compose path starts a local Ollama service named `gemma` and configures the app with:
+The full UI Compose path starts a local Ollama service named `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:latest}`, and configures the app with:
 
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`
@@ -82,7 +82,7 @@ The full Compose path starts a local Ollama service named `gemma` and configures
 
 The `gemma` service declares `gpus: all`; use `demo-text`/`ui-text` on machines without a compatible Docker GPU setup. To use another Ollama image, set `OLLAMA_IMAGE` explicitly.
 
-Before the first real run, cache the model in the named Docker volume:
+`make ui` uses that full path, so loading the UI also starts Ollama/Gemma and pulls the configured Gemma 4 tag when it is not already cached. To prewarm the model separately:
 
 ```bash
 GEMMA_MODEL=gemma4:latest docker compose --profile gemma-setup run --rm gemma-init

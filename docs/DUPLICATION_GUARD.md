@@ -53,12 +53,12 @@ Procurar:
 - Classificação de exceções deve acumular sinais em `secondary_exceptions` e `affected_resources`; não voltar a early return por primeira condição em `app/services/exception_classifier.py`.
 - Quando `MANUAL_REVIEW_HINT` aparecer em achados de classificação, mesmo como secundária, `needs_human_review` deve ser `true`; não depender apenas da exceção primária.
 - Combinações críticas de hierarquia devem ficar como testes unitários em `tests/unit/test_exception_classifier.py`, `tests/unit/test_constraints.py` e `tests/unit/test_truth_resolver.py`; não expandir o sample público congelado só para cobrir variantes de regra.
-- Judge Mode da UI deve reutilizar cenários do manifest e `DecisionOrchestrator`; não criar regra de decisão paralela para explicar FIFO vs Pe-Q.I.
+- A tela principal da UI deve ser operacional: comandos `Carregar exemplo`/`Limpar campos`, fila CSV por upload, ticket/documento por upload, nota, clima/recursos simples ou JSON, resultado, ação humana e auditoria técnica colapsada. Benchmark strip, Judge Mode e comparação FIFO vs Pe-Q.I não devem voltar para a superfície principal.
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.
 - Toda contribuição de score em `app/domain/ranking.py` deve adicionar `PolicyRule` correspondente em `fired_rules`; não deixar bônus/penalidade só em `reason_details`.
-- Faixas de benchmark na UI devem usar `app.ui.benchmark_summary.load_benchmark_summary`; não recriar `_benchmark_summary`, `_latest_benchmark_report_dir` ou métrica de comparação dentro de `streamlit_app.py`.
+- Se uma faixa de benchmark voltar em página ou modo separado, deve usar `app.ui.benchmark_summary.load_benchmark_summary`; não recriar `_benchmark_summary`, `_latest_benchmark_report_dir` ou métrica de comparação dentro de `streamlit_app.py`.
 - O benchmark deve distinguir `raw_fifo` de `fifo_safe`; não chamar a variante operacional `fifo` de FIFO puro em relatório público.
 - Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
 - Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.

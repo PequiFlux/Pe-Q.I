@@ -10,6 +10,16 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 
 ![PequiFlux Yard Copilot UI](assets/screenshots/pequiflux-ui.png)
 
+## Prints da UI
+
+| Nova decisão | Exemplo carregado |
+|---|---|
+| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Tela inicial da UI operacional" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-example-loaded.png" alt="UI com exemplo carregado" width="420"> |
+
+| Resultado da análise | Auditoria técnica |
+|---|---|
+| <img src="assets/screenshots/pequiflux-ui-03-result.png" alt="Resultado da análise com decisão PREVIEW_READY" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-audit-expanded.png" alt="Painel de auditoria técnica aberto" width="420"> |
+
 ## Para avaliadores
 
 | Em dois minutos | Onde ver |
@@ -17,7 +27,7 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 | Tese | Pe-Q.I recomenda quem chamar, para qual moega, por que o FIFO puro falharia e qual regra sustenta a decisão |
 | Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo |
 | Benchmark | `make bench` gera relatório interno em `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) permanece como snapshot público congelado |
-| Evidência visual | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) e imagem acima |
+| Evidência visual | [`assets/screenshots/`](assets/screenshots/) e prints acima |
 | Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
 | Critérios e limites | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) e [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) |
 
@@ -136,7 +146,7 @@ make ui-text
 
 Abra [http://localhost:8501](http://localhost:8501).
 
-Para a UI completa com Ollama/Gemma, rode `make ui` depois do setup do modelo.
+Para a UI completa com Ollama/Gemma, rode `make ui`; o Compose sobe `gemma`, executa `gemma-init` para puxar `${GEMMA_MODEL:-gemma4:latest}` e então inicia a UI.
 
 ### Benchmark completo com Gemma/Ollama
 
@@ -326,7 +336,7 @@ Se precisar forçar um destino específico:
 docker compose run --rm benchmark python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir bench/reports/extended/manual-run
 ```
 
-### Setup do Gemma (necessário para `make demo`, `make ui` e benchmark com runtime Ollama)
+### Setup do Gemma (necessário para `make demo` e benchmark com runtime Ollama; automático em `make ui`)
 
 ```bash
 # Puxar o modelo para o volume do Ollama
@@ -467,7 +477,7 @@ Se a verdade é insuficiente, a decisão é `BLOCKED` ou `REVIEW_REQUIRED` com m
 | `heuristic` | Não | Rules engine determinístico; parser de texto; templates de explicação |
 | `fifo` | Não | Variante operacional FIFO segura: preserva fila entre pares elegíveis e ainda respeita hard constraints |
 
-No relatório de benchmark, essa variante aparece como `fifo_safe`. A linha `raw_fifo` é calculada separadamente a partir da fila bruta para representar o FIFO puro que a UI mostra em "FIFO chamaria".
+No relatório de benchmark, essa variante aparece como `fifo_safe`. A linha `raw_fifo` é calculada separadamente a partir da fila bruta para manter a comparação pública de FIFO puro fora da tela operacional principal.
 
 Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
@@ -620,7 +630,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Evidência | Caminho |
 |---|---|
 | Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
-| Screenshot usada no README | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
+| Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-example-loaded.png`](assets/screenshots/pequiflux-ui-02-example-loaded.png), [`assets/screenshots/pequiflux-ui-03-result.png`](assets/screenshots/pequiflux-ui-03-result.png), [`assets/screenshots/pequiflux-ui-04-audit-expanded.png`](assets/screenshots/pequiflux-ui-04-audit-expanded.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
 | Relatórios extended internos | `bench/reports/extended/<run_id>/` |
 | Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |

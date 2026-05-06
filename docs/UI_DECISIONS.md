@@ -2,45 +2,41 @@
 
 ## Objetivo
 
-A interface foi desenhada para uma banca entender em menos de dois minutos:
-
-1. quem o FIFO chamaria;
-2. quem o Pe-Q.I recomenda;
-3. por que a quebra de FIFO e legitima;
-4. que documento foi interpretado;
-5. quais regras bloquearam alternativas;
-6. qual decisao ainda cabe ao operador.
+A interface principal deve parecer produto operacional, nao painel de banca. O operador entra para criar uma decisao, preencher ou carregar entradas, analisar com Gemma 4, ler o resultado e registrar a acao humana.
 
 ## Decisoes Principais
 
-### Judge Mode primeiro
+### Fluxo operacional primeiro
 
-A UI abre com tres casos narrativos em vez de formularios de JSON. Isso reduz densidade tecnica e permite que a banca veja a tese antes dos detalhes.
+A primeira tela segue quatro blocos:
+
+1. Nova decisao: botoes `Carregar exemplo` e `Limpar campos`, fila CSV por upload, ticket/documento PDF/PNG/JPG/TXT por upload, nota do operador, clima em formulario simples ou JSON, e recursos em formulario simples ou JSON.
+2. Resultado: status, caminhao recomendado, destino recomendado, motivo operacional, documento interpretado, restricoes criticas e mensagem ao motorista.
+3. Acao do operador: aprovar, bloquear ou sobrescrever com motivo.
+4. Auditoria tecnica: JSON, matriz de validacao, hashes, regras disparadas e latencia.
+
+### Demo discreta
+
+A UI mantem apenas dois comandos auxiliares antes dos campos: `Carregar exemplo` e `Limpar campos`. O exemplo preenche o pacote com um caso versionado do manifest e permite que avaliadores executem o fluxo como usuarios finais. A demo nao deve transformar a tela principal em benchmark, Judge Mode ou painel comparativo.
+
+### Sem benchmark na tela principal
+
+Benchmark strip, metricas `full`/`heuristic`/`raw_fifo`, texto de banca e comparacao `FIFO chamaria` versus `Pe-Q.I recomenda` ficam fora da superficie operacional principal. Esses artefatos continuam em README, docs e `bench/reports/sample/`.
 
 ### Fila como objeto central
 
-Os cinco primeiros caminhoes aparecem como cartoes empilhados. O primeiro da fila recebe estado explicito, como `bloqueado por restricao` ou `mantido aguardando`. O caminhao promovido fica destacado.
+Os cinco primeiros caminhoes aparecem como cartoes empilhados. O operador ve quem foi chamado, quem ficou aguardando e quais restricoes bloquearam alternativas, sem precisar abrir JSON.
 
-### Comparacao FIFO vs Pe-Q.I
+### Auditoria colapsada
 
-A comparacao aparece lado a lado para explicitar o conflito de legitimidade: o sistema nao apenas recomenda outro caminhao, ele mostra por que FIFO puro falharia.
-
-Nos resultados, esse bloco vem antes da fila empilhada para que o screenshot e a banca vejam primeiro o contraste `FIFO chamaria` versus `Pe-Q.I recomenda`.
-
-### Heatmap em vez de tabela
-
-A matriz de validacao tecnica virou heatmap: caminhoes nas linhas, destinos nas colunas, verde para elegivel, vermelho para bloqueado e chips com HC-01, HC-02 etc.
+A matriz de validacao, payload JSON, hashes, regras disparadas e latencias continuam disponiveis em `Ver auditoria tecnica`. Eles sao essenciais para rastreabilidade, mas nao competem com a decisao operacional.
 
 ### Linguagem operacional
 
-Rotulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam no painel avancado. A primeira leitura usa: `Documento interpretado`, `Regras conferidas`, `Alternativas bloqueadas`, `Fila recalculada`, `Operador decide`.
-
-### Benchmark visivel
-
-A faixa superior mostra o comparativo `full`, `raw_fifo`/`fifo_safe` e `heuristic` sem abrir notebook. Os detalhes públicos continuam em `bench/reports/sample/`, enquanto execuções maiores de desenvolvimento ficam em `bench/reports/extended/`.
+Rotulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam na auditoria tecnica. A primeira leitura usa: `Documento interpretado`, `Restricoes criticas`, `Fila`, `Mensagem ao motorista` e `Acao do operador`.
 
 ### Screenshot do README
 
-O README embute o screenshot canonico `assets/screenshots/pequiflux-ui.png`.
+O README embute o screenshot canonico `assets/screenshots/pequiflux-ui.png` e uma galeria curta em `assets/screenshots/pequiflux-ui-0*.png` mostrando entrada, exemplo carregado, resultado e auditoria.
 
-Para gerar evidencia visual sem clique manual, a UI aceita `PEQUIFLUX_UI_AUTORUN=1`, que executa o caso narrativo selecionado e deixa a decisao materializada para captura.
+Para gerar evidencia visual sem clique manual, a UI aceita `PEQUIFLUX_UI_AUTORUN=1`, que carrega o exemplo e deixa a decisao materializada para captura.

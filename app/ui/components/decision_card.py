@@ -4,69 +4,20 @@ from pathlib import Path
 from typing import Any
 
 from app.domain.models import DecisionRequest, FrontEndPayload
-from app.services.raw_fifo import raw_fifo_call, raw_queue_rows
+from app.services.raw_fifo import raw_queue_rows
 
 from app.ui.components.common import (
     chip,
     confidence_value,
     constraint_failure_summary,
     escape,
-    first_skipped_truck,
-    gemma_short_summary,
-    operator_actions_label,
-    primary_rule,
     reason_detail_label,
     story_tile,
     truck_failure_rules,
 )
 
 
-def judge_comparison_card(
-    payload: FrontEndPayload,
-    request: DecisionRequest,
-    fifo_payload: FrontEndPayload | None,
-) -> str:
-    fifo_truck, fifo_destination = raw_fifo_call(request)
-    if fifo_truck is None and fifo_payload and fifo_payload.recommended_truck:
-        fifo_truck = fifo_payload.recommended_truck.truck_id
-    if fifo_destination is None and fifo_payload and fifo_payload.recommended_destination:
-        fifo_destination = fifo_payload.recommended_destination.destination_id
-    fifo_truck_label = fifo_truck or "sem chamada"
-    fifo_destination_label = fifo_destination or "sem destino"
-    recommended_truck = (
-        payload.recommended_truck.truck_id if payload.recommended_truck else "revisao humana"
-    )
-    recommended_destination = (
-        payload.recommended_destination.destination_id
-        if payload.recommended_destination
-        else "aguardar decisao humana"
-    )
-    applied_rule = primary_rule(payload)
-    gemma_fields = gemma_short_summary(payload)
-    return f"""
-    <section class="judge-comparison">
-      <div class="comparison-tile fifo">
-        <span>FIFO chamaria</span>
-        <strong>{escape(fifo_truck_label)}</strong>
-        <p>Destino provavel: {escape(fifo_destination_label)}</p>
-      </div>
-      <div class="comparison-arrow">vs</div>
-      <div class="comparison-tile peqi">
-        <span>Pe-Q.I recomenda</span>
-        <strong>{escape(recommended_truck)}</strong>
-        <p>Destino: {escape(recommended_destination)}</p>
-      </div>
-      <div class="comparison-proof">
-        <div><span>Documento interpretado</span><strong>{escape(gemma_fields)}</strong></div>
-        <div><span>Regra aplicada</span><strong>{escape(applied_rule)}</strong></div>
-        <div><span>Decisao humana</span><strong>{escape(operator_actions_label(payload.operator_actions))}</strong></div>
-      </div>
-    </section>
-    """
-
-
 def recommended_decision_card(payload: FrontEndPayload) -> str:
-    skipped_truck = first_skipped_truck(payload)
     recommended_truck = (
         payload.recommended_truck.truck_id if payload.recommended_truck else "sem chamada"
     )
@@ -81,15 +32,15 @@ def recommended_decision_card(payload: FrontEndPayload) -> str:
     return f"""
     <section class="decision-story single">
       <div class="story-main">
-        <span class="eyebrow dark">1. Decisao recomendada</span>
+        <span class="eyebrow dark">Resultado da análise</span>
         <h2>{escape(recommended_truck)} deve ir para {escape(destination)}</h2>
-        <p>O primeiro da fila nao e chamado automaticamente. A recomendacao preserva legitimidade porque mostra o criterio que sustenta a quebra.</p>
+        <p>Recomendacao operacional baseada no ticket interpretado, no estado do patio e nas restricoes criticas avaliadas.</p>
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile("Nao chamar agora", skipped_truck or "nenhum", "Nao e fura-fila: ha evidencia operacional para nao chamar o primeiro.")}
-        {story_tile("Chamar agora", recommended_truck, f"Destino: {destination}", "action")}
-        {story_tile("Critério sustentado", "verificavel", reason_detail_label(payload.reason_summary), "proof")}
+        {story_tile("Status", str(payload.decision_status), "Resultado atual antes da acao humana.")}
+        {story_tile("Caminhao", recommended_truck, f"Destino: {destination}", "action")}
+        {story_tile("Motivo operacional", "verificavel", reason_detail_label(payload.reason_summary), "proof")}
       </div>
     </section>
     """
@@ -110,7 +61,7 @@ def queue_stack_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
     <section class="queue-focus">
       <div class="card-head">
         <div><h3>Fila em decisao</h3><p>Os 5 primeiros caminhoes como o operador ve: quem subiu, quem ficou aguardando e por qual restricao.</p></div>
-        {chip("FIFO visivel", "green")}
+        {chip("fila operacional", "green")}
       </div>
       <div class="queue-stack">{cards}</div>
     </section>
@@ -178,29 +129,6 @@ def _queue_stack_state(
     if diff_entry and diff_entry.decision == "shifted":
         return "neutral", "avancou na fila", diff_entry.reason
     return "neutral", "sem mudanca", "ordem preservada ate nova avaliacao"
-
-
-def why_not_fifo_card(payload: FrontEndPayload) -> str:
-    skipped_truck = first_skipped_truck(payload)
-    if skipped_truck:
-        title = f"Por que {skipped_truck} nao foi chamado?"
-        body = "Porque a fila pura perdeu legitimidade neste contexto: a decisao precisa respeitar restricoes, risco operacional e criterio publicado."
-    else:
-        title = "FIFO preservado"
-        body = "O primeiro da fila continua compativel com as restricoes avaliadas."
-    details = "".join(
-        f"<li>{escape(reason_detail_label(item))}</li>" for item in payload.reason_details[:3]
-    )
-    return f"""
-    <article class="card narrative-card">
-      <div class="card-head">
-        <div><h3>2. Por que nao FIFO?</h3><p>{escape(title)}</p></div>
-        {chip("anti-arbitragem", "green")}
-      </div>
-      <p>{escape(body)}</p>
-      <ul class="note-list">{details}</ul>
-    </article>
-    """
 
 
 def gemma_extraction_card(payload: FrontEndPayload, request: DecisionRequest) -> str:

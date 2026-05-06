@@ -4,42 +4,49 @@ Roteiro para video de 3 minutos da Gemma 4 Good Hackathon.
 
 ## 0:00-0:20 — Tese
 
-Mostrar a tela inicial com a faixa de benchmark.
+Mostrar a tela inicial de nova decisao.
 
 Fala:
 > Pe-Q.I decide qual caminhao chamar quando FIFO puro parece justo, mas fica errado diante de chuva, carga umida ou documento bloqueado. Gemma interpreta o documento, regras deterministicas decidem, e o operador continua no controle.
 
-## 0:20-0:55 — Judge Mode
+## 0:20-0:45 — Carregar Exemplo
 
-Clique em `Chuva bloqueando moega aberta` e depois em `Executar caso`.
-
-Fala:
-> A banca nao precisa editar JSON. A UI abre com tres casos narrativos. Aqui, o primeiro da fila iria para moega aberta, mas a chuva e a compatibilidade bloqueiam essa alternativa.
-
-## 0:55-1:35 — Fila Como Objeto Central
-
-Role para `Fila em decisao`.
+Clique em `Carregar exemplo`. O botao `Limpar campos` fica ao lado para voltar ao estado vazio.
 
 Fala:
-> O primeiro caminhao fica marcado como bloqueado por restricao. O caminhao que subiu aparece destacado, com a nova posicao. Isso evita a percepcao de favorecimento ou fura-fila.
+> Para a demo, eu carrego um pacote sintetico versionado. Em operacao, esses campos viriam do upload da fila CSV, do ticket PDF, imagem ou TXT, da nota do operador, e do clima/recursos em formulario simples ou JSON.
 
-## 1:35-2:10 — FIFO vs Pe-Q.I
+## 0:45-1:10 — Analisar
 
-Mostrar a comparacao `FIFO chamaria` versus `Pe-Q.I recomenda`.
-
-Fala:
-> FIFO chamaria TRK-001. Pe-Q.I recomenda TRK-005 para DST-COV-01. A diferenca e verificavel: documento interpretado, regra aplicada e decisao humana disponivel.
-
-## 2:10-2:40 — Evidencia e Auditoria
-
-Abrir `Ver evidencias tecnicas e auditoria`.
+Clique em `Analisar com Gemma 4`.
 
 Fala:
-> A matriz vira um heatmap: caminhoes nas linhas, destinos nas colunas, verde para elegivel e vermelho para bloqueado. Os chips mostram HC-01, HC-05 e outras restricoes.
+> A execucao interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisao auditavel. Se faltar verdade material, o sistema fecha em bloqueio ou revisao, sem fallback operacional.
 
-## 2:40-3:00 — Benchmark e Fechamento
+## 1:10-1:50 — Resultado Operacional
 
-Voltar para a faixa superior.
+Mostrar status, caminhao recomendado, destino recomendado, motivo operacional, documento interpretado e restricoes criticas.
 
 Fala:
-> O scenario pack sintetico compara full, heuristic, fifo seguro e FIFO bruto. O sistema completo roda o pack versionado com zero violacoes de regra; o FIFO bruto fica fora do alvo em cenarios documentais, multimodais e de politica operacional. O projeto e reproduzivel por Docker e deixa evidencias no repositorio.
+> O operador ve o status da decisao, o caminhao recomendado, o destino, o motivo operacional e os campos extraidos do documento. As restricoes bloqueantes aparecem como regras duras, nao como sugestao do modelo.
+
+## 1:50-2:20 — Fila e Mensagem
+
+Role pela fila visual e pela mensagem ao motorista.
+
+Fala:
+> A fila visual mostra quem foi chamado, quem ficou aguardando e quais restricoes explicam o estado de cada caminhao. A mensagem ao motorista transforma a decisao em comunicacao operacional curta.
+
+## 2:20-2:45 — Acao Humana
+
+Mostrar aprovar, bloquear ou sobrescrever com motivo obrigatorio.
+
+Fala:
+> O sistema recomenda; o operador governa. Aprovar, bloquear ou sobrescrever exige motivo, e a persistencia registra a acao humana junto da auditoria.
+
+## 2:45-3:00 — Auditoria Tecnica
+
+Abrir `Ver auditoria tecnica`.
+
+Fala:
+> A auditoria tecnica fica colapsada: matriz de validacao, regras disparadas, hashes, latencias e JSON completo continuam disponiveis para reconstrucao da decisao.

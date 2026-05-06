@@ -46,18 +46,14 @@ def render_status_bar(payload: FrontEndPayload) -> None:
     )
     rejected = len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
     latency = sum(payload.latency_ms.values())
-    fifo_break = bool(
-        payload.recommended_truck and payload.recommended_truck.queue_position_before != 1
-    )
     cards = [
         ("Status", display_status(str(payload.decision_status)), "estado final da previa"),
         ("Caminhao", truck, "proxima chamada"),
         ("Destino", destination, "recurso recomendado"),
-        ("FIFO", "quebrado" if fifo_break else "preservado", "justificavel e auditado"),
         ("Rejeicoes", str(rejected), "pares inelegiveis"),
         ("Latencia", f"{latency} ms", "pipeline local"),
     ]
-    for column, (label, value, note) in zip(st.columns(6), cards):
+    for column, (label, value, note) in zip(st.columns(5), cards):
         with column:
             st.markdown(status_card(label, value, note), unsafe_allow_html=True)
 
@@ -100,7 +96,7 @@ def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> 
 
 def render_operator_action(payload: FrontEndPayload) -> None:
     st.markdown(
-        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>5. Acao do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restricao dura.</p></div></div>',
+        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>3. Acao do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restricao dura.</p></div></div>',
         unsafe_allow_html=True,
     )
     action = st.radio(
@@ -109,7 +105,7 @@ def render_operator_action(payload: FrontEndPayload) -> None:
         format_func=operator_action_label,
         horizontal=True,
     )
-    reason = st.text_input("Motivo", value="OP-DEMO-01 revisou a decisao.")
+    reason = st.text_input("Motivo obrigatório", value="OP-DEMO-01 revisou a decisao.")
     requested_truck = None
     requested_destination = None
     if action.endswith("override"):

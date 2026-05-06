@@ -22,7 +22,7 @@ services:
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
     entrypoint: ["sh", "-lc"]
     command: ["ollama pull \"$${GEMMA_MODEL}\""]
-    profiles: ["gemma-setup"]
+    profiles: ["gemma-setup", "ui"]
 
   demo:
     build:
@@ -103,8 +103,8 @@ services:
       target: ui
     image: pequiflux-yard-copilot:ui
     depends_on:
-      gemma:
-        condition: service_healthy
+      gemma-init:
+        condition: service_completed_successfully
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434

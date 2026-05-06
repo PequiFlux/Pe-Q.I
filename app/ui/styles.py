@@ -61,6 +61,10 @@ def inject_styles() -> None:
           section[data-testid="stSidebar"] li {
             color: rgba(236, 255, 248, 0.82);
           }
+          section[data-testid="stSidebar"] button p {
+            color: var(--green-900);
+            font-weight: 900;
+          }
           .brand {
             display: grid;
             grid-template-columns: 48px 1fr;
@@ -178,49 +182,6 @@ def inject_styles() -> None:
             gap: 12px;
             margin: 10px 0 10px;
           }
-          .benchmark-strip {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-            gap: 10px;
-            align-items: stretch;
-            margin: 0 0 10px;
-            padding: 10px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.88);
-            border: 1px solid var(--line);
-            box-shadow: 0 8px 22px rgba(15,23,42,0.05);
-          }
-          .benchmark-strip div {
-            min-width: 0;
-            padding: 11px 12px;
-            border-radius: 10px;
-            background: #fff;
-            border: 1px solid var(--line);
-          }
-          .benchmark-strip span {
-            display: block;
-            color: var(--green-800);
-            font-size: 11px;
-            font-weight: 950;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-          }
-          .benchmark-strip strong {
-            display: block;
-            margin-top: 5px;
-            color: var(--ink);
-            font-size: 14px;
-            line-height: 1.3;
-            overflow-wrap: anywhere;
-          }
-          .benchmark-strip small {
-            display: grid;
-            align-items: center;
-            max-width: 170px;
-            color: var(--muted);
-            font-size: 11px;
-            line-height: 1.35;
-          }
           .compact-title {
             margin-top: 0;
           }
@@ -242,67 +203,7 @@ def inject_styles() -> None:
           .section-title h2 {
             font-size: 22px;
           }
-          .judge-title {
-            margin-top: 4px;
-          }
-          .judge-card {
-            min-height: 258px;
-            margin-bottom: 10px;
-            padding: 16px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.90);
-            border: 1px solid var(--line);
-            box-shadow: 0 8px 22px rgba(15,23,42,0.06);
-          }
-          .judge-card.selected {
-            border-color: rgba(34,201,139,0.42);
-            background: linear-gradient(145deg, var(--green-50), #fff);
-            box-shadow: 0 14px 30px rgba(7,95,69,0.13);
-          }
-          .judge-card > span,
-          .judge-facts strong,
-          .comparison-tile span,
-          .comparison-proof span {
-            display: block;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 950;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-          }
-          .judge-card h3 {
-            margin: 10px 0 8px;
-            color: var(--ink);
-            font-size: 21px;
-            line-height: 1.12;
-            letter-spacing: 0;
-          }
-          .judge-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.45;
-          }
-          .judge-facts {
-            display: grid;
-            gap: 8px;
-            margin-top: 14px;
-          }
-          .judge-facts div {
-            padding: 10px;
-            border-radius: 10px;
-            background: #fff;
-            border: 1px solid var(--line);
-          }
-          .judge-facts em {
-            display: block;
-            margin-top: 5px;
-            color: var(--ink);
-            font-size: 12px;
-            line-height: 1.35;
-            font-style: normal;
-          }
-          .empty-judge {
+          .empty-state {
             margin-top: 10px;
             padding: 18px;
             border-radius: 18px;
@@ -310,12 +211,12 @@ def inject_styles() -> None:
             border: 1px solid rgba(245,197,66,0.38);
             box-shadow: 0 8px 22px rgba(15,23,42,0.06);
           }
-          .empty-judge strong {
+          .empty-state strong {
             display: block;
             color: var(--ink);
             font-size: 18px;
           }
-          .empty-judge p {
+          .empty-state p {
             margin: 6px 0 0;
             color: var(--muted);
             font-size: 13px;
@@ -388,6 +289,16 @@ def inject_styles() -> None:
           .run-note {
             color: var(--muted);
             font-size: 12px;
+          }
+          .source-note {
+            margin: 8px 0 10px;
+            padding: 9px 11px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 750;
           }
           div[data-testid="stButton"] button {
             border-radius: 10px;
@@ -513,85 +424,6 @@ def inject_styles() -> None:
             background: var(--slate-50);
             border: 1px solid var(--line);
             font-weight: 900;
-          }
-          .judge-comparison {
-            display: grid;
-            grid-template-columns: minmax(0, 0.95fr) 50px minmax(0, 1fr) minmax(320px, 1.08fr);
-            gap: 12px;
-            align-items: stretch;
-            margin: 2px 0 10px;
-          }
-          .comparison-tile,
-          .comparison-proof {
-            min-width: 0;
-            padding: 16px;
-            border-radius: 14px;
-            border: 1px solid var(--line);
-            background: rgba(255,255,255,0.90);
-            box-shadow: 0 8px 22px rgba(15,23,42,0.06);
-          }
-          .comparison-tile.fifo {
-            background: linear-gradient(145deg, var(--red-50), #fff);
-            border-color: rgba(220,38,38,0.26);
-          }
-          .comparison-tile.peqi {
-            color: #fff;
-            background: linear-gradient(145deg, var(--green-800), var(--slate-900));
-            border-color: rgba(34,201,139,0.34);
-            box-shadow: 0 18px 34px rgba(7,95,69,0.18);
-          }
-          .comparison-tile strong {
-            display: block;
-            margin-top: 8px;
-            overflow-wrap: anywhere;
-            color: var(--ink);
-            font-size: 26px;
-            line-height: 1.05;
-          }
-          .comparison-tile.peqi span,
-          .comparison-tile.peqi strong,
-          .comparison-tile.peqi p {
-            color: #fff;
-          }
-          .comparison-tile.peqi p {
-            color: rgba(255,255,255,0.72);
-          }
-          .comparison-tile p {
-            margin: 8px 0 0;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.35;
-          }
-          .comparison-arrow {
-            display: grid;
-            place-items: center;
-            border-radius: 999px;
-            color: var(--green-800);
-            background: #fff;
-            border: 1px solid var(--line);
-            font-size: 14px;
-            font-weight: 950;
-            text-transform: uppercase;
-          }
-          .comparison-proof {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 8px;
-          }
-          .comparison-proof div {
-            min-width: 0;
-            padding: 10px;
-            border-radius: 10px;
-            background: #fff;
-            border: 1px solid var(--line);
-          }
-          .comparison-proof strong {
-            display: block;
-            margin-top: 6px;
-            overflow-wrap: anywhere;
-            color: var(--ink);
-            font-size: 13px;
-            line-height: 1.3;
           }
           .decision-story.single {
             grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -1140,15 +972,12 @@ def inject_styles() -> None:
             .status-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .hero { grid-template-columns: 1fr; }
             .decision-story { grid-template-columns: 1fr; }
-            .judge-comparison { grid-template-columns: 1fr; }
-            .comparison-arrow { min-height: 42px; }
             .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
           }
           @media (max-width: 860px) {
             .status-grid,
             .hero-proof,
             .story-grid,
-            .comparison-proof,
             .decision-pair,
             .input-summary,
             .package-grid,
@@ -1157,16 +986,9 @@ def inject_styles() -> None:
               grid-template-columns: 1fr;
             }
             .run-strip,
-            .benchmark-strip,
             .section-title,
             .card-head {
               flex-direction: column;
-            }
-            .benchmark-strip {
-              grid-template-columns: 1fr;
-            }
-            .benchmark-strip small {
-              max-width: none;
             }
             .timeline-item {
               grid-template-columns: 18px minmax(0, 1fr);

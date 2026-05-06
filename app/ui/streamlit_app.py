@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 from contextlib import nullcontext
-from pathlib import Path
 from typing import Any
 
 import streamlit as st
@@ -19,50 +19,38 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.benchmark_summary import load_benchmark_summary
 from app.ui.components.common import escape
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
-    judge_comparison_card,
     queue_stack_card,
     recommended_decision_card,
-    why_not_fifo_card,
 )
 from app.ui.components.validation_matrix import render_validation_matrix
 from app.ui.scenario_loader import (
     build_request_from_inputs,
-    judge_request,
     load_case_defaults,
     load_manifest,
 )
 from app.ui.styles import inject_styles
 from app.ui.ui_runner import run_payload_pair
 
-BENCHMARK_REPORTS_DIR = Path("bench/reports")
-JUDGE_SCENARIOS = [
-    {
-        "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
-        "title": "Chuva bloqueando moega aberta",
-        "story": "A chuva derruba a legitimidade do FIFO puro e a compatibilidade define quem pode ir.",
-        "gemma": "Leitura confirma ticket seco, placa e destino esperado.",
-        "rule": "HC-01, HC-05",
-    },
-    {
-        "scenario_id": "S03_WET_LOAD",
-        "title": "Carga umida exige moega compativel",
-        "story": "A fila favorece um destino seco, mas o ticket chega como imagem e sustenta a revisao correta.",
-        "gemma": "Leitura extrai carga umida, placa e restricao de destino a partir da imagem.",
-        "rule": "HC-02",
-    },
-    {
-        "scenario_id": "S06_DOCUMENT_BLOCK",
-        "title": "Documento ambiguo pede revisao humana",
-        "story": "O primeiro da fila nao pode ser despachado automaticamente enquanto a nota exige conferencia.",
-        "gemma": "Leitura identifica status documental e campos que exigem revisao.",
-        "rule": "HC-04",
-    },
-]
+EXAMPLE_SCENARIO_ID = "S10_FIFO_BREAK_JUSTIFIED"
+INPUT_KEYS = {
+    "queue_csv": "yard_queue_csv",
+    "ticket_text": "yard_ticket_text",
+    "operator_note": "yard_operator_note",
+    "weather_json": "yard_weather_json",
+    "resource_json": "yard_resource_json",
+    "queue_upload": "yard_queue_upload",
+    "ticket_upload": "yard_ticket_upload",
+    "weather_mode": "yard_weather_mode",
+    "resource_mode": "yard_resource_mode",
+    "weather_precipitation": "yard_weather_precipitation",
+    "weather_severity": "yard_weather_severity",
+    "resource_available": "yard_resource_available",
+    "resource_blocked": "yard_resource_blocked",
+}
 
 
 def main() -> None:
@@ -71,74 +59,56 @@ def main() -> None:
 
     manifest = load_manifest()
     case_by_id = {case["scenario_id"]: case for case in manifest["cases"]}
+    example_case = case_by_id[EXAMPLE_SCENARIO_ID]
 
     with st.sidebar:
         st.markdown(_brand_block(), unsafe_allow_html=True)
-        st.markdown(
-            f"""
-            <div class="side-card">
-              <div class="side-kicker">Fluxo da demo</div>
-              <ol>
-                <li>Escolher caso narrativo</li>
-                <li>Comparar FIFO vs Pe-Q.I</li>
-                <li>Conferir regra aplicada</li>
-                <li>Operador aprova, bloqueia ou sobrescreve</li>
-              </ol>
-            </div>
-            <div class="side-card compact">
-              <div class="side-kicker">Leitura do documento</div>
-              <p>{escape(_runtime_label())}</p>
-              <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.markdown(_sidebar_runtime_block(), unsafe_allow_html=True)
 
     _render_intro()
-    _render_benchmark_strip()
-    judge_submitted, scenario_id = _render_judge_mode(case_by_id)
-    variant = "full"
-    case = case_by_id[scenario_id]
-    defaults = load_case_defaults(case)
-
-    inputs = _render_technical_mode(defaults, case_by_id, scenario_id, variant)
-    if inputs["scenario_id"] != scenario_id or inputs["variant"] != variant:
-        scenario_id = inputs["scenario_id"]
-        variant = inputs["variant"]
-        case = case_by_id[scenario_id]
-        defaults = load_case_defaults(case)
-
-    if judge_submitted:
-        request = judge_request(case)
-        payload, fifo_payload = run_payload_pair(request)
-        st.session_state["last_payload"] = payload
-        st.session_state["last_request"] = request
-        st.session_state["last_fifo_payload"] = fifo_payload
-    elif inputs["submitted"]:
-        request, error = build_request_from_inputs(inputs, scenario_id, variant)
+    _ensure_input_state()
+    _render_input_actions(example_case)
+    if payload := st.session_state.get("last_payload"):
+        request = st.session_state.get("last_request")
+    elif _ui_autorun_enabled():
+        _load_example_into_state(example_case)
+        st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+        request, error = build_request_from_inputs(
+            {**_state_defaults(), "uploaded_ticket": None},
+            EXAMPLE_SCENARIO_ID,
+            "full",
+        )
         if error:
             _render_error(error)
             return
         assert request is not None
-        payload, fifo_payload = run_payload_pair(request)
+        payload, _ = run_payload_pair(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
-        st.session_state["last_fifo_payload"] = fifo_payload
+    else:
+        payload = None
+        request = None
 
-    payload = st.session_state.get("last_payload")
-    request = st.session_state.get("last_request")
-    fifo_payload = st.session_state.get("last_fifo_payload")
-    if payload is None and _ui_autorun_enabled():
-        request = judge_request(case)
-        payload, fifo_payload = run_payload_pair(request)
+    active_case_id = st.session_state.get("active_case", "UI_INTERACTIVE")
+    inputs = _render_operator_input(expanded=True, use_expander=False)
+
+    if inputs["submitted"]:
+        scenario_id = active_case_id if active_case_id in case_by_id else "UI_INTERACTIVE"
+        request, error = build_request_from_inputs(inputs, scenario_id, "full")
+        if error:
+            _render_error(error)
+            return
+        assert request is not None
+        payload, _ = run_payload_pair(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
-        st.session_state["last_fifo_payload"] = fifo_payload
+
     if payload is None or request is None:
-        _render_judge_empty_state()
+        _render_empty_state()
         return
 
-    _render_outputs(payload, request, case, fifo_payload)
+    case = case_by_id.get(request.scenario_id, {"scenario_id": request.scenario_id})
+    _render_outputs(payload, request, case)
 
 
 def _render_intro() -> None:
@@ -146,9 +116,9 @@ def _render_intro() -> None:
         """
         <section class="hero">
           <div>
-            <span class="eyebrow">PequiFlux Yard Copilot · Hackathon</span>
-            <h1>Gemma interpreta. Regras decidem. Operador governa.</h1>
-            <p>Copiloto local-first para fila de pátio: documento, contexto operacional, regras de bloqueio e decisão auditável em uma tela.</p>
+            <span class="eyebrow">PequiFlux Yard Copilot</span>
+            <h1>Nova decisão de pátio</h1>
+            <p>Envie fila, documento, nota, clima e recursos. O sistema interpreta o ticket, aplica restrições operacionais e devolve uma decisão auditável para aprovação humana.</p>
           </div>
           <div class="hero-proof">
             <div><strong>Documento</strong><span>interpretado</span></div>
@@ -161,155 +131,50 @@ def _render_intro() -> None:
     )
 
 
-def _render_benchmark_strip() -> None:
-    summary = load_benchmark_summary(BENCHMARK_REPORTS_DIR)
-    st.markdown(
-        f"""
-        <section class="benchmark-strip">
-          <div>
-            <span>Full</span>
-            <strong>{escape(summary["full"])}</strong>
-          </div>
-          <div>
-            <span>FIFO</span>
-            <strong>{escape(summary["fifo"])}</strong>
-          </div>
-          <div>
-            <span>Heuristico</span>
-            <strong>{escape(summary["heuristic"])}</strong>
-          </div>
-          <small>{escape(summary["source"])}</small>
-        </section>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def _render_judge_mode(case_by_id: dict[str, dict[str, Any]]) -> tuple[bool, str]:
-    selected = st.session_state.get("judge_scenario_id", JUDGE_SCENARIOS[0]["scenario_id"])
+def _render_empty_state() -> None:
     st.markdown(
         """
-        <div class="section-title judge-title">
-          <div><h2>Judge Mode</h2><p>Tres casos prontos para a banca entender em 20 segundos onde FIFO falha e onde o operador continua no controle.</p></div>
-          <span class="chip success">modo avaliador</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    submitted = False
-    for column, scenario in zip(st.columns(3, gap="large"), JUDGE_SCENARIOS):
-        scenario_id = scenario["scenario_id"]
-        with column:
-            st.markdown(_judge_case_card(scenario, selected == scenario_id), unsafe_allow_html=True)
-            if st.button(
-                "Executar caso",
-                key=f"judge-run-{scenario_id}",
-                type="primary" if selected == scenario_id else "secondary",
-                width="stretch",
-            ):
-                st.session_state["judge_scenario_id"] = scenario_id
-                selected = scenario_id
-                submitted = True
-    if selected not in case_by_id:
-        selected = JUDGE_SCENARIOS[0]["scenario_id"]
-        st.session_state["judge_scenario_id"] = selected
-    return submitted, selected
-
-
-def _judge_case_card(scenario: dict[str, str], selected: bool) -> str:
-    state = " selected" if selected else ""
-    return f"""
-    <article class="judge-card{state}">
-      <span>{escape(scenario["scenario_id"])}</span>
-      <h3>{escape(scenario["title"])}</h3>
-      <p>{escape(scenario["story"])}</p>
-      <div class="judge-facts">
-        <div><strong>Documento interpretado</strong><em>{escape(scenario["gemma"])}</em></div>
-        <div><strong>Regra em foco</strong><em>{escape(scenario["rule"])}</em></div>
-      </div>
-    </article>
-    """
-
-
-def _render_judge_empty_state() -> None:
-    st.markdown(
-        """
-        <article class="empty-judge">
-          <strong>Escolha um caso e clique em Executar caso.</strong>
-          <p>A proxima dobra compara o que o FIFO chamaria com o que o Pe-Q.I recomenda, mostra o documento interpretado, a regra aplicada e a decisao humana disponivel.</p>
+        <article class="empty-state">
+          <strong>Preencha os campos ou clique em Carregar exemplo.</strong>
+          <p>Depois, use Analisar com Gemma 4 para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
         </article>
         """,
         unsafe_allow_html=True,
     )
 
 
-def _render_technical_mode(
-    defaults: dict[str, str],
-    case_by_id: dict[str, dict[str, Any]],
-    scenario_id: str,
-    variant: str,
-) -> dict[str, Any]:
-    with st.expander("Modo tecnico: escolher variante e editar CSV/JSON", expanded=False):
-        selected = st.selectbox(
-            "Cenario base", list(case_by_id), index=list(case_by_id).index(scenario_id)
-        )
-        selected_variant = st.radio(
-            "Variante",
-            ["full", "heuristic", "fifo"],
-            index=["full", "heuristic", "fifo"].index(variant),
-            horizontal=True,
-        )
-        selected_defaults = (
-            defaults if selected == scenario_id else load_case_defaults(case_by_id[selected])
-        )
-        inputs = _render_inputs(
-            selected_defaults,
-            case_by_id[selected],
-            selected_variant,
-            expanded=True,
-            use_expander=False,
-        )
-    inputs["scenario_id"] = selected
-    inputs["variant"] = selected_variant
-    return inputs
-
-
-def _render_inputs(
-    defaults: dict[str, str],
-    case: dict[str, Any],
-    variant: str,
+def _render_operator_input(
     *,
     expanded: bool,
     use_expander: bool = True,
 ) -> dict[str, Any]:
     wrapper = (
-        st.expander("Editar pacote operacional de entrada", expanded=expanded)
-        if use_expander
-        else nullcontext()
+        st.expander("Entrada operacional", expanded=expanded) if use_expander else nullcontext()
     )
     with wrapper:
         st.markdown(
             """
             <div class="section-title compact-title">
-              <div><h2>Entradas do pátio</h2><p>Fila, ticket, nota, clima e recursos exigidos pelo blueprint.</p></div>
-              <span class="chip">editavel</span>
+              <div><h2>Entrada operacional</h2><p>Carregue a fila, o ticket, a nota e o contexto operacional antes da análise.</p></div>
             </div>
             """,
             unsafe_allow_html=True,
         )
         submitted = False
-        top_a, top_b = st.columns([1.08, 0.92], gap="large")
-        with st.form("yard_inputs", border=False):
+        with st.container():
+            top_a, top_b = st.columns([1.08, 0.92], gap="large")
             with top_a:
                 st.markdown(
                     '<div class="panel-title">1 · Fila de caminhoes</div>', unsafe_allow_html=True
                 )
-                queue_csv = st.text_area(
-                    "queue.csv",
-                    value=defaults["queue_csv"],
-                    height=180,
+                uploaded_queue = st.file_uploader(
+                    "Fila CSV: upload",
+                    type=["csv"],
+                    key=INPUT_KEYS["queue_upload"],
                     help="Colunas minimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
                 )
+                queue_csv = _queue_csv_value(uploaded_queue)
+                st.markdown(_queue_source_note(uploaded_queue, queue_csv), unsafe_allow_html=True)
                 st.markdown(_queue_preview(queue_csv), unsafe_allow_html=True)
 
             with top_b:
@@ -317,48 +182,39 @@ def _render_inputs(
                     '<div class="panel-title">2 · Ticket ou documento</div>', unsafe_allow_html=True
                 )
                 uploaded_ticket = st.file_uploader(
-                    "Ticket PDF, imagem ou TXT",
+                    "Ticket/documento: upload",
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
+                    key=INPUT_KEYS["ticket_upload"],
                     help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens sao enviadas ao leitor local de documento.",
                 )
-                ticket_text = st.text_area(
-                    "Ticket textual para demo local",
-                    value=defaults["ticket_text"],
-                    height=180,
+                ticket_text = _ticket_text_value(uploaded_ticket)
+                st.markdown(
+                    _ticket_source_note(uploaded_ticket, ticket_text), unsafe_allow_html=True
                 )
 
             mid_a, mid_b, mid_c = st.columns([1, 1, 1], gap="large")
             with mid_a:
-                st.markdown(
-                    '<div class="panel-title">3 · Nota do operador</div>', unsafe_allow_html=True
-                )
-                operator_note = st.text_area(
-                    "operator_note", value=defaults["operator_note"], height=140
-                )
+                operator_note = _render_operator_note_input()
             with mid_b:
                 st.markdown('<div class="panel-title">4 · Clima</div>', unsafe_allow_html=True)
-                weather_json = st.text_area(
-                    "weather_state.json", value=defaults["weather_json"], height=140
-                )
+                weather_json = _render_weather_input()
             with mid_c:
-                st.markdown('<div class="panel-title">5 · Recursos</div>', unsafe_allow_html=True)
-                resource_json = st.text_area(
-                    "resource_state.json", value=defaults["resource_json"], height=140
+                st.markdown(
+                    '<div class="panel-title">5 · Recursos</div>',
+                    unsafe_allow_html=True,
                 )
+                resource_json = _render_resource_input()
 
             st.markdown(
                 f"""
                 <div class="run-strip">
-                  <div>
-                    <strong>Cenario base:</strong> {escape(case["scenario_id"])}
-                    <span>Variante: {escape(variant)}</span>
-                  </div>
+                  <div><strong>Runtime:</strong> {escape(_runtime_label())}</div>
                   <div class="run-note">A execucao grava arquivos temporarios em cache/ui_sessions dentro do container.</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            submitted = st.form_submit_button("Executar decisao", type="primary", width="stretch")
+            submitted = st.button("Analisar com Gemma 4", type="primary", width="stretch")
 
     return {
         "submitted": submitted,
@@ -371,42 +227,181 @@ def _render_inputs(
     }
 
 
+def _render_operator_note_input() -> str:
+    st.markdown('<div class="panel-title">3 · Nota do operador</div>', unsafe_allow_html=True)
+    return st.text_area(
+        "Nota do operador",
+        height=140,
+        key=INPUT_KEYS["operator_note"],
+    )
+
+
+def _render_weather_input() -> str:
+    mode = st.radio(
+        "Clima",
+        ["formulario", "JSON"],
+        horizontal=True,
+        key=INPUT_KEYS["weather_mode"],
+    )
+    if mode == "JSON":
+        return st.text_area("Clima JSON", height=140, key=INPUT_KEYS["weather_json"])
+    precipitation = st.selectbox(
+        "Precipitacao",
+        ["none", "rain"],
+        key=INPUT_KEYS["weather_precipitation"],
+    )
+    severity = st.selectbox(
+        "Severidade",
+        ["none", "low", "medium", "high"],
+        key=INPUT_KEYS["weather_severity"],
+    )
+    return json.dumps({"precipitation": precipitation, "severity": severity})
+
+
+def _render_resource_input() -> str:
+    mode = st.radio(
+        "Recursos",
+        ["formulario", "JSON"],
+        horizontal=True,
+        key=INPUT_KEYS["resource_mode"],
+    )
+    if mode == "JSON":
+        return st.text_area("Recursos JSON", height=140, key=INPUT_KEYS["resource_json"])
+    available = st.text_input(
+        "Destinos disponíveis",
+        key=INPUT_KEYS["resource_available"],
+        help="Separe IDs por virgula. Ex.: DST-COV-01, DST-COV-02",
+    )
+    blocked = st.text_input(
+        "Destinos bloqueados",
+        key=INPUT_KEYS["resource_blocked"],
+        help="Separe IDs por virgula. Ex.: DST-OPEN-01",
+    )
+    resources = [
+        {
+            "resource_id": item,
+            "status": "available",
+            "capacity_pct": 85,
+            "resource_type": "covered_hopper",
+            "exposure": "covered",
+            "allowed_vehicle_types": ["truck", "bitrem"],
+            "supported_load_conditions": ["dry"],
+        }
+        for item in _split_ids(available)
+    ]
+    resources.extend(
+        {
+            "resource_id": item,
+            "status": "blocked",
+            "capacity_pct": 100,
+            "resource_type": "open_hopper",
+            "exposure": "open",
+            "allowed_vehicle_types": ["truck", "bitrem"],
+            "supported_load_conditions": ["dry"],
+        }
+        for item in _split_ids(blocked)
+    )
+    return json.dumps(resources)
+
+
+def _queue_csv_value(uploaded_queue: Any) -> str:
+    if uploaded_queue is None:
+        return st.session_state.get(INPUT_KEYS["queue_csv"], "")
+    try:
+        return uploaded_queue.getvalue().decode("utf-8")
+    except UnicodeDecodeError:
+        return ""
+
+
+def _ticket_text_value(uploaded_ticket: Any) -> str:
+    if uploaded_ticket is None:
+        return st.session_state.get(INPUT_KEYS["ticket_text"], "")
+    if not uploaded_ticket.name.lower().endswith(".txt"):
+        return ""
+    try:
+        return uploaded_ticket.getvalue().decode("utf-8")
+    except UnicodeDecodeError:
+        return ""
+
+
+def _queue_source_note(uploaded_queue: Any, queue_csv: str) -> str:
+    if uploaded_queue is not None:
+        source = f"Arquivo carregado: {uploaded_queue.name}"
+    elif queue_csv:
+        source = "Exemplo carregado como CSV de fixture."
+    else:
+        source = "Nenhuma fila carregada."
+    return f'<div class="source-note">{escape(source)}</div>'
+
+
+def _ticket_source_note(uploaded_ticket: Any, ticket_text: str) -> str:
+    if uploaded_ticket is not None:
+        source = f"Arquivo carregado: {uploaded_ticket.name}"
+    elif ticket_text:
+        source = "Exemplo carregado como ticket TXT de fixture."
+    else:
+        source = "Nenhum ticket carregado."
+    return f'<div class="source-note">{escape(source)}</div>'
+
+
+def _split_ids(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _render_input_actions(example_case: dict[str, Any]) -> None:
+    left, right = st.columns([0.18, 0.18], gap="small")
+    with left:
+        if st.button("Carregar exemplo", width="stretch"):
+            _load_example_into_state(example_case)
+            st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+            st.rerun()
+    with right:
+        if st.button("Limpar campos", width="stretch"):
+            _clear_input_state()
+            st.rerun()
+
+
 def _render_outputs(
     payload: FrontEndPayload,
     request: DecisionRequest,
     case: dict[str, Any],
-    fifo_payload: FrontEndPayload | None,
 ) -> None:
     st.markdown(
         """
         <div class="section-title">
-          <div><h2>Decisao recomendada</h2><p>Quebra de FIFO explicada por criterio verificavel, sem parecer favorecimento.</p></div>
-          <span class="chip success">pronto para operador</span>
+          <div><h2>2. Resultado da análise</h2><p>Status operacional, recomendação, evidências do documento e restrições críticas.</p></div>
+          <span class="chip success">decisão auditável</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.markdown(judge_comparison_card(payload, request, fifo_payload), unsafe_allow_html=True)
+    render_status_bar(payload)
     st.markdown(recommended_decision_card(payload), unsafe_allow_html=True)
     st.markdown(queue_stack_card(payload, request), unsafe_allow_html=True)
     first_left, first_right = st.columns([1, 1], gap="large")
     with first_left:
-        st.markdown(why_not_fifo_card(payload), unsafe_allow_html=True)
-    with first_right:
         st.markdown(gemma_extraction_card(payload, request), unsafe_allow_html=True)
+    with first_right:
+        st.markdown(blocked_constraints_card(payload), unsafe_allow_html=True)
 
     second_left, second_right = st.columns([1, 1], gap="large")
     with second_left:
-        st.markdown(blocked_constraints_card(payload), unsafe_allow_html=True)
+        render_driver_message(payload)
     with second_right:
         render_operator_action(payload)
 
-    with st.expander("Ver evidencias tecnicas e auditoria", expanded=False):
-        render_status_bar(payload)
+    _render_technical_audit_expander(payload, request, case)
+
+
+def _render_technical_audit_expander(
+    payload: FrontEndPayload,
+    request: DecisionRequest,
+    case: dict[str, Any],
+) -> None:
+    with st.expander("Ver auditoria técnica", expanded=False):
         render_input_evidence(payload, request, case)
         st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
-        render_driver_message(payload)
         left, right = st.columns([1.15, 0.85], gap="large")
         with left:
             render_validation_matrix(payload)
@@ -414,7 +409,6 @@ def _render_outputs(
             render_gemma_context(payload, request)
             st.markdown(tool_badges_card(payload), unsafe_allow_html=True)
         render_audit(payload)
-    with st.expander("Painel avancado: payload JSON completo", expanded=False):
         st.json(payload.model_dump(mode="json"))
 
 
@@ -452,10 +446,75 @@ def _brand_block() -> str:
       <div class="brand-mark"></div>
       <div>
         <h1>PequiFlux</h1>
-        <p>Yard Copilot · I/O Demo</p>
+        <p>Yard Copilot · Operação</p>
       </div>
     </div>
     """
+
+
+def _sidebar_runtime_block() -> str:
+    return f"""
+    <div class="side-card compact">
+      <div class="side-kicker">Execução</div>
+      <p>{escape(_runtime_label())}</p>
+      <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
+    </div>
+    """
+
+
+def _empty_defaults() -> dict[str, str]:
+    return {
+        "queue_csv": "",
+        "ticket_text": "",
+        "operator_note": "",
+        "weather_json": '{\n  "precipitation": "none",\n  "severity": "none"\n}',
+        "resource_json": "[]",
+        "weather_mode": "JSON",
+        "resource_mode": "JSON",
+        "weather_precipitation": "none",
+        "weather_severity": "none",
+        "resource_available": "",
+        "resource_blocked": "",
+    }
+
+
+def _ensure_input_state() -> None:
+    defaults = _empty_defaults()
+    for field, value in defaults.items():
+        key = INPUT_KEYS[field]
+        if key in {INPUT_KEYS["queue_upload"], INPUT_KEYS["ticket_upload"]}:
+            continue
+        st.session_state.setdefault(key, value)
+
+
+def _clear_input_state() -> None:
+    for key in INPUT_KEYS.values():
+        st.session_state.pop(key, None)
+    st.session_state.pop("active_case", None)
+    st.session_state.pop("last_payload", None)
+    st.session_state.pop("last_request", None)
+    defaults = _empty_defaults()
+    for field, value in defaults.items():
+        key = INPUT_KEYS[field]
+        st.session_state.setdefault(key, value)
+
+
+def _state_defaults() -> dict[str, str]:
+    _ensure_input_state()
+    return {
+        field: st.session_state[INPUT_KEYS[field]]
+        for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json")
+    }
+
+
+def _load_example_into_state(case: dict[str, Any]) -> None:
+    defaults = load_case_defaults(case)
+    for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json"):
+        st.session_state[INPUT_KEYS[field]] = defaults[field]
+    st.session_state[INPUT_KEYS["weather_mode"]] = "JSON"
+    st.session_state[INPUT_KEYS["resource_mode"]] = "JSON"
+    st.session_state.pop("last_payload", None)
+    st.session_state.pop("last_request", None)
 
 
 def _runtime_label() -> str:

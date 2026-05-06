@@ -15,7 +15,7 @@ Mapa dos criterios esperados da submissao para evidencias versionadas no reposit
 
 ## Claim Principal
 
-Pe-Q.I torna mensuravel quando e por que o FIFO puro deve ser quebrado: o sistema mostra quem seria chamado por FIFO, quem o Pe-Q.I recomenda, quais restricoes bloquearam alternativas, o que o documento trouxe e qual acao humana ainda falta.
+Pe-Q.I torna mensuravel quando e por que o FIFO puro deve ser quebrado: o benchmark preserva a comparacao entre variantes, enquanto a UI operacional mostra status, caminhao, destino, restricoes bloqueantes, documento interpretado, mensagem ao motorista e acao humana.
 
 ## Evidencia Rapida
 
