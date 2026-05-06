@@ -32,8 +32,9 @@ class ExceptionRuntime:
 
 
 class Adapter:
-    def __init__(self) -> None:
+    def __init__(self, *, needs_human_review: bool = True) -> None:
         self.runtime = ExceptionRuntime()
+        self.needs_human_review = needs_human_review
 
     def classify_exception(self, **kwargs) -> ExceptionAssessment:
         result = self.runtime.generate_structured(
@@ -41,6 +42,7 @@ class Adapter:
             response_model=ExceptionAssessment,
             metadata={"request_id": kwargs["request_id"]},
         )
+        result["needs_human_review"] = self.needs_human_review
         return ExceptionAssessment.model_validate(result)
 
 
@@ -166,6 +168,37 @@ def test_rain_on_open_destination_keeps_document_block_secondary() -> None:
     assert assessment.needs_human_review is False
 
 
+def test_manual_review_hint_secondary_forces_human_review() -> None:
+    assessment = classify_exception(
+        request_id="REQ-RESOURCE-MANUAL",
+        parsed_ticket=ParsedTicket(
+            truck_id="TRK-001",
+            vehicle_type=VehicleType.TRUCK,
+            document_status=DocumentStatus.CLEAR,
+            load_condition=LoadCondition.DRY,
+            parse_confidence=0.95,
+        ),
+        operator_note="Conferir manualmente antes de liberar.",
+        weather_state=WeatherState(precipitation="none", severity="none"),
+        resource_state=[
+            ResourceState(
+                resource_id="DST-BLOCKED-01",
+                status="blocked",
+                capacity_pct=0,
+                exposure="covered",
+                allowed_vehicle_types=[VehicleType.TRUCK],
+                supported_load_conditions=[LoadCondition.DRY],
+            )
+        ],
+        queue_snapshot=_snapshot(),
+        gemma_adapter=None,
+    )
+
+    assert assessment.primary_exception == "RESOURCE_UNAVAILABLE"
+    assert assessment.secondary_exceptions == ["MANUAL_REVIEW_HINT"]
+    assert assessment.needs_human_review is True
+
+
 def test_ambiguous_exception_uses_gemma_adapter_when_available() -> None:
     adapter = Adapter()
 
@@ -213,6 +246,24 @@ def test_contextual_adapter_result_keeps_primary_and_receives_deterministic_seco
         "Operator note requires contextual interpretation.",
         "Unreadable handwritten field.",
     ]
+
+
+def test_contextual_adapter_manual_review_hint_forces_review_even_if_adapter_does_not() -> None:
+    adapter = Adapter(needs_human_review=False)
+
+    assessment = classify_exception(
+        request_id="REQ-EXC",
+        parsed_ticket=None,
+        operator_note="Relato ambiguo de campo; conferir exceção.",
+        weather_state=WeatherState(precipitation="none", severity="none"),
+        resource_state=[],
+        queue_snapshot=_snapshot(),
+        gemma_adapter=adapter,  # type: ignore[arg-type]
+    )
+
+    assert assessment.primary_exception == "AMBIGUOUS_FIELD_REPORT"
+    assert assessment.secondary_exceptions == ["MANUAL_REVIEW_HINT"]
+    assert assessment.needs_human_review is True
 
 
 def test_ambiguous_exception_without_gemma_stays_deterministic_review_hint() -> None:

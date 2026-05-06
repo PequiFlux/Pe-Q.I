@@ -1,8 +1,8 @@
 {
-  "expected_status": "PREVIEW_READY",
-  "acceptable_trucks": ["TRK-002"],
-  "acceptable_destinations": ["DST-COV-01"],
-  "required_constraints": ["HC-04"],
-  "fifo_break_expected": true,
+  "expected_status": "REVIEW_REQUIRED",
+  "acceptable_trucks": [null],
+  "acceptable_destinations": [null],
+  "required_constraints": [],
+  "fifo_break_expected": false,
   "expected_primary_exception": "DOCUMENT_BLOCK"
 }

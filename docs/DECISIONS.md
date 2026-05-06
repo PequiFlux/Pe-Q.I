@@ -526,6 +526,9 @@ Substituir `primary_exception` por uma lista sem prioridade ou manter early retu
 Impacto:
 Payloads e ranking passam a receber uma visão mais completa do contexto operacional sem alterar o contrato de primária esperado pelo benchmark público.
 
+Atualização 2026-05-06:
+Quando `MANUAL_REVIEW_HINT` aparece nos achados acumulados, mesmo como exceção secundária, `needs_human_review` deve ser `true`. Um pedido explícito do operador para revisar ou conferir não pode ficar inerte apenas porque chuva, recurso indisponível ou documento bloqueado mantiveram a prioridade de `primary_exception`.
+
 Arquivos/módulos afetados:
 - `app/services/exception_classifier.py`
 - `tests/unit/test_exception_classifier.py`

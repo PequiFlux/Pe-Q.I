@@ -51,6 +51,7 @@ Procurar:
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
 - Notas operacionais com termos de revisão (`revisar`, `conferir`) devem prevalecer sobre classificações automáticas como `WET_LOAD`.
 - Classificação de exceções deve acumular sinais em `secondary_exceptions` e `affected_resources`; não voltar a early return por primeira condição em `app/services/exception_classifier.py`.
+- Quando `MANUAL_REVIEW_HINT` aparecer em achados de classificação, mesmo como secundária, `needs_human_review` deve ser `true`; não depender apenas da exceção primária.
 - Combinações críticas de hierarquia devem ficar como testes unitários em `tests/unit/test_exception_classifier.py`, `tests/unit/test_constraints.py` e `tests/unit/test_truth_resolver.py`; não expandir o sample público congelado só para cobrir variantes de regra.
 - Judge Mode da UI deve reutilizar cenários do manifest e `DecisionOrchestrator`; não criar regra de decisão paralela para explicar FIFO vs Pe-Q.I.
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.

@@ -89,7 +89,7 @@ def classify_exception(
             severity=severity,
             affected_resources=_unique(affected_resources),
             ambiguities=_unique(ambiguities),
-            needs_human_review=needs_human_review or primary_exception == "MANUAL_REVIEW_HINT",
+            needs_human_review=needs_human_review or _has_manual_review_hint(findings),
         )
 
     return ExceptionAssessment(
@@ -119,9 +119,17 @@ def _merge_assessment(
             ),
             "affected_resources": _unique([*assessment.affected_resources, *affected_resources]),
             "ambiguities": _unique([*assessment.ambiguities, *ambiguities]),
-            "needs_human_review": assessment.needs_human_review or needs_human_review,
+            "needs_human_review": (
+                assessment.needs_human_review
+                or needs_human_review
+                or _has_manual_review_hint(findings)
+            ),
         }
     )
+
+
+def _has_manual_review_hint(findings: list[tuple[str, Severity, list[str]]]) -> bool:
+    return any(name == "MANUAL_REVIEW_HINT" for name, _, _ in findings)
 
 
 def _unique(items: Iterable[_Item]) -> list[_Item]:
