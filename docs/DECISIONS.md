@@ -10,7 +10,7 @@ Contexto:
 O sample público do benchmark cresceu para 20 cenários e já cobre a tese principal da submissão. Continuar expandindo esse mesmo snapshot aumentaria o peso da página pública e misturaria evidência de submissão com exploração interna.
 
 Decisão:
-Congelar `bench/reports/sample/` como snapshot público de 20 cenários usado por README, CI e evidência versionada. Fazer execuções normais de benchmark escreverem em `bench/reports/extended/<run_id>/` por padrão e tratar esse trilho como espaço de desenvolvimento interno.
+Congelar `bench/reports/sample/` como snapshot público de 20 cenários usado por README, CI e evidência versionada. Fazer execuções normais de benchmark escreverem em `bench/reports/extended/<run_id>/` por padrão e tratar esse trilho como espaço de desenvolvimento interno. O CLI de benchmark deve recusar `bench/reports/sample/` como `--output-dir`; novos snapshots de teste devem ir para `bench/reports/extended-sample/<run_id>` ou diretório temporário local.
 
 Alternativas rejeitadas:
 Continuar publicando todo crescimento em `sample/` ou manter novos runs diretamente em `bench/reports/<run_id>/` sem separar o contrato público do trilho exploratório.
@@ -20,6 +20,7 @@ A superfície pública fica estável e leve, enquanto o benchmark interno pode c
 
 Arquivos/módulos afetados:
 - `app/cli/run_benchmark.py`
+- `tests/unit/test_public_sample_consistency.py`
 - `README.md`
 - `docs`
 
@@ -70,7 +71,7 @@ Contexto:
 Casos `BLOCKED` e `REVIEW_REQUIRED` corretos podem parar antes da matriz de validação, mas ainda precisam ser auditáveis. Exigir `hard_constraints_checked` para todos os status subestimava `audit_completeness` no sample.
 
 Decisão:
-Manter matriz de validação obrigatória para `PREVIEW_READY`. Para `BLOCKED` e `REVIEW_REQUIRED`, considerar a auditoria completa quando houver razão terminal, status, contexto observado, hashes de fonte e audit record coerente.
+Manter matriz de validação obrigatória para `PREVIEW_READY`. Para `BLOCKED` e `REVIEW_REQUIRED`, considerar a auditoria completa quando houver razão terminal, status, contexto observado, proveniência, hashes de `queue_csv_ref`, `ticket_ref`, `operator_note`, `weather_state` e `resource_state`, e audit record coerente.
 
 Alternativas rejeitadas:
 Forçar matriz vazia ou artificial em estados terminais apenas para satisfazer métrica agregada.
@@ -103,13 +104,13 @@ Arquivos/módulos afetados:
 - `tests/unit/test_benchmark_rows.py`
 - `scenarios/cases/S15_UNKNOWN_DESTINATION_IN_TICKET/queue.csv`
 
-### 2026-05-05 — Scenario Pack expande robustez além de S01-S10
+### 2026-05-05 — Scenario Pack consolida S01-S20 como vitrine
 
 Contexto:
 O sample já tinha um caso multimodal (`S03_WET_LOAD`), mas a tese de valor do Gemma fica mais forte quando o benchmark cobre variações multimodais, conflitos de verdade e invariantes operacionais.
 
 Decisão:
-Manter S01-S10 como pack obrigatório original e adicionar cenários versionados S11-S20 ao mesmo `scenarios/manifest.json`. S17/S18 também têm testes unitários de governança de override, porque a validade final do override acontece após o preview.
+Consolidar S01-S20 no mesmo `scenarios/manifest.json` como pack público congelado. S17/S18 também têm testes unitários de governança de override, porque a validade final do override acontece após o preview.
 
 Alternativas rejeitadas:
 Criar um manifest paralelo de robustez ou tratar override como fixture de benchmark sem o fluxo de finalização do operador.
@@ -117,9 +118,13 @@ Criar um manifest paralelo de robustez ou tratar override como fixture de benchm
 Impacto:
 O benchmark passa a exercitar imagem rotacionada, PDF escaneado, conflitos entre documento/fila/nota/estado local, ausência de par elegível, override governado, desempate determinístico e fila com 100 caminhões sem alterar o contrato público de cenário.
 
+Adendo 2026-05-06:
+O pack principal em `scenarios/cases/` fica congelado em S01-S20 como vitrine pública. Novos casos devem ir para `scenarios/extended/stress/` ou `scenarios/extended/failure/` e não devem ser adicionados ao `scenarios/manifest.json` principal sem decisão explícita de mudar o contrato público.
+
 Arquivos/módulos afetados:
 - `scenarios/manifest.json`
 - `scenarios/cases/S11_*`..`S20_*`
+- `scenarios/extended/`
 - `tests/scenarios`
 - `tests/unit/test_operator_governance.py`
 - `docs`
@@ -169,7 +174,7 @@ Arquivos/módulos afetados:
 ### 2026-05-05 — Benchmark separa `raw_fifo` de `fifo_safe`
 
 Contexto:
-A variante operacional `fifo` ainda passa por `validate_hard_constraints`, então ela não representa FIFO puro. O README chamava essa linha de baseline ingênuo, enquanto a UI já mostrava separadamente o "FIFO chamaria" pela fila bruta.
+A variante operacional `fifo` ainda passa por `validate_hard_constraints`, então ela não representa FIFO puro. O README misturava essa linha com a comparação simplificada, enquanto a UI já mostrava separadamente o "FIFO chamaria" pela fila bruta.
 
 Decisão:
 Manter o contrato interno `DecisionVariant="fifo"` por compatibilidade, mas reportar essa saída no benchmark como `fifo_safe`. Adicionar uma linha `raw_fifo` calculada por `app.services.raw_fifo`, sem hard constraints, para a comparação narrativa de FIFO puro.
@@ -506,3 +511,22 @@ Cenários com `operator_note` pedindo conferência retornam `REVIEW_REQUIRED` at
 Arquivos/módulos afetados:
 - `app/services/exception_classifier.py`
 - `scenarios/cases/S03_WET_LOAD/expected_decision.json`
+
+### 2026-05-06 — Classificação de exceções acumula sinais combinados
+
+Contexto:
+O classificador de exceções retornava na primeira condição encontrada. Isso preservava uma exceção primária, mas escondia exceções reais simultâneas como recurso indisponível, chuva em destino aberto, documento bloqueado, indicação humana de revisão e carga úmida.
+
+Decisão:
+Manter a prioridade de `primary_exception`, mas acumular os demais sinais em `secondary_exceptions`, `affected_resources`, `ambiguities` e `needs_human_review`. Quando a classificação contextual via Gemma é usada sem exceção determinística alta, enriquecer a resposta do adapter com sinais determinísticos.
+
+Alternativas rejeitadas:
+Substituir `primary_exception` por uma lista sem prioridade ou manter early returns que descartam sinais reais.
+
+Impacto:
+Payloads e ranking passam a receber uma visão mais completa do contexto operacional sem alterar o contrato de primária esperado pelo benchmark público.
+
+Arquivos/módulos afetados:
+- `app/services/exception_classifier.py`
+- `tests/unit/test_exception_classifier.py`
+- `docs`

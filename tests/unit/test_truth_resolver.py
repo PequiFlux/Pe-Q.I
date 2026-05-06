@@ -115,3 +115,37 @@ def test_queue_snapshot_contract_priority_prevails_over_ticket_flag() -> None:
     assert any(
         "queue_snapshot contract_priority_flag prevails" in item for item in context.review_reasons
     )
+
+
+def test_queue_snapshot_prevails_when_ticket_is_out_of_queue_and_note_is_ambiguous() -> None:
+    context = resolve_truth(
+        queue_snapshot=_snapshot(),
+        parsed_ticket=ParsedTicket(
+            truck_id="TRK-999",
+            vehicle_type=VehicleType.TRUCK,
+            document_status=DocumentStatus.CLEAR,
+            load_condition=LoadCondition.DRY,
+            parse_confidence=0.95,
+        ),
+        exception_assessment=ExceptionAssessment(
+            primary_exception="AMBIGUOUS_FIELD_REPORT",
+            severity=Severity.MEDIUM,
+            ambiguities=["Operator note is ambiguous about the truck id."],
+            needs_human_review=True,
+        ),
+        operator_note="Nota ambigua: talvez liberar o caminhao fora da fila.",
+        weather_state=WeatherState(precipitation="none", severity="none"),
+        resource_state=[],
+    )
+
+    assert context.needs_human_review is True
+    assert context.exception_assessment.primary_exception == "AMBIGUOUS_FIELD_REPORT"
+    assert any(
+        "queue_snapshot prevails because parsed truck_id is not present in the queue" in item
+        for item in context.truth_resolution.material_conflicts
+    )
+    assert context.truth_resolution.authoritative_sources[:3] == [
+        "queue_snapshot",
+        "weather_state",
+        "resource_state",
+    ]

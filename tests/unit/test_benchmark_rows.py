@@ -156,6 +156,39 @@ def test_audit_complete_requires_terminal_context_for_blocked_payload() -> None:
     assert audit_complete(payload_without_terminal_context) is False
 
 
+def test_audit_complete_requires_all_source_hashes_for_terminal_payload() -> None:
+    scenario_id = "S16_ALL_DESTINATIONS_BLOCKED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+    assert payload.audit_record is not None
+
+    partial_hashes = {
+        key: value
+        for key, value in payload.audit_record.source_hashes.items()
+        if key != "weather_state"
+    }
+    payload_without_weather_hash = payload.model_copy(
+        update={
+            "audit_record": payload.audit_record.model_copy(
+                update={"source_hashes": partial_hashes}
+            )
+        }
+    )
+
+    assert audit_complete(payload_without_weather_hash) is False
+
+
+def test_audit_complete_requires_provenance_for_terminal_payload() -> None:
+    scenario_id = "S16_ALL_DESTINATIONS_BLOCKED"
+    payload = _orchestrator().run_decision(_request(scenario_id, "full"))
+    assert payload.audit_record is not None
+
+    payload_without_provenance = payload.model_copy(
+        update={"audit_record": payload.audit_record.model_copy(update={"provenance": []})}
+    )
+
+    assert audit_complete(payload_without_provenance) is False
+
+
 def test_ticket_field_accuracy_scores_declared_fields() -> None:
     expected = {
         "ticket_id": "TCK-001",

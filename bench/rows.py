@@ -16,6 +16,14 @@ TICKET_ACCURACY_FIELDS = [
     "contract_priority_flag",
     "destination_constraints",
 ]
+REQUIRED_SOURCE_HASHES = {
+    "queue_csv_ref",
+    "ticket_ref",
+    "operator_note",
+    "weather_state",
+    "resource_state",
+}
+TERMINAL_AUDIT_STATUSES = {"BLOCKED", "REVIEW_REQUIRED"}
 
 
 def build_raw_fifo_row(
@@ -161,24 +169,31 @@ def audit_complete(payload: FrontEndPayload) -> bool:
     if audit is None:
         return False
     status = str(payload.decision_status)
-    has_terminal_context = bool(
-        payload.reason_summary
-        and status
-        and payload.benchmark_observed.get("primary_exception")
-        and payload.gemma_visible_summary.exception_label
-    )
     has_base_audit = all(
         [
-            bool(audit.provenance),
             bool(audit.latencies_ms),
-            {"queue_csv_ref", "ticket_ref"}.issubset(audit.source_hashes),
+            REQUIRED_SOURCE_HASHES.issubset(audit.source_hashes),
             audit.request_id == payload.request_id,
             audit.scenario_id == payload.scenario_id,
             audit.variant == payload.variant,
         ]
     )
-    if status in {"BLOCKED", "REVIEW_REQUIRED"}:
-        return has_base_audit and has_terminal_context
+    has_provenance_when_available = bool(audit.provenance)
+    if status in TERMINAL_AUDIT_STATUSES:
+        has_terminal_reason = bool(payload.reason_summary)
+        has_terminal_context = bool(
+            status
+            and payload.benchmark_observed.get("primary_exception")
+            and payload.gemma_visible_summary.exception_label
+        )
+        return all(
+            [
+                has_base_audit,
+                has_provenance_when_available,
+                has_terminal_reason,
+                has_terminal_context,
+            ]
+        )
 
     has_recommendation = all(
         [
@@ -192,6 +207,7 @@ def audit_complete(payload: FrontEndPayload) -> bool:
             status == "PREVIEW_READY",
             bool(audit.hard_constraints_checked),
             has_base_audit,
+            has_provenance_when_available,
             has_recommendation,
         ]
     )

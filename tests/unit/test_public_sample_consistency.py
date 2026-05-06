@@ -6,9 +6,21 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+import pytest
+
+from app.cli.run_benchmark import _benchmark_output_dir
+
 EXPECTED_SCENARIO_COUNT = 20
-EXPECTED_VARIANTS = {"raw_fifo", "fifo_safe", "heuristic", "full"}
+EXPECTED_REPORT_VARIANTS = ["raw_fifo", "fifo_safe", "heuristic", "full"]
+EXPECTED_VARIANTS = set(EXPECTED_REPORT_VARIANTS)
 EXPECTED_SUMMARY_DATA_ROWS = 80
+EXPECTED_RUN_METADATA = {
+    "runtime": "text",
+    "scenario_count": EXPECTED_SCENARIO_COUNT,
+    "report_variants": EXPECTED_REPORT_VARIANTS,
+    "generated_from_manifest": "scenarios/manifest.json",
+    "latency_note": "text-runtime fixture; not Ollama/Gemma performance",
+}
 EXPECTED_README_METRICS = {
     "full": {
         "decision_match_at_1": 1.0,
@@ -44,6 +56,7 @@ def test_public_sample_metrics_summary_and_readme_stay_consistent() -> None:
 
     assert metrics["scenario_count"] == EXPECTED_SCENARIO_COUNT
     assert metrics["passed_count"] == EXPECTED_SCENARIO_COUNT
+    assert metrics["run_metadata"] == EXPECTED_RUN_METADATA
     assert set(metrics["variant_metrics"]) == EXPECTED_VARIANTS
 
     assert len(summary_rows) == EXPECTED_SUMMARY_DATA_ROWS
@@ -65,6 +78,18 @@ def test_public_sample_metrics_summary_and_readme_stay_consistent() -> None:
             assert _readme_metric(readme_text, variant, metric_name) == expected_value
 
     assert _readme_full_count(readme_text) == (EXPECTED_SCENARIO_COUNT, EXPECTED_SCENARIO_COUNT)
+
+
+def test_public_sample_directory_is_not_a_live_benchmark_output() -> None:
+    with pytest.raises(SystemExit, match="frozen public evidence"):
+        _benchmark_output_dir("bench/reports/sample", "manual")
+
+    with pytest.raises(SystemExit, match="frozen public evidence"):
+        _benchmark_output_dir("bench/reports/sample/manual", "manual")
+
+    assert _benchmark_output_dir("bench/reports/extended-sample/manual", "manual") == Path(
+        "bench/reports/extended-sample/manual"
+    )
 
 
 def _readme_metric(readme_text: str, variant: str, metric_name: str) -> float:

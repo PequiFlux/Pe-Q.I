@@ -45,7 +45,7 @@ def test_load_benchmark_summary_reads_current_schema(tmp_path: Path) -> None:
     assert summary["source"] == "Scenario pack sintetico · 20260505T000000Z"
 
 
-def test_load_benchmark_summary_returns_explicit_fallback_for_invalid_schema(
+def test_load_benchmark_summary_returns_unavailable_summary_for_invalid_schema(
     tmp_path: Path,
 ) -> None:
     report_dir = tmp_path / "20260505T000000Z"
@@ -62,4 +62,4 @@ def test_load_benchmark_summary_returns_explicit_fallback_for_invalid_schema(
     summary = load_benchmark_summary(tmp_path)
 
     assert summary["full"] == "pack versionado | 0% violacoes de regra"
-    assert "fallback explicito: schema invalido em 20260505T000000Z" in summary["source"]
+    assert "resumo indisponivel: schema invalido em 20260505T000000Z" in summary["source"]

@@ -198,6 +198,43 @@ def test_wet_load_requires_resource_supported_load_condition_without_ticket_dest
     assert by_destination["DST-WET-01"].eligible is True
 
 
+def test_wet_load_with_unknown_destination_fails_before_ticket_hint_is_trusted() -> None:
+    snapshot = QueueSnapshot(
+        request_id="REQ-WET-UNKNOWN",
+        rows=[
+            QueueRow(
+                truck_id="TRK-001",
+                arrival_ts=datetime(2026, 4, 15, tzinfo=timezone.utc),
+                status="waiting",
+                vehicle_type=VehicleType.TRUCK,
+                queue_position=1,
+                wait_minutes=10,
+            )
+        ],
+    )
+    parsed_ticket = ParsedTicket(
+        truck_id="TRK-001",
+        vehicle_type=VehicleType.TRUCK,
+        document_status=DocumentStatus.CLEAR,
+        load_condition=LoadCondition.WET,
+        destination_constraints=["DST-GHOST-01"],
+        parse_confidence=0.95,
+    )
+
+    with pytest.raises(PequiFluxError) as exc_info:
+        validate_hard_constraints(
+            request_id="REQ-WET-UNKNOWN",
+            normalized_queue=snapshot,
+            parsed_ticket=parsed_ticket,
+            weather_state=WeatherState(precipitation="none", severity="none"),
+            resource_state=[],
+            candidate_destinations=["DST-GHOST-01"],
+            policy_profile=_policy(),
+        )
+
+    assert exc_info.value.code == "UNKNOWN_DESTINATION"
+
+
 def test_override_cannot_bypass_hard_constraints() -> None:
     validation = ValidationResult(
         validation_matrix=[
@@ -229,6 +266,62 @@ def test_override_cannot_bypass_hard_constraints() -> None:
                 requested_destination_id="DST-OPEN-01",
             ),
         )
+
+
+def test_blocked_resource_remains_ineligible_under_operator_override() -> None:
+    snapshot = QueueSnapshot(
+        request_id="REQ-BLOCKED-OVERRIDE",
+        rows=[
+            QueueRow(
+                truck_id="TRK-001",
+                arrival_ts=datetime(2026, 4, 15, tzinfo=timezone.utc),
+                status="waiting",
+                vehicle_type=VehicleType.TRUCK,
+                queue_position=1,
+                wait_minutes=10,
+            )
+        ],
+    )
+
+    validation = validate_hard_constraints(
+        request_id="REQ-BLOCKED-OVERRIDE",
+        normalized_queue=snapshot,
+        parsed_ticket=ParsedTicket(
+            truck_id="TRK-001",
+            vehicle_type=VehicleType.TRUCK,
+            document_status=DocumentStatus.CLEAR,
+            load_condition=LoadCondition.DRY,
+            parse_confidence=0.95,
+        ),
+        weather_state=WeatherState(precipitation="none", severity="none"),
+        resource_state=[
+            ResourceState(
+                resource_id="DST-BLOCKED-01",
+                status="blocked",
+                capacity_pct=80,
+                resource_type="hopper",
+                exposure="covered",
+                allowed_vehicle_types=[VehicleType.TRUCK],
+            )
+        ],
+        candidate_destinations=["DST-BLOCKED-01"],
+        policy_profile=_policy(),
+    )
+
+    assert validation.validation_matrix[0].failed_constraints[0].constraint_id == "HC-03"
+    with pytest.raises(PequiFluxError) as exc_info:
+        validate_override_action(
+            validation=validation,
+            operator_action=OperatorDecision(
+                action_type=OperatorAction.OVERRIDE,
+                actor_id="OP-DEMO-01",
+                reason="Supervisor tentou liberar recurso bloqueado.",
+                requested_truck_id="TRK-001",
+                requested_destination_id="DST-BLOCKED-01",
+            ),
+        )
+
+    assert exc_info.value.code == "HC_07_OVERRIDE_CANNOT_BYPASS_HARD_CONSTRAINTS"
 
 
 def test_override_allows_eligible_pair_with_reason() -> None:

@@ -35,7 +35,7 @@ Esta é a visão arquitetural oficial do repositório. O código segue o desenho
 1. `adapters/*` convertem entradas brutas em `DecisionRequest` e artefatos canônicos.
 2. `csv_adapter.normalize_queue_snapshot` fixa FIFO, IDs e tempos de espera.
 3. `services.parser` chama `gemma.adapter` para obter `ParsedTicket`.
-4. `services.exception_classifier` classifica a exceção operacional dominante.
+4. `services.exception_classifier` classifica a exceção operacional primária e acumula exceções secundárias/recursos afetados.
 5. `orchestration.truth_resolver` aplica a hierarquia de verdade e materializa conflitos.
 6. `domain.constraints.validate_hard_constraints` produz a matriz de elegibilidade.
 7. `domain.ranking.rank_candidates` ordena somente pares elegíveis.

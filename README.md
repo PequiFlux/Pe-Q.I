@@ -259,6 +259,7 @@ Há dois artefatos conceitualmente distintos:
 
 - `bench/reports/sample/`: snapshot público congelado em 20 cenários para README, CI e evidência de submissão.
 - `bench/reports/extended/<run_id>/`: runs de desenvolvimento interno, livres para crescer sem inflar a página pública.
+- `bench/reports/extended-sample/<run_id>/`: snapshots temporários para testar mudanças próximas do sample público sem alterar a evidência congelada.
 
 ### Variantes
 
@@ -301,6 +302,7 @@ Saída padrão: `bench/reports/extended/<run_id>/` com `metrics.json`, `per_scen
 
 O snapshot versionado em `bench/reports/sample/` fica congelado em 20 cenários. Ele inclui `S03_WET_LOAD` e `S11_IMAGE_ROTATED_WET_LOAD` como tickets em `image/png`, além de `S12_PDF_SCANNED_DOCUMENT_BLOCK` como PDF escaneado sem texto extraível.
 Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma no trilho `extended`.
+O CLI recusa `bench/reports/sample/` como `--output-dir`; novos testes devem usar `bench/reports/extended-sample/<run_id>` ou um diretório temporário local.
 
 - `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`
 - `heuristic`: `decision_match_at_1 = 0.85`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.85`, `audit_completeness = 0.85`
@@ -310,7 +312,7 @@ Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contr
 
 ### Benchmark extended interno
 
-Use o trilho `extended` para evoluir o scenario pack, latência real, ablações e comparativos maiores sem alterar o contrato público do sample.
+Use o trilho `extended` para evoluir o scenario pack, latência real, ablações e comparativos maiores sem alterar o contrato público do sample. Use `extended-sample` apenas quando precisar comparar um snapshot de teste contra a evidência pública congelada.
 
 ```bash
 make bench
@@ -477,7 +479,7 @@ Seleção por `PEQUIFLUX_GEMMA_RUNTIME`:
 
 ## Scenario Pack
 
-O pack atual tem 20 cenários sintéticos em `scenarios/cases/`.
+O pack principal tem 20 cenários sintéticos em `scenarios/cases/` e está congelado como vitrine pública. Próximos casos devem ir para `scenarios/extended/stress/` ou `scenarios/extended/failure/`, não para o manifest principal.
 
 Catálogo humano canônico:
 - [`scenarios/README.md`](scenarios/README.md)
@@ -532,8 +534,9 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 ├── data/                     # Diretório de dados runtime
 ├── docs/                     # Documentação modular
 ├── scenarios/                # Fixtures sintéticas de benchmark
-│   ├── cases/                # Diretórios S01–S20 versionados
+│   ├── cases/                # Diretórios S01–S20 da vitrine pública congelada
 │   ├── common/               # Policy profile e catálogo de destinos
+│   ├── extended/             # Casos futuros fora do sample principal
 │   ├── manifest.json         # Payloads completos do pack de cenários
 │   └── schemas/              # JSON schemas dos contratos
 ├── scripts/                  # Shell scripts (bootstrap, demo, benchmark, prepublish)

@@ -1,6 +1,6 @@
 # Scenarios
 
-Pacote sintetico de casos para demo, benchmark e avaliacao tecnica. Cada caso vive em `scenarios/cases/<SCENARIO>/` e traz fila, ticket, nota do operador, clima, recursos e decisao esperada.
+Pacote sintetico de casos para demo, benchmark e avaliacao tecnica. O pack principal vive em `scenarios/cases/<SCENARIO>/`, tem 20 casos e fica congelado como vitrine pública. Próximos casos experimentais, de stress ou de falha devem ir para [`extended/`](./extended/).
 
 ## Como usar
 
@@ -10,6 +10,7 @@ make bench
 ```
 
 O manifest completo fica em [`manifest.json`](./manifest.json). A estrutura e os criterios de integridade ficam em [`../docs/scenario-pack.md`](../docs/scenario-pack.md).
+O manifest principal deve permanecer alinhado aos 20 casos da vitrine; manifests estendidos, se necessários, devem ficar sob `extended/`.
 
 ## Leitura humana dos cenarios
 

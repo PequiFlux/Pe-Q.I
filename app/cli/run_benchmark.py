@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,6 +21,8 @@ from bench.validation import validate_payload
 from bench.variants import FULL_VARIANT, OPERATIONAL_FIFO_VARIANT, OPERATIONAL_VARIANTS
 from bench.variants import REPORT_VARIANTS, report_variant_name
 
+PUBLIC_SAMPLE_OUTPUT_DIR = Path("bench/reports/sample")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run all Yard Copilot scenarios from a manifest.")
@@ -30,8 +33,9 @@ def main() -> None:
 
     manifest_path = Path(args.manifest)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output_dir = Path(args.output_dir or f"bench/reports/extended/{run_id}")
+    output_dir = _benchmark_output_dir(args.output_dir, run_id)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     orchestrator = DecisionOrchestrator(gemma_adapter=build_gemma_adapter())
@@ -107,6 +111,17 @@ def main() -> None:
         "scenario_count": len(full_rows),
         "passed_count": sum(1 for item in full_rows if item["passed"]),
         "failed_count": sum(1 for item in full_rows if not item["passed"]),
+        "run_metadata": {
+            "runtime": runtime,
+            "scenario_count": len(full_rows),
+            "report_variants": list(REPORT_VARIANTS),
+            "generated_from_manifest": str(manifest_path),
+            "latency_note": (
+                "text-runtime fixture; not Ollama/Gemma performance"
+                if runtime == "text"
+                else "runtime-reported latency; hardware and model dependent"
+            ),
+        },
         "variant_metrics": variant_metrics,
     }
 
@@ -123,6 +138,23 @@ def main() -> None:
     print(json.dumps({"run_id": run_id, "output_dir": str(output_dir), **metrics}, indent=2))
     if failures:
         raise SystemExit("Benchmark validation failed: " + "; ".join(failures))
+
+
+def _benchmark_output_dir(output_dir: str | None, run_id: str) -> Path:
+    report_dir = Path(output_dir or f"bench/reports/extended/{run_id}")
+    _reject_public_sample_output_dir(report_dir)
+    return report_dir
+
+
+def _reject_public_sample_output_dir(output_dir: Path) -> None:
+    resolved_output = output_dir.resolve()
+    resolved_sample = PUBLIC_SAMPLE_OUTPUT_DIR.resolve()
+    if resolved_output == resolved_sample or resolved_sample in resolved_output.parents:
+        raise SystemExit(
+            "bench/reports/sample/ is frozen public evidence. "
+            "Write new reports to bench/reports/extended-sample/<run_id>, "
+            "bench/reports/extended/<run_id>, or /tmp."
+        )
 
 
 if __name__ == "__main__":

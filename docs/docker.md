@@ -51,7 +51,7 @@ docker compose --profile ci run --rm test
 docker compose run --rm benchmark
 ```
 
-Reports are written to `bench/reports/extended/` by default. The public frozen sample remains in `bench/reports/sample/`.
+Reports are written to `bench/reports/extended/` by default. The public frozen sample remains in `bench/reports/sample/`, and the CLI refuses that directory as `--output-dir`. Use `bench/reports/extended-sample/<run_id>` or `/tmp` for temporary sample-like reports.
 
 ## Run UI
 

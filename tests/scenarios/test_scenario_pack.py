@@ -39,6 +39,8 @@ def test_scenario_pack_v0_is_complete_and_loadable() -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     cases = manifest["cases"]
+    case_dirs = {path.name for path in Path("scenarios/cases").iterdir() if path.is_dir()}
+    assert case_dirs == REQUIRED_CASES
     assert {case["scenario_id"] for case in cases} == REQUIRED_CASES
 
     for case in cases:

@@ -49,6 +49,16 @@ REQUIRED_SCENARIO_IDS = {
     "S08_REDUCED_CAPACITY",
     "S09_HUMAN_OVERRIDE",
     "S10_FIFO_BREAK_JUSTIFIED",
+    "S11_IMAGE_ROTATED_WET_LOAD",
+    "S12_PDF_SCANNED_DOCUMENT_BLOCK",
+    "S13_TRUCK_ID_NOT_IN_QUEUE",
+    "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+    "S15_UNKNOWN_DESTINATION_IN_TICKET",
+    "S16_ALL_DESTINATIONS_BLOCKED",
+    "S17_OVERRIDE_INELIGIBLE_PAIR",
+    "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+    "S19_TIE_BREAK_EQUAL_SCORE",
+    "S20_LARGE_QUEUE_100_TRUCKS",
 }
 
 DEPRECATED_BLUEPRINT_PHRASES = (
@@ -143,18 +153,27 @@ def _check_manifest(manifest_path: Path) -> AuditCheck:
 
     unique_case_ids = set(case_ids)
     missing_required = sorted(REQUIRED_SCENARIO_IDS - unique_case_ids)
+    extra_cases = sorted(unique_case_ids - REQUIRED_SCENARIO_IDS)
+    case_dirs = {path.name for path in Path("scenarios/cases").iterdir() if path.is_dir()}
+    unexpected_case_dirs = sorted(case_dirs - REQUIRED_SCENARIO_IDS)
+    missing_case_dirs = sorted(REQUIRED_SCENARIO_IDS - case_dirs)
     passed = (
-        len(cases) >= len(REQUIRED_SCENARIO_IDS)
+        len(cases) == len(REQUIRED_SCENARIO_IDS)
         and len(unique_case_ids) == len(cases)
         and not missing_files
         and not missing_required
+        and not extra_cases
+        and not unexpected_case_dirs
+        and not missing_case_dirs
     )
     detail = (
-        f"{len(cases)} unique scenarios with required baseline pack and all required files"
+        f"{len(cases)} frozen showcase scenarios with required files"
         if passed
         else (
             f"case_count={len(cases)} unique={len(unique_case_ids)} "
-            f"missing_required={missing_required} missing_files={missing_files}"
+            f"missing_required={missing_required} extra_cases={extra_cases} "
+            f"missing_case_dirs={missing_case_dirs} unexpected_case_dirs={unexpected_case_dirs} "
+            f"missing_files={missing_files}"
         )
     )
     return AuditCheck("scenario_manifest", passed, detail)

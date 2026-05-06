@@ -1,6 +1,18 @@
 {
   "failed_count": 0,
   "passed_count": 20,
+  "run_metadata": {
+    "generated_from_manifest": "scenarios/manifest.json",
+    "latency_note": "text-runtime fixture; not Ollama/Gemma performance",
+    "report_variants": [
+      "raw_fifo",
+      "fifo_safe",
+      "heuristic",
+      "full"
+    ],
+    "runtime": "text",
+    "scenario_count": 20
+  },
   "scenario_count": 20,
   "variant_metrics": {
     "fifo_safe": {

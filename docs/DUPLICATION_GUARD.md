@@ -45,11 +45,13 @@ Procurar:
 - Não criar novo parser de ticket sem verificar `app/services/parser.py`, `app/services/structured_ticket_parser.py` e `app/adapters/document_adapter.py`.
 - Fixtures textuais de ticket devem reutilizar `app/services/structured_ticket_parser.py`; `TextTicketRuntime` não deve extrair dados de frases do prompt.
 - Casos multimodais do benchmark devem reutilizar o sidecar `expected_ticket.json`; não criar formato paralelo de fixture esperado por cenário.
-- Expansões do scenario pack devem reutilizar `scenarios/manifest.json`, `tests/scenarios/test_scenario_pack.py` e `scenarios/README.md`; não criar manifest paralelo para robustez multimodal, conflitos ou stress.
+- `scenarios/cases/` e `scenarios/manifest.json` estão congelados em 20 casos de vitrine; expansões futuras devem ir para `scenarios/extended/stress/` ou `scenarios/extended/failure/`, não para o sample principal.
 - Não parsear `arrival_ts` fora de `app/adapters/csv_adapter.py`; timestamps de fila precisam ter timezone explícito e serem normalizados para UTC.
 - Leitura canônica de `queue.csv` deve passar por `app/adapters/csv_adapter.load_queue_rows`; não manter leitor paralelo de fila para UI ou FIFO bruto.
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
 - Notas operacionais com termos de revisão (`revisar`, `conferir`) devem prevalecer sobre classificações automáticas como `WET_LOAD`.
+- Classificação de exceções deve acumular sinais em `secondary_exceptions` e `affected_resources`; não voltar a early return por primeira condição em `app/services/exception_classifier.py`.
+- Combinações críticas de hierarquia devem ficar como testes unitários em `tests/unit/test_exception_classifier.py`, `tests/unit/test_constraints.py` e `tests/unit/test_truth_resolver.py`; não expandir o sample público congelado só para cobrir variantes de regra.
 - Judge Mode da UI deve reutilizar cenários do manifest e `DecisionOrchestrator`; não criar regra de decisão paralela para explicar FIFO vs Pe-Q.I.
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
@@ -59,7 +61,7 @@ Procurar:
 - O benchmark deve distinguir `raw_fifo` de `fifo_safe`; não chamar a variante operacional `fifo` de FIFO puro em relatório público.
 - Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
 - Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.
-- Completude de auditoria do benchmark deve ser status-aware em `bench.rows.audit_complete`; não exigir matriz de validação para `BLOCKED`/`REVIEW_REQUIRED` corretos.
+- Completude de auditoria do benchmark deve ser status-aware em `bench.rows.audit_complete`; `PREVIEW_READY` exige matriz de validação, e `BLOCKED`/`REVIEW_REQUIRED` exigem razão terminal, contexto observado, proveniência e todos os hashes de entrada gerados pelo orquestrador.
 - Validação de violação do FIFO bruto deve tratar par caminhão-destino ausente da matriz como inválido em `bench.rows.pair_rejected`; não interpretar destino desconhecido como “sem violação”.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
@@ -70,6 +72,7 @@ Procurar:
 - Consistência do sample público deve ficar em `tests/unit/test_public_sample_consistency.py`; não criar validação paralela entre README, `metrics.json` e `summary.csv`.
 - A imagem de teste deve incluir apenas `bench/reports/sample/` entre relatórios versionados; não remover as exceções correspondentes em `.dockerignore` sem mover o teste de contrato público.
 - O benchmark público congelado deve continuar em `bench/reports/sample/` com 20 cenários; runs maiores ou exploratórios devem ir para `bench/reports/extended/`, não para novos snapshots públicos.
+- `bench/reports/sample/` é evidência pública congelada e não pode ser usado como `--output-dir`; novos snapshots de teste devem ir para `bench/reports/extended-sample/<run_id>` ou diretório local temporário.
 - O catálogo humano canônico do scenario pack deve ficar em `scenarios/README.md`; `README.md` e `docs/scenario-pack.md` devem resumir e apontar para ele, não repetir a lista completa.
 - Finalização de ação humana deve reutilizar `SQLiteStore.save_operator_finalization`; não encadear `save_operator_action`, `save_decision_finalized` e `save_audit_record` com commits separados.
 - Novos blocos da UI devem entrar em `app/ui/components/*`, `scenario_loader.py`, `ui_runner.py` ou `styles.py` conforme responsabilidade; não voltar a concentrar carregamento de cenário, orquestração, persistência e renderização em `streamlit_app.py`.

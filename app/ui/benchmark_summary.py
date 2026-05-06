@@ -9,7 +9,7 @@ from app.ui.components.common import percent_label
 from bench.variants import FIFO_SAFE_VARIANT, OPERATIONAL_FIFO_VARIANT, RAW_FIFO_VARIANT
 from bench.variants import report_variant_name
 
-BENCHMARK_STRIP_FALLBACK = {
+BENCHMARK_STRIP_UNAVAILABLE = {
     "full": "pack versionado | 0% violacoes de regra",
     "fifo": "raw FIFO vs FIFO seguro separados no benchmark",
     "heuristic": "sem leitura Gemma multimodal | 92.5% no parse e falha em S03_WET_LOAD",
@@ -20,13 +20,13 @@ BENCHMARK_STRIP_FALLBACK = {
 def load_benchmark_summary(reports_dir: Path) -> dict[str, str]:
     report_dir = _latest_benchmark_report_dir(reports_dir)
     if report_dir is None:
-        return _explicit_fallback("relatorio ausente")
+        return _unavailable_summary("relatorio ausente")
     try:
         metrics = _load_metrics(report_dir / "metrics.json")
         rows = _load_summary_rows(report_dir / "summary.csv")
         return _build_summary(report_dir.name, metrics, rows)
     except (OSError, json.JSONDecodeError, csv.Error, TypeError, ValueError):
-        return _explicit_fallback(f"schema invalido em {report_dir.name}")
+        return _unavailable_summary(f"schema invalido em {report_dir.name}")
 
 
 def _latest_benchmark_report_dir(reports_dir: Path) -> Path | None:
@@ -186,7 +186,7 @@ def _required_metric_number(
         raise TypeError(f"metric {key} is required")
 
 
-def _explicit_fallback(reason: str) -> dict[str, str]:
-    summary = dict(BENCHMARK_STRIP_FALLBACK)
-    summary["source"] = f"{summary['source']} · fallback explicito: {reason}"
+def _unavailable_summary(reason: str) -> dict[str, str]:
+    summary = dict(BENCHMARK_STRIP_UNAVAILABLE)
+    summary["source"] = f"{summary['source']} · resumo indisponivel: {reason}"
     return summary

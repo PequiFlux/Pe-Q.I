@@ -304,7 +304,7 @@ Referências:
 |---|---|
 | `normalize_queue_snapshot` | normalizar a fila e fixar FIFO |
 | `parse_ticket_document` | obter `ParsedTicket` via Gemma sob contrato |
-| `classify_exception` | produzir `ExceptionAssessment` |
+| `classify_exception` | produzir `ExceptionAssessment` com `primary_exception`, `secondary_exceptions` e `affected_resources` cumulativos |
 | `resolve_truth` | aplicar a hierarquia de verdade |
 | `validate_hard_constraints` | calcular elegibilidade por código puro |
 | `rank_candidates` | ordenar somente pares elegíveis |

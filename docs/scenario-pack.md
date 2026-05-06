@@ -193,6 +193,17 @@ Em `bench/reports/extended/<run_id>/`:
 
 - `summary.csv`
 - `per_scenario.json`
-- `metrics.json`
+- `metrics.json` com `run_metadata` declarando runtime, manifest, contagem, variantes reportadas e nota de latência
 - gráficos de latência e comparação
 - amostras de payload auditável
+
+`bench/reports/sample/` é evidência pública congelada e não deve ser usado como saída viva do benchmark. Para snapshots experimentais próximos do sample público, use `bench/reports/extended-sample/<run_id>` ou um diretório temporário local.
+
+## Extensões futuras
+
+`scenarios/cases/` e `scenarios/manifest.json` representam a vitrine pública congelada de 20 casos. Novos cenários devem ficar fora desse pack:
+
+- `scenarios/extended/stress/` para filas maiores, latência, escala e robustez.
+- `scenarios/extended/failure/` para entradas inválidas, documentos malformados, dependências ausentes e casos fail-closed.
+
+Manifests estendidos, quando necessários, devem viver em `scenarios/extended/` e escrever relatórios em `bench/reports/extended/`, `bench/reports/extended-sample/` ou diretório temporário local.
