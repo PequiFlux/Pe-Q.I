@@ -588,7 +588,7 @@ Toda hard constraint tem pelo menos um teste determinístico. Testes de falha co
 
 ## Documentação
 
-A pasta `docs/` contém documentação modular de implementação. Em caso de conflito com o blueprint, os docs modulares prevalecem.
+A pasta `docs/` contém documentação modular de implementação. Em caso de conflito técnico, `technical_blueprint.md` da raiz é canônico; docs modulares detalham a implementação corrente.
 
 | Documento | Conteúdo |
 |-----------|----------|

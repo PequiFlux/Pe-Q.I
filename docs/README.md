@@ -19,9 +19,7 @@ Esta pasta converte o `technical_blueprint.md` em documentação operacional, mo
 
 ## Regra de precedência
 
-O blueprint canônico da raiz continua sendo a referência ampla, mas os documentos modulares desta pasta são a referência de implementação do repositório.
-
-Quando houver conflito entre o blueprint e a política atual do repositório, prevalecem estes documentos modulares. Em particular:
+Em caso de conflito técnico, `technical_blueprint.md` da raiz é canônico; docs modulares detalham a implementação corrente. Em particular:
 
 - o sistema opera em modo fail-closed;
 - não há fallback operacional;
