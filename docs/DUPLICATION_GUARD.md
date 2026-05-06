@@ -63,6 +63,7 @@ Procurar:
 - Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
 - Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.
 - Completude de auditoria do benchmark deve ser status-aware em `bench.rows.audit_complete`; `PREVIEW_READY` exige matriz de validação, e `BLOCKED`/`REVIEW_REQUIRED` exigem razão terminal, contexto observado, proveniência e todos os hashes de entrada gerados pelo orquestrador.
+- `audit_completeness` mede completude de payloads comparáveis do benchmark; falhas catastróficas antes da ingestão completa podem falhar fechado sem latências, proveniência ou hashes completos e não devem forçar relaxamento dessa métrica.
 - Validação de violação do FIFO bruto deve tratar par caminhão-destino ausente da matriz como inválido em `bench.rows.pair_rejected`; não interpretar destino desconhecido como “sem violação”.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.

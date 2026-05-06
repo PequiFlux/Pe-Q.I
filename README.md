@@ -282,6 +282,8 @@ Há dois artefatos conceitualmente distintos:
 | `latency_p50` / `latency_p95` | Latência de decisão (ms) em execução Ollama/Gemma local | p50 ≤ 8s, p95 ≤ 15s no hardware de referência |
 | `audit_completeness` | Completude da trilha de auditoria | 100% |
 
+`audit_completeness` é uma métrica de completude dos payloads que entram no benchmark comparativo, não um indicador universal de toda falha catastrófica. Em falhas pré-ingestão, como arquivo ausente antes de haver interpretação, hashes completos, latências e proveniência podem não existir; nesses casos a expectativa correta é falhar fechado com erro explícito, não preservar `audit_completeness = 1.0`.
+
 ### Critérios de sucesso
 
 - `constraint_violation_rate = 0` no sistema completo

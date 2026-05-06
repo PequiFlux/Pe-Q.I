@@ -79,6 +79,9 @@ Forçar matriz vazia ou artificial em estados terminais apenas para satisfazer m
 Impacto:
 A métrica passa a medir auditabilidade real por tipo de estado sem mascarar ausência de validação em previews automáticos.
 
+Atualização 2026-05-06:
+Essa rigidez é intencional para payloads que entram no benchmark comparativo. `audit_completeness` não é um indicador universal de toda falha catastrófica: falhas antes da ingestão completa, como arquivo ausente antes da interpretação, podem não ter latências, proveniência ou hashes completos. Nesses casos o requisito é falhar fechado com erro explícito, não manter `audit_completeness = 1.0`.
+
 Arquivos/módulos afetados:
 - `bench/rows.py`
 - `tests/unit/test_benchmark_rows.py`
