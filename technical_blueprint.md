@@ -39,7 +39,7 @@ A submissão não é uma plataforma logística ampla. Ela é um **artefato verti
 - um **fluxo ponta a ponta** com entradas multimodais;
 - um **rules engine determinístico**;
 - um **Gemma 4** central, porém delimitado;
-- um **Scenario Pack sintético** com S01-S10 obrigatórios e expansão versionada S11+;
+- um **Scenario Pack sintético** com S01-S20 congelados como vitrine pública e expansão versionada em `scenarios/extended/`;
 - um **benchmark** contra FIFO puro e baseline heurístico sem Gemma;
 - um **repositório público sanitizado**, reproduzível e offline após setup/cache.
 
@@ -1604,7 +1604,7 @@ Classificar a exceção operacional dominante com abordagem híbrida: regra simp
 - `LOW_CONFIDENCE_AMBIGUITY`
 
 **Testes essenciais**  
-- o pack obrigatório S01-S10 e expansões versionadas;
+- o pack congelado S01-S20 e expansões versionadas fora do sample público;
 - conflito entre nota e estado local;
 - caso sem exceção;
 - múltiplos sinais simultâneos.
@@ -2671,7 +2671,7 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 
 | Semana | Backlog principal | Definition of Done |
 |---|---|---|
-| Semana 1 | congelar escopo, schemas, ADRs, policy profile, Scenario Pack v0, wireframe da UI | schemas versionados, pack S01-S10 definido, política de verdade fechada, wireframe aprovado |
+| Semana 1 | congelar escopo, schemas, ADRs, policy profile, Scenario Pack v0, wireframe da UI | schemas versionados, pack S01-S20 congelado, política de verdade fechada, wireframe aprovado |
 | Semana 2 | implementar fluxo e2e mínimo, parser multimodal, classificação, rules engine, tool gateway | um cenário roda ponta a ponta por CLI; HC-01..HC-07 implementadas; adapter Gemma retorna schema válido |
 | Semana 3 | fechar UI, auditoria, logs, benchmark, override, fail-closed | o pack versionado roda em lote; UI exibe preview e trilha; falhas induzidas cobertas |
 | Semana 4 | hardening, rerun final, gravação, writeup, sanitização, submissão | benchmark final exportado; vídeo pronto; repo sanitizado; checklist pré-publicação concluído |
@@ -3036,7 +3036,7 @@ Em ordem de corte:
 
 O que **não** deve ser simplificado:
 
-- o pack obrigatório S01-S10 e expansões versionadas;
+- o pack congelado S01-S20 e expansões versionadas fora do sample público;
 - hard constraints;
 - trilha auditável;
 - fail-closed;
