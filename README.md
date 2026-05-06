@@ -89,7 +89,9 @@ O que Gemma 4 prova nesta submissão — três pontos onde um baseline heurísti
 
 1. **Parsing multimodal do ticket/documento** — extrai campos estruturados de PDF/imagem com confiança
 2. **Classificação da exceção** — quando documento, nota e estado precisam ser reconciliados
-3. **Explicação controlada** — `reason_summary` em linguagem natural ancorada na decisão formal
+3. **Tools controladas** — no fluxo `full`, constraints, ranking e auditoria passam por whitelist, ordem de estados e log estruturado
+
+`reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua. O `ToolGateway` está implementado e é usado no fluxo `full` para executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado.
 
 ---
 
@@ -222,8 +224,8 @@ O sistema oferece dois runtimes de interpretação, selecionados por `PEQUIFLUX_
 | Backend | Ollama local hospedando Gemma 4 (E4B recomendado, E2B como fail-closed de modelo) |
 | Parsing | Multimodal real — PDF renderizado em imagem + texto extraído |
 | Classificação de exceção | Modelo interpreta documento + nota + estado e classifica |
-| `reason_summary` | Gerada pelo modelo em linguagem natural, ancorada na decisão formal |
-| Tool calling | Modelo pode solicitar `validate_hard_constraints`, `rank_candidates`, `generate_audit_payload` |
+| `reason_summary` | Gerado de forma determinística a partir da decisão formal |
+| ToolGateway | No fluxo `full`, executa `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado |
 | Temperatura | `0` (determinístico na inferência) |
 | Formato de saída | JSON estruturado validado contra Pydantic schema |
 | Requisitos | GPU ou CPU com latência aceitável; Ollama ativo; modelo previamente puxado |
@@ -235,8 +237,8 @@ O sistema oferece dois runtimes de interpretação, selecionados por `PEQUIFLUX_
 | Backend | Parser determinístico puro — sem modelo, sem GPU, sem rede |
 | Parsing | Regex simples sobre `ticket.txt`; fixtures multimodais de CI usam `expected_ticket.json` sidecar |
 | Classificação de exceção | Retorna `MANUAL_REVIEW_HINT` com `needs_human_review=true` |
-| `reason_summary` | Trunca o prompt em 220 caracteres |
-| Tool calling | Não disponível — adapter delega ao fluxo determinístico |
+| `reason_summary` | Gerado de forma determinística a partir da decisão formal |
+| ToolGateway | Intent determinístico para CI; sem Gemma/Ollama real |
 | Formato de saída | `ParsedTicket` Pydantic validado normalmente |
 | Requisitos | Nenhum — funciona em CI, Docker sem GPU, qualquer máquina |
 | Uso principal | Testes, CI/CD, validação de contratos, debug rápido |
@@ -275,7 +277,7 @@ Há dois artefatos conceitualmente distintos:
 
 | Variante | Gemma? | Comportamento |
 |----------|--------|---------------|
-| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção, tool calling, `reason_summary` gerada |
+| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e tools determinísticas via `ToolGateway`; `reason_summary` é determinístico |
 | `heuristic` | Não | Mesmo rules engine determinístico; parser de texto estruturado; explicação por template |
 | `fifo_safe` | Não | FIFO entre pares elegíveis; ignora interpretação documental, mas respeita hard constraints |
 | `raw_fifo` | Não | FIFO bruto por `arrival_ts` e `declared_destination`; ignora contexto e constraints |
@@ -384,7 +386,7 @@ queue.csv + ticket + nota + clima + recursos
 [ Adapters ]         -- normaliza inputs brutos em objetos canônicos
     |
     v
-[ Gemma ]            -- parsing multimodal, classificação de exceção, tool calling controlado
+[ Gemma ]            -- parsing multimodal e classificação de exceção ambígua
     |
     v
 [ Truth Resolver ]   -- estado local > documento parseado > nota; conflitos = BLOCKED
@@ -473,7 +475,7 @@ Se a verdade é insuficiente, a decisão é `BLOCKED` ou `REVIEW_REQUIRED` com m
 
 | Variante | Gemma? | Comportamento |
 |----------|--------|---------------|
-| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção, tool calling, `reason_summary` gerada |
+| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e tools determinísticas via `ToolGateway`; `reason_summary` é determinístico |
 | `heuristic` | Não | Rules engine determinístico; parser de texto; templates de explicação |
 | `fifo` | Não | Variante operacional FIFO segura: preserva fila entre pares elegíveis e ainda respeita hard constraints |
 
@@ -607,7 +609,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | [`docs/product.md`](docs/product.md) | Tese, problema, escopo e critérios de sucesso |
 | [`docs/decision-policy.md`](docs/decision-policy.md) | Constraints, ranking, verdade, semântica de decisão |
 | [`docs/architecture.md`](docs/architecture.md) | Módulos, fluxo, máquina de estados, persistência |
-| [`docs/gemma.md`](docs/gemma.md) | Papel do Gemma, prompting contract-first, tool calling |
+| [`docs/gemma.md`](docs/gemma.md) | Papel do Gemma, prompting contract-first, ToolGateway |
 | [`docs/contracts.md`](docs/contracts.md) | Payloads e contratos de função |
 | [`docs/scenario-pack.md`](docs/scenario-pack.md) | Estrutura dos cenários, benchmark e relatórios |
 | [`docs/docker.md`](docs/docker.md) | Uso Docker/Compose, variáveis, GPU |

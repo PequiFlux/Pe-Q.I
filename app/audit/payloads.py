@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.domain.models import AuditRecord, DecisionPreview, InterpretedContext, ValidationResult
 
 
@@ -11,6 +13,7 @@ def build_audit_record(
     latencies_ms: dict[str, int],
     source_hashes: dict[str, str],
     operator_action: dict | None = None,
+    tool_calls: list[dict[str, Any]] | None = None,
 ) -> AuditRecord:
     rejected = []
     checked = []
@@ -43,6 +46,7 @@ def build_audit_record(
         ),
         provenance=[item.model_dump(mode="json") for item in interpreted_context.provenance],
         operator_action=operator_action,
+        tool_calls=tool_calls or [],
         latencies_ms=latencies_ms,
         source_hashes=source_hashes,
     )

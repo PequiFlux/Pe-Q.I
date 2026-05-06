@@ -33,6 +33,7 @@ Procurar:
 - Transições e estados terminais: reutilizar `app/orchestration/state_machine.py`.
 - Construção de payload/decisão: reutilizar `app/services/decision_builder.py`.
 - Finalização terminal com driver message, payload, persistência e log: reutilizar `DecisionOrchestrator.persist_and_log` / `_finalize_payload`.
+- Construção de orquestrador em entrypoints: reutilizar `app.orchestration.factory.build_decision_orchestrator`; não chamar `build_gemma_adapter()` diretamente em UI/CLI de cenário.
 - Gateway e contrato LLM: reutilizar `app/gemma/*`.
 - Métricas de benchmark: reutilizar `bench/metrics.py`.
 
@@ -54,8 +55,8 @@ Procurar:
 - Quando `MANUAL_REVIEW_HINT` aparecer em achados de classificação, mesmo como secundária, `needs_human_review` deve ser `true`; não depender apenas da exceção primária.
 - Combinações críticas de hierarquia devem ficar como testes unitários em `tests/unit/test_exception_classifier.py`, `tests/unit/test_constraints.py` e `tests/unit/test_truth_resolver.py`; não expandir o sample público congelado só para cobrir variantes de regra.
 - A tela principal da UI deve ser operacional: comandos `Carregar exemplo`/`Carregar e analisar exemplo`/`Limpar campos` no cabeçalho da entrada operacional, fila CSV por upload, ticket/documento por upload, nota, clima/recursos simples ou JSON, resultado, ação humana e auditoria técnica colapsada. Benchmark strip, modo de banca e comparação entre variantes não devem voltar para a superfície principal.
-- O formulário simples de recursos deve modelar compatibilidade com carga úmida via `Destinos para carga úmida`; não forçar operadores finais a editar JSON para adicionar `supported_load_conditions: ["dry", "wet"]`.
-- Prova de Gemma na UI deve usar `gemma_extraction_card` para o resumo operacional e `render_gemma_context` para Runtime/Etapa/Tipo do arquivo/Status na auditoria avançada; não criar cartão paralelo de benchmark ou runtime.
+- O formulário simples de recursos deve modelar compatibilidade com carga úmida via `Destinos compatíveis com carga úmida`; não forçar operadores finais a editar JSON para adicionar `supported_load_conditions: ["dry", "wet"]`.
+- Prova de Gemma na UI deve usar `gemma_extraction_card` para o resumo operacional, `render_gemma_context` para Runtime/Etapa/Tipo do arquivo/Status e `tool_badges_card` para a sequência `AuditRecord.tool_calls` na auditoria avançada; não criar cartão paralelo de benchmark ou runtime.
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.

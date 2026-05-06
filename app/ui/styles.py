@@ -694,6 +694,35 @@ def inject_styles() -> None:
             border-top-color: var(--slate-500);
             background: var(--slate-50);
           }
+          .tool-call-summary {
+            margin-top: 8px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--slate-50);
+          }
+          .tool-call-summary h4 {
+            margin: 0 0 8px;
+            color: var(--ink);
+            font-size: 13px;
+          }
+          .tool-call-summary ol {
+            margin: 0;
+            padding-left: 22px;
+          }
+          .tool-call-summary li {
+            margin: 5px 0;
+            color: var(--muted);
+            font-size: 13px;
+          }
+          .tool-call-summary li span {
+            color: var(--ink);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          }
+          .tool-call-summary li strong {
+            color: var(--green-800);
+            font-weight: 900;
+          }
           .card {
             margin-bottom: 10px;
             padding: 13px;

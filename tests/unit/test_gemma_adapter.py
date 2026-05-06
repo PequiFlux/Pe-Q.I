@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from app.domain.errors import PequiFluxError, SchemaViolationError
-from app.domain.models import DocumentBundle, ParsedTicket
+from app.domain.models import DocumentBundle, ParsedTicket, ToolCallIntent
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
 
@@ -71,6 +71,21 @@ class FailingRuntime:
         raise TimeoutError("network timeout")
 
 
+class ToolRuntime:
+    def __init__(self, result: dict) -> None:
+        self.result = result
+        self.last_prompt: str | None = None
+        self.last_metadata: dict | None = None
+
+    def generate_structured(self, **kwargs):
+        self.last_prompt = kwargs["prompt"]
+        self.last_metadata = kwargs["metadata"]
+        return self.result
+
+    def summarize(self, **kwargs) -> str:
+        return "Decision summary."
+
+
 def test_gemma_adapter_fails_closed_without_runtime() -> None:
     with pytest.raises(PequiFluxError, match="MODEL_RUNTIME_UNAVAILABLE"):
         GemmaAdapter().parse_ticket_document(_bundle())
@@ -121,6 +136,101 @@ def test_gemma_adapter_passes_extracted_text_as_runtime_metadata() -> None:
 
     assert ticket.truck_id == "TRK-001"
     assert ticket.parse_confidence == 0.92
+
+
+def test_gemma_adapter_choose_tool_validates_runtime_intent() -> None:
+    runtime = ToolRuntime(
+        {
+            "tool_name": "validate_hard_constraints",
+            "request_id": "REQ-001",
+            "purpose": "Validate candidate destinations.",
+        }
+    )
+
+    intent = GemmaAdapter(runtime=runtime).choose_tool(
+        request_id="REQ-001",
+        current_state="INTERPRETED",
+        allowed_tools=["validate_hard_constraints"],
+        context_summary="Truth resolved.",
+    )
+
+    assert intent.tool_name == "validate_hard_constraints"
+    assert runtime.last_metadata == {
+        "request_id": "REQ-001",
+        "task": "choose_tool",
+        "current_state": "INTERPRETED",
+        "allowed_tools": ["validate_hard_constraints"],
+    }
+    assert runtime.last_prompt is not None
+    assert "ToolCallIntent schema" in runtime.last_prompt
+
+
+def test_gemma_adapter_choose_tool_rejects_disallowed_tool() -> None:
+    runtime = ToolRuntime(
+        {
+            "tool_name": "rank_candidates",
+            "request_id": "REQ-001",
+        }
+    )
+
+    with pytest.raises(PequiFluxError, match="MODEL_TOOL_NOT_ALLOWED"):
+        GemmaAdapter(runtime=runtime).choose_tool(
+            request_id="REQ-001",
+            current_state="INTERPRETED",
+            allowed_tools=["validate_hard_constraints"],
+            context_summary="Truth resolved.",
+        )
+
+
+def test_gemma_adapter_choose_tool_rejects_request_id_mismatch() -> None:
+    runtime = ToolRuntime(
+        {
+            "tool_name": "validate_hard_constraints",
+            "request_id": "REQ-OTHER",
+        }
+    )
+
+    with pytest.raises(PequiFluxError, match="MODEL_TOOL_REQUEST_ID_MISMATCH"):
+        GemmaAdapter(runtime=runtime).choose_tool(
+            request_id="REQ-001",
+            current_state="INTERPRETED",
+            allowed_tools=["validate_hard_constraints"],
+            context_summary="Truth resolved.",
+        )
+
+
+def test_gemma_adapter_choose_tool_rejects_invalid_schema_output() -> None:
+    runtime = ToolRuntime({"tool_name": "not_a_tool", "request_id": "REQ-001"})
+
+    with pytest.raises(SchemaViolationError):
+        GemmaAdapter(runtime=runtime).choose_tool(
+            request_id="REQ-001",
+            current_state="INTERPRETED",
+            allowed_tools=["validate_hard_constraints"],
+            context_summary="Truth resolved.",
+        )
+
+
+def test_text_runtime_returns_deterministic_tool_intent() -> None:
+    intent = GemmaAdapter(runtime=TextTicketRuntime()).choose_tool(
+        request_id="REQ-001",
+        current_state="INTERPRETED",
+        allowed_tools=["validate_hard_constraints", "rank_candidates"],
+        context_summary="Truth resolved.",
+    )
+
+    assert intent.tool_name == "validate_hard_constraints"
+    assert intent.request_id == "REQ-001"
+    assert intent.purpose == "Deterministic CI tool intent."
+
+
+def test_text_runtime_requires_tool_intent_metadata() -> None:
+    with pytest.raises(PequiFluxError, match="TEXT_RUNTIME_TOOL_METADATA_REQUIRED"):
+        TextTicketRuntime().generate_structured(
+            prompt="Select a tool.",
+            response_model=ToolCallIntent,
+            metadata={"request_id": "REQ-001", "allowed_tools": []},
+        )
 
 
 def test_text_runtime_reads_expected_ticket_sidecar_for_multimodal_fixture() -> None:

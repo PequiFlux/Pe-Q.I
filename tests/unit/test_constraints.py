@@ -235,6 +235,35 @@ def test_wet_load_with_unknown_destination_fails_before_ticket_hint_is_trusted()
     assert exc_info.value.code == "UNKNOWN_DESTINATION"
 
 
+def test_empty_candidate_destinations_has_specific_error() -> None:
+    snapshot = QueueSnapshot(
+        request_id="REQ-NO-DESTINATIONS",
+        rows=[
+            QueueRow(
+                truck_id="TRK-001",
+                arrival_ts=datetime(2026, 4, 15, tzinfo=timezone.utc),
+                status="waiting",
+                vehicle_type=VehicleType.TRUCK,
+                queue_position=1,
+                wait_minutes=10,
+            )
+        ],
+    )
+
+    with pytest.raises(PequiFluxError) as exc_info:
+        validate_hard_constraints(
+            request_id="REQ-NO-DESTINATIONS",
+            normalized_queue=snapshot,
+            parsed_ticket=None,
+            weather_state=WeatherState(precipitation="none", severity="none"),
+            resource_state=[],
+            candidate_destinations=[],
+            policy_profile=_policy(),
+        )
+
+    assert exc_info.value.code == "NO_CANDIDATE_DESTINATIONS"
+
+
 def test_override_cannot_bypass_hard_constraints() -> None:
     validation = ValidationResult(
         validation_matrix=[

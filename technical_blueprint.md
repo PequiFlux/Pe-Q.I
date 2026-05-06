@@ -15,7 +15,7 @@ Quando um ponto operacional, técnico ou de hardware não está definido explici
 |---|---|---|
 | A-01 | Haverá hardware local capaz de executar Gemma 4 **E4B** ou **E2B** com latência interativa aceitável após warmup. Se isso falhar, o benchmark principal usa o menor modelo local viável e o sistema entra em BLOCKED/REVIEW_REQUIRED conforme política de fail-closed. | Afeta latência, escolha do modelo e vídeo-demo. |
 | A-02 | Stack-base do monólito: **Python 3.11**, **Streamlit** para UI única, **Pydantic 2** para contratos, **SQLite** para persistência local, **pytest** para testes. | Afeta estrutura do repositório e scripts de bootstrap. |
-| A-03 | O runtime local do Gemma 4 fica atrás de um adaptador, sem acoplamento a um backend único. O backend concreto pode ser trocado desde que preserve multimodalidade local, output estruturado e function calling. | Evita dependência não comprovada de um único runtime. |
+| A-03 | O runtime local do Gemma 4 fica atrás de um adaptador, sem acoplamento a um backend único. O backend concreto pode ser trocado desde que preserve multimodalidade local, output estruturado e integração com `ToolGateway`. | Evita dependência não comprovada de um único runtime. |
 | A-04 | Limiar de confiança para campos documentais críticos: `>= 0.75` para confiar diretamente; `0.60–0.74` exige corroboração ou marca ambiguidade; `< 0.60` em campo material gera `REVIEW_REQUIRED`. | Afeta parsing, política de verdade e modo de falha fechada. |
 | A-05 | Perfil de ranking genérico publicado no repositório: `FIFO=40`, `CONTRACT_PRIORITY=30`, `RESOURCE_FIT=15`, `CAPACITY_HEADROOM=10`, `WAIT_SLA=5`; `MIN_OPERATIONAL_CAPACITY_PCT=20`; `COMFORT_CAPACITY_PCT=50`. | Afeta cenários S05, S08 e S10. |
 | A-06 | No Scenario Pack sintético, `weather_state.json` e `resource_state.json` são considerados snapshots autoritativos e frescos do cenário. | Simplifica benchmark e elimina ambiguidade temporal artificial. |
@@ -146,7 +146,7 @@ o sistema deve devolver:
 | Estado de clima e recurso | Sim |
 | Parsing multimodal com Gemma 4 | Sim |
 | Classificação de exceção | Sim |
-| Tool calling controlado | Sim |
+| ToolGateway controlado no fluxo `full` | Sim |
 | Validação determinística de hard constraints | Sim |
 | Ranking explicável | Sim |
 | Audit payload imutável | Sim |
@@ -271,7 +271,7 @@ Essa distinção precisa ser consistente em todo o sistema.
 ### 4.1 Direcionadores arquiteturais
 
 1. **Determinismo onde existe risco operacional.** Toda elegibilidade crítica precisa ser calculável por código puro e testável.
-2. **Gemma sob contrato.** O modelo produz contexto estruturado, tool intents e explicação natural, mas não muta estado autoritativo.
+2. **Gemma sob contrato.** O modelo interpreta documentos e contexto ambíguo em saída estruturada, mas não muta estado autoritativo nem decide regras duras.
 3. **Fail-closed para decisão automática.** Quando a verdade é insuficiente, o sistema exige revisão.
 4. **Proveniência explícita.** Todo campo relevante precisa apontar sua origem.
 5. **Reprodutibilidade por design.** Cenários, métricas e saídas precisam ser reexecutáveis por um terceiro.
@@ -352,7 +352,7 @@ repo/
 |---|---|
 | `ui` | Coletar entradas, renderizar recomendação, permitir ação humana, exibir trilha de auditoria |
 | `orchestration` | Coordenar o fluxo ponta a ponta, controlar estados, chamar módulos e encerrar em `BLOCKED` ou `REVIEW_REQUIRED` quando faltar verdade operacional |
-| `gemma` | Empacotar prompts, validar outputs estruturados, controlar tool calling, isolar runtime |
+| `gemma` | Empacotar prompts, validar outputs estruturados, executar tools determinísticas via `ToolGateway` e isolar runtime |
 | `adapters` | Ler CSV, ticket/documento, nota e estados, produzindo insumos internos canônicos |
 | `domain` | Modelos de domínio, enums, hard constraints, ranking, policy profile, códigos de erro |
 | `services` | Parsing, classificação de exceção, composição de decisão e de mensagem |
@@ -376,7 +376,7 @@ repo/
 | 7. Ranking | `rank_candidates` | matriz validada + policy profile | `RankedCandidates` | Nenhum par fora da matriz entra no ranking |
 | 8. Composição da decisão | `decision_builder` | ranking + contexto | `DecisionPreview` | Status coerente com evidência e regras |
 | 9. Auditoria | `generate_audit_payload` | contexto + validação + ranking + preview | `AuditRecord` | Toda quebra de FIFO fica reconstruível |
-| 10. Explicação/mensagem | `gemma` e/ou templates controlados | decisão formal | `reason_summary` + `DriverMessage` | Sem chain-of-thought; sem score interno |
+| 10. Explicação/mensagem | `services` e templates controlados | decisão formal | `reason_summary` + `DriverMessage` | `reason_summary` determinístico; sem chain-of-thought; sem score interno |
 | 11. UI | `ui` | payload final | tela única renderizada | Acima da dobra mostra recomendação, restrições e ações |
 | 12. Ação humana | `ui` + `storage` | `approve`/`block`/`override` | `DecisionFinalized` | Override exige motivo e não pode burlar HC |
 
@@ -406,11 +406,11 @@ Entrada: `ParsedTicket`, nota do operador, clima, recurso e resumo da fila.
 Saída: `ExceptionAssessment`.  
 Contrato: a classificação indica o quadro contextual dominante, mas não autoriza despacho.
 
-**Fronteira E — `InterpretedContext -> Tool Gateway`**
+**Fronteira E — `InterpretedContext -> ToolGateway`**
 
 Entrada: `InterpretedContext` já reconciliado.  
-Saída: execução validada de tools permitidas.  
-Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos.
+Saída: execução validada de tools permitidas.
+Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos. No fluxo `full`, o orquestrador executa constraints, ranking e auditoria por essa fronteira. A mensagem ao motorista permanece serviço determinístico local.
 
 **Fronteira F — `Rules Engine -> Ranking`**
 
@@ -626,15 +626,17 @@ Princípio: todo módulo crítico precisa ter teste que prove tanto o caminho fe
 
 ### 5.1 Papel exato do Gemma 4
 
-Gemma 4 é a **camada de interpretação e explicação**, não o sistema de registro nem o árbitro final da elegibilidade operacional.
+Gemma 4 é a **camada de interpretação documental e apoio a classificação ambígua**, não o sistema de registro nem o árbitro final da elegibilidade operacional.
 
 Ele faz:
 
 1. interpretar ticket PDF/imagem e produzir `ParsedTicket`;
 2. ajudar na classificação da exceção quando o contexto é ambíguo;
-3. solicitar tools permitidas sob schema e ordem controlados;
-4. sintetizar `reason_summary` em linguagem natural a partir da decisão formal;
-5. expor ambiguidade explicitamente quando a verdade não é suficiente.
+3. expor ambiguidade explicitamente quando a verdade não é suficiente.
+
+`reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua.
+
+O `ToolGateway` está implementado e é usado no fluxo `full` para executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado.
 
 Ele **não** faz:
 
@@ -652,7 +654,7 @@ De acordo com o recorte descrito no dossiê, a escolha operacional é:
 
 | Papel | Modelo | Justificativa |
 |---|---|---|
-| Primário | **Gemma 4 E4B** | melhor equilíbrio entre capacidade multimodal, function calling e custo local |
+| Primário | **Gemma 4 E4B** | melhor equilíbrio entre capacidade multimodal, saída estruturada e custo local |
 | Fail-closed de modelo | **Gemma 4 E2B** | menor custo e maior tolerância em hardware restrito |
 | Ablação opcional | **Gemma 4 26B A4B** | útil apenas se houver hardware sobrando; não deve ser dependência do vídeo |
 | Não padrão | **Gemma 4 31B** | pouco aderente ao objetivo local-first da demo |
@@ -674,7 +676,6 @@ Requisitos do adaptador:
 
 - aceitar texto + imagem/PDF renderizado quando aplicável;
 - permitir saída estruturada validável;
-- permitir function calling ou, no mínimo, emissão de `tool_name + arguments` estruturados;
 - devolver erros categorizáveis;
 - operar localmente após setup/cache.
 
@@ -699,9 +700,8 @@ Você é a camada de interpretação do PequiFlux Yard Copilot.
 Seu trabalho é:
 1) interpretar documento e contexto operacional;
 2) devolver somente JSON conforme o schema fornecido;
-3) solicitar apenas tools explicitamente permitidas;
-4) nunca decidir elegibilidade final sem validação determinística;
-5) marcar needs_human_review=true quando houver inconsistência material.
+3) nunca decidir elegibilidade final sem validação determinística;
+4) marcar needs_human_review=true quando houver inconsistência material.
 ```
 
 #### 5.5.2 Regras de prompting
@@ -724,20 +724,19 @@ A multimodalidade existe para resolver o parsing do ticket/documento de forma me
 
 A submissão não precisa provar visão computacional geral. Ela precisa provar leitura documental útil.
 
-### 5.7 Função exata do tool calling
+### 5.7 Função exata do ToolGateway
 
-O tool calling deve existir, mas sob contenção rígida. O modelo pode **pedir** ferramentas; a aplicação decide se vai executá-las.
+O `ToolGateway` existe sob contenção rígida. O fluxo `full` usa o gateway para executar as tools determinísticas da decisão; o modelo interpreta documentos e contexto ambíguo, mas o código continua decidindo elegibilidade.
 
-Tools expostas ao modelo:
+Tools previstas na whitelist:
 
-| Tool | Finalidade | Exposta? |
+| Tool | Finalidade | Estado |
 |---|---|---|
-| `validate_hard_constraints` | gerar matriz de elegibilidade e falhas | Sim |
-| `rank_candidates` | ordenar apenas pares elegíveis | Sim |
-| `generate_audit_payload` | consolidar evidência e trilha | Sim |
-| `compose_driver_message` | opcional; em geral pode ser template-first | Opcional |
-| `parse_ticket_document` | já foi executada antes; não deve ser tool livre | Não |
-| `normalize_queue_snapshot` | função interna determinística | Não |
+| `validate_hard_constraints` | gerar matriz de elegibilidade e falhas | Executada via `ToolGateway` no fluxo `full` |
+| `rank_candidates` | ordenar apenas pares elegíveis | Executada via `ToolGateway` no fluxo `full` |
+| `generate_audit_payload` | consolidar evidência e trilha | Executada via `ToolGateway` no fluxo `full` |
+| `parse_ticket_document` | já foi executada antes; não deve ser tool livre | Não permitida |
+| `normalize_queue_snapshot` | função interna determinística | Não permitida |
 
 ### 5.8 Grafo permitido de tools
 
@@ -750,8 +749,6 @@ VALIDATED
   -> rank_candidates
 RANKED
   -> generate_audit_payload
-AUDITED
-  -> compose_driver_message (opcional)
 ```
 
 Chamadas inválidas:
@@ -797,7 +794,7 @@ Não existe caminho operacional degradado. Se uma entrada, serviço, tool call o
 
 #### Caminho normal
 
-Gemma interpreta, tool calling validado, regras determinísticas decidem e a UI apresenta `PREVIEW_READY`, `BLOCKED` ou `REVIEW_REQUIRED` com trilha auditável.
+Gemma interpreta documentos e ajuda em classificação ambígua; o orquestrador executa constraints, ranking e auditoria via `ToolGateway`; a UI apresenta `PREVIEW_READY`, `BLOCKED` ou `REVIEW_REQUIRED` com trilha auditável.
 
 #### `BLOCKED`
 
@@ -1225,13 +1222,6 @@ Padrão de IDs sintéticos:
       "type": "array",
       "items": {"type": "object"}
     },
-    "requested_tool_call": {
-      "type": ["object", "null"],
-      "properties": {
-        "tool_name": {"type": "string"},
-        "arguments": {"type": "object"}
-      }
-    },
     "needs_human_review": {"type": "boolean"},
     "error_code": {"type": ["string", "null"]}
   },
@@ -1241,7 +1231,6 @@ Padrão de IDs sintéticos:
     "exception_assessment",
     "ambiguities",
     "provenance",
-    "requested_tool_call",
     "needs_human_review",
     "error_code"
   ],
@@ -1279,13 +1268,6 @@ Padrão de IDs sintéticos:
     {"field": "vehicle_type", "source": "ticket_document", "confidence": 0.88},
     {"field": "primary_exception", "source": "operator_note", "confidence": null}
   ],
-  "requested_tool_call": {
-    "tool_name": "validate_hard_constraints",
-    "arguments": {
-      "candidate_trucks": ["TRK-001", "TRK-002", "TRK-003", "TRK-005"],
-      "candidate_destinations": ["DST-OPEN-01", "DST-COV-01"]
-    }
-  },
   "needs_human_review": false,
   "error_code": null
 }
@@ -1400,6 +1382,19 @@ Padrão de IDs sintéticos:
     "operator_action": {
       "type": ["object", "null"]
     },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tool_name": {"type": "string"},
+          "request_id": {"type": "string"},
+          "state": {"type": "string"},
+          "status": {"type": "string"},
+          "error_code": {"type": ["string", "null"]}
+        }
+      }
+    },
     "latencies_ms": {"type": "object"},
     "source_hashes": {"type": "object"},
     "created_at": {"type": "string"}
@@ -1416,6 +1411,7 @@ Padrão de IDs sintéticos:
     "fifo_break",
     "provenance",
     "operator_action",
+    "tool_calls",
     "latencies_ms",
     "source_hashes",
     "created_at"
@@ -1459,6 +1455,22 @@ Padrão de IDs sintéticos:
     {"field": "primary_exception", "source": "operator_note"}
   ],
   "operator_action": {"action": "approve", "actor_id": "OP-DEMO-01"},
+  "tool_calls": [
+    {
+      "tool_name": "validate_hard_constraints",
+      "request_id": "REQ-2026-0007",
+      "state": "INTERPRETED",
+      "status": "executed",
+      "error_code": null
+    },
+    {
+      "tool_name": "rank_candidates",
+      "request_id": "REQ-2026-0007",
+      "state": "VALIDATED",
+      "status": "executed",
+      "error_code": null
+    }
+  ],
   "latencies_ms": {
     "model": 2850,
     "rules": 41,
@@ -1616,7 +1628,7 @@ Classificar a exceção operacional dominante com abordagem híbrida: regra simp
 
 **Notas de implementação**  
 - casos óbvios a partir do estado local, como `resource.status="down"`, podem ser classificados sem chamar o modelo para economizar latência;
-- mesmo quando a exceção é óbvia, Gemma continua central via parsing do ticket e/ou explicação final.
+- mesmo quando a exceção é óbvia, Gemma continua central via parsing do ticket/documento.
 
 #### 6.8.4 `validate_hard_constraints`
 
@@ -1878,17 +1890,9 @@ Exemplos:
 }
 ```
 
-#### `compose_driver_message` (opcional)
+#### `compose_driver_message`
 
-```json
-{
-  "tool_name": "compose_driver_message",
-  "arguments": {
-    "max_chars": 220,
-    "locale": "pt-BR"
-  }
-}
-```
+Serviço determinístico chamado após a decisão formal para montar a mensagem curta ao motorista. Não faz parte da whitelist de tools solicitáveis pelo modelo.
 
 ---
 
@@ -2139,7 +2143,7 @@ O cenário recomendado para o vídeo principal é **S02_RAIN_OPEN**. Ele tem van
 
 - a dor é imediatamente compreensível;
 - a relação entre clima, recurso e fila é visual;
-- Gemma entra no parsing do ticket e na explicação;
+- Gemma entra no parsing do ticket e na classificação ambígua;
 - o rules engine aparece de forma clara;
 - a quebra de FIFO é tecnicamente defensável e fácil de filmar.
 
@@ -2171,9 +2175,9 @@ Comportamento:
 
 - usa Gemma 4 no parsing multimodal;
 - usa Gemma 4 na classificação contextual quando necessário;
-- usa tool calling controlado;
+- usa tools controladas via `ToolGateway`;
 - mantém regras e ranking determinísticos;
-- usa Gemma 4 para `reason_summary` final a partir do resultado formal.
+- gera `reason_summary` de forma determinística a partir do resultado formal.
 
 Função no benchmark: demonstrar valor incremental real.
 
@@ -2312,7 +2316,7 @@ Condições típicas:
 
 | Risco | Sinal precoce | Contramedida |
 |---|---|---|
-| Projeto parecer dashboard genérico | juiz não vê papel do Gemma | destacar parsing multimodal, tool calling e benchmark por ablação |
+| Projeto parecer dashboard genérico | juiz não vê papel do Gemma | destacar parsing multimodal, classificação contextual e benchmark por ablação |
 | Escopo expandir | backlog fora do recorte | congelar OOS e ADRs na semana 1 |
 | Parsing multimodal fraco | campos críticos saem `unknown` | curar tickets sintéticos e manter fail-closed |
 | Latência excessiva | `p95` acima da meta | E4B/E2B, prompts curtos, warmup, thinking off |
@@ -2600,11 +2604,11 @@ O repositório deve falar somente do recorte **Yard Copilot**. Não deve antecip
 **Consequências positivas:** menos overhead, debug simples, menor custo de integração.  
 **Consequências negativas:** menor isolamento operacional.
 
-### ADR-002 — Gemma como camada de interpretação e explicação vs motor decisório total
+### ADR-002 — Gemma como camada de interpretação vs motor decisório total
 
 **Status:** Accepted  
 **Contexto:** hard constraints não podem depender de modelo.  
-**Decisão:** Gemma interpreta, pede tools permitidas e explica; regras decidem.  
+**Decisão:** Gemma interpreta documentos e ajuda em classificação ambígua; regras determinísticas decidem; `ToolGateway` executa tools permitidas sob whitelist, ordem de estados e validação de IDs locais.
 **Alternativa rejeitada:** LLM como motor decisório completo.  
 **Consequências positivas:** segurança, auditabilidade, testabilidade.  
 **Consequências negativas:** menos autonomia aparente do agente.
@@ -3021,7 +3025,7 @@ Uma arquitetura correta no papel pode falhar na demo por detalhe de schema, time
 
 A cadeia mais vulnerável é:
 
-`documento -> Gemma -> tool call -> validação -> ranking -> UI`
+`documento -> Gemma -> orquestrador -> validação -> ranking -> UI`
 
 Se qualquer elo ficar opaco, o juiz não verá o valor. O segundo risco é o benchmark: uma tabela correta ainda pode parecer fraca se o vídeo não mostrar visualmente por que o FIFO foi quebrado.
 

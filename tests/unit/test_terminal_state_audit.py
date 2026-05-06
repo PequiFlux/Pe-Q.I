@@ -124,3 +124,40 @@ def test_preview_ready_still_has_audit_record_and_persistence(tmp_path: Path) ->
     assert len(lines) >= 1
     entry = json.loads(lines[-1])
     assert entry["state"] == "PREVIEW_READY"
+
+
+def test_orchestrator_executes_decision_tools_through_gateway(tmp_path: Path) -> None:
+    orchestrator = _make_orchestrator_with_storage(tmp_path)
+    request = _load_request("S01_BASELINE")
+
+    payload = orchestrator.run_decision(request)
+
+    log_path = tmp_path / "events.jsonl"
+    events = [
+        json.loads(line)
+        for line in log_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    executed_tools = {
+        event.get("tool_name")
+        for event in events
+        if event.get("module") == "tool_gateway" and event.get("status") == "executed"
+    }
+
+    assert executed_tools >= {
+        "validate_hard_constraints",
+        "rank_candidates",
+        "generate_audit_payload",
+    }
+    assert payload.audit_record is not None
+    audit_tool_statuses = {
+        (record.tool_name, record.status) for record in payload.audit_record.tool_calls
+    }
+    assert audit_tool_statuses >= {
+        ("validate_hard_constraints", "requested"),
+        ("validate_hard_constraints", "executed"),
+        ("rank_candidates", "requested"),
+        ("rank_candidates", "executed"),
+        ("generate_audit_payload", "requested"),
+        ("generate_audit_payload", "executed"),
+    }

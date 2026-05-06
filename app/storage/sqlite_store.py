@@ -13,6 +13,7 @@ class SQLiteStore:
         self.migrations_path = migrations_path or str(Path(__file__).with_name("migrations.sql"))
 
     def initialize(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         with sqlite3.connect(self.path) as connection:
             connection.executescript(Path(self.migrations_path).read_text(encoding="utf-8"))
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from app.audit.payloads import build_audit_record
 from app.domain.models import AuditRecord, DecisionPreview, InterpretedContext, ValidationResult
 
@@ -14,6 +16,7 @@ class AuditService:
         latencies_ms: dict[str, int],
         source_hashes: dict[str, str],
         operator_action: dict | None = None,
+        tool_calls: list[dict[str, Any]] | None = None,
     ) -> AuditRecord:
         return build_audit_record(
             preview=preview,
@@ -22,4 +25,5 @@ class AuditService:
             latencies_ms=latencies_ms,
             source_hashes=source_hashes,
             operator_action=operator_action,
+            tool_calls=tool_calls,
         )

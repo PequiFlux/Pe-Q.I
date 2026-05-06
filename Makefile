@@ -1,4 +1,4 @@
-.PHONY: help demo demo-text ui ui-text test bench audit format-check benchmark-smoke quality prewarm
+.PHONY: help demo demo-text ui ui-text test bench audit format-check benchmark-smoke benchmark-validate-text quality prewarm
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 
@@ -43,6 +43,10 @@ format-check:
 benchmark-smoke:
 	docker build --target test -t pequiflux-yard-copilot:test .
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+
+benchmark-validate-text:
+	docker build --target test -t pequiflux-yard-copilot:test .
+	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 
 quality: format-check test audit benchmark-smoke
 

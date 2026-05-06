@@ -274,12 +274,39 @@ Registra:
 - candidatos rejeitados
 - par recomendado
 - proveniência
+- tool calls solicitadas/executadas/erro
 - hashes de origem
 - latências
 
 Referência:
 
 - [`app/audit/payloads.py`](../app/audit/payloads.py)
+
+### Tool intent e registro de tool call
+
+`ToolCallIntent` representa a intenção mínima de uma tool permitida:
+
+- `tool_name`: `validate_hard_constraints`, `rank_candidates` ou `generate_audit_payload`
+- `request_id`
+- `purpose` opcional, limitado a 240 caracteres
+
+`app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`.
+
+`GemmaAdapter.choose_tool()` chama o runtime com esse prompt, valida `ToolCallIntent`, rejeita tool fora da allowlist com `MODEL_TOOL_NOT_ALLOWED` e rejeita `request_id` divergente com `MODEL_TOOL_REQUEST_ID_MISMATCH`.
+
+No runtime textual de CI, `TextTicketRuntime` retorna a primeira tool em `allowed_tools` com `purpose="Deterministic CI tool intent."`; se `request_id` ou `allowed_tools` não vierem nos metadados, falha fechado com `TEXT_RUNTIME_TOOL_METADATA_REQUIRED`.
+
+`app.gemma.tool_schemas.TOOL_SCHEMAS` define os schemas mínimos das tools solicitáveis pelo modelo. Cada schema aceita apenas `request_id`; o código local injeta fila, recursos, clima e política.
+
+`ToolCallRecord` registra a execução auditável:
+
+- `tool_name`
+- `request_id`
+- `state`
+- `status`: `requested`, `executed` ou `error`
+- `error_code` opcional
+
+`AuditRecord.tool_calls` mantém a lista tipada desses registros.
 
 ### `FrontEndPayload`
 

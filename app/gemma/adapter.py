@@ -12,12 +12,14 @@ from app.domain.models import (
     ParsedTicket,
     QueueSnapshot,
     ResourceState,
+    ToolCallIntent,
     WeatherState,
 )
 from app.gemma.prompts import (
     build_exception_classification_prompt,
     build_parse_ticket_prompt,
     build_reason_summary_prompt,
+    build_tool_call_prompt,
 )
 
 ModelT = TypeVar("ModelT")
@@ -98,6 +100,66 @@ class GemmaAdapter:
         if not summary.strip():
             raise SchemaViolationError("Gemma runtime returned an empty decision summary.")
         return summary
+
+    def choose_tool(
+        self,
+        *,
+        request_id: str,
+        current_state: str,
+        allowed_tools: list[str],
+        context_summary: str,
+    ) -> ToolCallIntent:
+        if self.runtime is None:
+            raise PequiFluxError(
+                "MODEL_RUNTIME_UNAVAILABLE",
+                "Gemma runtime is not configured; the system fails closed.",
+            )
+
+        try:
+            result = self.runtime.generate_structured(
+                prompt=build_tool_call_prompt(
+                    request_id=request_id,
+                    current_state=current_state,
+                    allowed_tools=allowed_tools,
+                    context_summary=context_summary,
+                ),
+                response_model=ToolCallIntent,
+                metadata={
+                    "request_id": request_id,
+                    "task": "choose_tool",
+                    "current_state": current_state,
+                    "allowed_tools": allowed_tools,
+                },
+            )
+        except PequiFluxError:
+            raise
+        except Exception as exc:
+            raise PequiFluxError(
+                "MODEL_RUNTIME_ERROR",
+                "Gemma runtime failed while selecting a tool call.",
+            ) from exc
+
+        if isinstance(result, ToolCallIntent):
+            intent = result
+        else:
+            try:
+                intent = ToolCallIntent.model_validate(result)
+            except ValidationError as exc:
+                raise SchemaViolationError(
+                    "Gemma runtime did not return a valid ToolCallIntent."
+                ) from exc
+
+        if intent.tool_name not in allowed_tools:
+            raise PequiFluxError(
+                "MODEL_TOOL_NOT_ALLOWED",
+                f"Gemma requested tool {intent.tool_name}, allowed tools: {', '.join(allowed_tools)}.",
+            )
+        if intent.request_id != request_id:
+            raise PequiFluxError(
+                "MODEL_TOOL_REQUEST_ID_MISMATCH",
+                "Gemma returned a tool call for a different request_id.",
+            )
+        return intent
 
     def classify_exception(
         self,

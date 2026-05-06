@@ -30,6 +30,8 @@ from app.domain.models import (
 from app.domain.policy import load_policy_profiles
 from app.domain.ranking import rank_candidates
 from app.gemma.adapter import GemmaAdapter
+from app.gemma.tool_gateway import ToolGateway, ToolLocalIds
+from app.gemma.tool_schemas import TOOL_SCHEMAS
 from app.orchestration.state_machine import WorkflowStateMachine
 from app.orchestration.truth_resolver import resolve_truth
 from app.services.decision_builder import (
@@ -87,6 +89,7 @@ class DecisionOrchestrator:
         state_machine = WorkflowStateMachine()
         timers: dict[str, int] = {}
         source_hashes: dict[str, str] = {}
+        tool_records: list[dict[str, Any]] = []
         interpreted_context_for_error: InterpretedContext | None = None
         try:
             loaded = self.load_inputs(request, state_machine, timers)
@@ -107,6 +110,8 @@ class DecisionOrchestrator:
                     interpreted=interpreted,
                     ranked=None,
                     timers=timers,
+                    state_machine=state_machine,
+                    tool_records=tool_records,
                 )
                 return self.persist_and_log(
                     preview=preview,
@@ -121,6 +126,7 @@ class DecisionOrchestrator:
                 interpreted=interpreted,
                 state_machine=state_machine,
                 timers=timers,
+                tool_records=tool_records,
             )
             preview, audit = self.build_payload(
                 request=request,
@@ -128,6 +134,8 @@ class DecisionOrchestrator:
                 interpreted=interpreted,
                 ranked=ranked,
                 timers=timers,
+                state_machine=state_machine,
+                tool_records=tool_records,
             )
             state_machine.transition_to(FlowState.PREVIEW_READY)
             return self.persist_and_log(
@@ -147,6 +155,7 @@ class DecisionOrchestrator:
                 timers,
                 source_hashes,
                 interpreted_context_for_error,
+                tool_records,
             )
 
     def load_inputs(
@@ -241,30 +250,71 @@ class DecisionOrchestrator:
         interpreted: InterpretedStep,
         state_machine: WorkflowStateMachine,
         timers: dict[str, int],
+        tool_records: list[dict[str, Any]],
     ) -> RankedStep:
         validation_t0 = perf_counter()
-        validation = validate_hard_constraints(
-            request_id=request.request_id,
-            normalized_queue=loaded.normalized_queue,
-            parsed_ticket=interpreted.parsed_ticket_for_constraints,
-            weather_state=request.weather_state,
-            resource_state=request.resource_state,
-            candidate_destinations=request.candidate_destinations,
-            policy_profile=loaded.policy_profile,
+        local_ids = ToolLocalIds.from_iterables(
+            request_ids={request.request_id},
+            truck_ids={row.truck_id for row in loaded.normalized_queue.waiting_rows},
+            destination_ids={resource.resource_id for resource in request.resource_state},
         )
+
+        def run_validation(request_id: str) -> ValidationResult:
+            return validate_hard_constraints(
+                request_id=request_id,
+                normalized_queue=loaded.normalized_queue,
+                parsed_ticket=interpreted.parsed_ticket_for_constraints,
+                weather_state=request.weather_state,
+                resource_state=request.resource_state,
+                candidate_destinations=request.candidate_destinations,
+                policy_profile=loaded.policy_profile,
+            )
+
+        if request.variant == "full":
+            validation = self._execute_gemma_tool(
+                request_id=request.request_id,
+                state_machine=state_machine,
+                allowed_tool="validate_hard_constraints",
+                tools={"validate_hard_constraints": run_validation},
+                context_summary=(
+                    "Ticket interpreted and truth resolved; hard constraints must be checked "
+                    "before ranking."
+                ),
+                local_ids=local_ids,
+                tool_records=tool_records,
+            )
+        else:
+            validation = run_validation(request.request_id)
         state_machine.transition_to(FlowState.VALIDATED)
         timers["validate_hard_constraints"] = int((perf_counter() - validation_t0) * 1000)
 
         ranking_t0 = perf_counter()
-        ranking = rank_candidates(
-            request_id=request.request_id,
-            validation_matrix=validation,
-            policy_profile=loaded.policy_profile,
-            queue_snapshot=loaded.normalized_queue,
-            exception_assessment=interpreted.interpreted_context.exception_assessment,
-            resource_state=request.resource_state,
-            variant=request.variant,
-        )
+
+        def run_ranking(request_id: str) -> RankedCandidates:
+            return rank_candidates(
+                request_id=request_id,
+                validation_matrix=validation,
+                policy_profile=loaded.policy_profile,
+                queue_snapshot=loaded.normalized_queue,
+                exception_assessment=interpreted.interpreted_context.exception_assessment,
+                resource_state=request.resource_state,
+                variant=request.variant,
+            )
+
+        if request.variant == "full":
+            ranking = self._execute_gemma_tool(
+                request_id=request.request_id,
+                state_machine=state_machine,
+                allowed_tool="rank_candidates",
+                tools={"rank_candidates": run_ranking},
+                context_summary=(
+                    "Hard constraints were validated; ranking may only order eligible pairs."
+                ),
+                local_ids=local_ids,
+                tool_records=tool_records,
+            )
+        else:
+            ranking = run_ranking(request.request_id)
         state_machine.transition_to(FlowState.RANKED)
         timers["rank_candidates"] = int((perf_counter() - ranking_t0) * 1000)
         return RankedStep(validation=validation, ranking=ranking)
@@ -277,6 +327,8 @@ class DecisionOrchestrator:
         interpreted: InterpretedStep,
         ranked: RankedStep | None,
         timers: dict[str, int],
+        state_machine: WorkflowStateMachine,
+        tool_records: list[dict[str, Any]],
     ) -> tuple[DecisionPreview, AuditRecord]:
         if ranked is None:
             preview = build_review_required_preview(
@@ -299,14 +351,43 @@ class DecisionOrchestrator:
             )
             validation = ranked.validation
 
-        audit = self.audit_service.generate_audit_payload(
-            interpreted_context=interpreted.interpreted_context,
-            validation=validation,
-            preview=preview,
-            latencies_ms=timers,
-            source_hashes=loaded.source_hashes,
+        local_ids = ToolLocalIds.from_iterables(
+            request_ids={request.request_id},
+            truck_ids={row.truck_id for row in loaded.normalized_queue.waiting_rows},
+            destination_ids={resource.resource_id for resource in request.resource_state},
         )
-        return preview, audit
+
+        def run_audit(request_id: str) -> AuditRecord:
+            if request_id != request.request_id:
+                raise PequiFluxError(
+                    "REQUEST_ID_MISMATCH",
+                    "Audit tool request_id mismatch.",
+                )
+            return self.audit_service.generate_audit_payload(
+                interpreted_context=interpreted.interpreted_context,
+                validation=validation,
+                preview=preview,
+                latencies_ms=timers,
+                source_hashes=loaded.source_hashes,
+                tool_calls=tool_records,
+            )
+
+        if request.variant == "full" and ranked is not None:
+            audit = self._execute_gemma_tool(
+                request_id=request.request_id,
+                state_machine=state_machine,
+                allowed_tool="generate_audit_payload",
+                tools={"generate_audit_payload": run_audit},
+                context_summary=(
+                    "Ranking is complete; audit payload must be generated from formal "
+                    "decision artifacts."
+                ),
+                local_ids=local_ids,
+                tool_records=tool_records,
+            )
+        else:
+            audit = run_audit(request.request_id)
+        return preview, _attach_tool_records(audit, tool_records)
 
     def persist_and_log(
         self,
@@ -331,7 +412,9 @@ class DecisionOrchestrator:
         timers: dict[str, int],
         source_hashes: dict[str, str],
         interpreted_context: InterpretedContext | None = None,
+        tool_records: list[dict[str, Any]] | None = None,
     ) -> FrontEndPayload:
+        tool_records = tool_records or []
         state_machine.force_terminal(FlowState.BLOCKED, reason=exc.message)
         preview = build_blocked_preview(
             request_id=request.request_id,
@@ -376,10 +459,11 @@ class DecisionOrchestrator:
             preview=preview,
             latencies_ms=timers,
             source_hashes=source_hashes,
+            tool_calls=tool_records,
         )
         return self.persist_and_log(
             preview=preview,
-            audit=audit,
+            audit=_attach_tool_records(audit, tool_records),
             interpreted_context=blocked_context,
             state=state_machine.current_state,
         )
@@ -445,6 +529,66 @@ class DecisionOrchestrator:
             }
         )
 
+    def _execute_gemma_tool(
+        self,
+        *,
+        request_id: str,
+        state_machine: WorkflowStateMachine,
+        allowed_tool: str,
+        tools: dict[str, Any],
+        context_summary: str,
+        local_ids: ToolLocalIds,
+        tool_records: list[dict[str, Any]],
+    ):
+        intent = self.gemma_adapter.choose_tool(
+            request_id=request_id,
+            current_state=state_machine.current_state.value,
+            allowed_tools=[allowed_tool],
+            context_summary=context_summary,
+        )
+        tool_records.append(
+            {
+                "tool_name": intent.tool_name,
+                "request_id": intent.request_id,
+                "state": state_machine.current_state.value,
+                "status": "requested",
+            }
+        )
+
+        gateway = ToolGateway(
+            tools,
+            tool_schemas=TOOL_SCHEMAS,
+            current_state=state_machine.current_state,
+            local_ids=local_ids,
+            logger=self.jsonl_logger,
+        )
+        try:
+            result = gateway.execute(
+                intent.tool_name,
+                {"request_id": intent.request_id},
+            )
+        except PequiFluxError as exc:
+            tool_records.append(
+                {
+                    "tool_name": intent.tool_name,
+                    "request_id": intent.request_id,
+                    "state": state_machine.current_state.value,
+                    "status": "error",
+                    "error_code": exc.code,
+                }
+            )
+            raise
+
+        tool_records.append(
+            {
+                "tool_name": intent.tool_name,
+                "request_id": intent.request_id,
+                "state": state_machine.current_state.value,
+                "status": "executed",
+            }
+        )
+        return result
+
 
 def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:
     return {
@@ -462,6 +606,12 @@ def _blocked_policy_rules(exc: PequiFluxError) -> list[str]:
     if exc.code in {"NO_ELIGIBLE_CANDIDATE", "EMPTY_VALIDATION_MATRIX"}:
         return [PolicyRule.NO_VALID_PAIR_BLOCKS_AUTODISPATCH]
     return []
+
+
+def _attach_tool_records(audit: AuditRecord, tool_records: list[dict[str, Any]]) -> AuditRecord:
+    payload = audit.model_dump(mode="python")
+    payload["tool_calls"] = list(tool_records)
+    return AuditRecord.model_validate(payload)
 
 
 def _build_source_hashes_if_available(request: DecisionRequest) -> dict[str, str]:

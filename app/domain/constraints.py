@@ -79,6 +79,12 @@ def validate_hard_constraints(
     policy_profile: PolicyProfile,
 ) -> ValidationResult:
     resources = {resource.resource_id: resource for resource in resource_state}
+    if not candidate_destinations:
+        raise PequiFluxError(
+            "NO_CANDIDATE_DESTINATIONS",
+            "At least one candidate destination is required.",
+        )
+
     missing_destinations = [
         destination_id
         for destination_id in candidate_destinations

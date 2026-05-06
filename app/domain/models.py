@@ -18,6 +18,11 @@ from app.domain.enums import (
 DecisionVariant = Literal["fifo", "heuristic", "full"]
 RunMode = Literal["interactive", "benchmark"]
 TicketContentType = Literal["application/pdf", "image/png", "image/jpeg", "text/plain"]
+ToolName = Literal[
+    "validate_hard_constraints",
+    "rank_candidates",
+    "generate_audit_payload",
+]
 
 
 def utc_now() -> datetime:
@@ -26,6 +31,20 @@ def utc_now() -> datetime:
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+
+class ToolCallIntent(StrictModel):
+    tool_name: ToolName
+    request_id: str
+    purpose: str = Field(default="", max_length=240)
+
+
+class ToolCallRecord(StrictModel):
+    tool_name: ToolName
+    request_id: str
+    state: str
+    status: Literal["requested", "executed", "error"]
+    error_code: str | None = None
 
 
 class WeatherState(StrictModel):
@@ -253,6 +272,7 @@ class AuditRecord(StrictModel):
     fifo_break: bool = False
     provenance: list[dict[str, Any]] = Field(default_factory=list)
     operator_action: dict[str, Any] | None = None
+    tool_calls: list[ToolCallRecord] = Field(default_factory=list)
     latencies_ms: dict[str, int] = Field(default_factory=dict)
     source_hashes: dict[str, str] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=utc_now)

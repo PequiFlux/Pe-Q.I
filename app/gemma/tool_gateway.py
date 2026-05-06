@@ -13,8 +13,11 @@ JsonSchema = dict[str, Any]
 TOOL_STATE_ORDER: dict[str, set[str]] = {
     "validate_hard_constraints": {FlowState.INTERPRETED.value},
     "rank_candidates": {FlowState.VALIDATED.value},
-    "generate_audit_payload": {FlowState.RANKED.value},
-    "compose_driver_message": {"AUDITED", FlowState.PREVIEW_READY.value},
+    "generate_audit_payload": {
+        FlowState.RANKED.value,
+        FlowState.REVIEW_REQUIRED.value,
+        FlowState.BLOCKED.value,
+    },
 }
 
 

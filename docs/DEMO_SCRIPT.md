@@ -18,7 +18,7 @@ Fala:
 
 ## 0:45-1:10 — Analisar
 
-Se tiver usado apenas `Carregar exemplo`, clique em `Analisar com Gemma 4`.
+Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Em `make ui-text`, ele aparece como `Analisar em modo teste`; em `make ui`, aparece como `Analisar com Gemma 4`.
 
 Fala:
 > A execução interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisão auditável. Se faltar verdade material, o sistema fecha em bloqueio ou revisão, sem fallback operacional.

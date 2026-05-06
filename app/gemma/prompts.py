@@ -41,6 +41,26 @@ def build_reason_summary_prompt(preview: DecisionPreview) -> str:
     )
 
 
+def build_tool_call_prompt(
+    *,
+    request_id: str,
+    current_state: str,
+    allowed_tools: list[str],
+    context_summary: str,
+) -> str:
+    return (
+        "Select exactly one tool call for the current PequiFlux workflow state. "
+        "Return only a JSON object matching the ToolCallIntent schema. "
+        "Do not make dispatch decisions. Do not invent IDs. "
+        "Use only one of the allowed tool names. "
+        "The tool arguments are restricted to request_id; local code owns all queue, resource, weather and policy state. "
+        f"Request id: {request_id}. "
+        f"Current state: {current_state}. "
+        f"Allowed tools: {', '.join(allowed_tools)}. "
+        f"Context summary: {context_summary}."
+    )
+
+
 def build_exception_classification_prompt(
     *,
     request_id: str,

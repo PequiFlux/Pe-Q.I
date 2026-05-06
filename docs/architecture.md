@@ -21,7 +21,7 @@ Esta é a visão arquitetural oficial do repositório. O código segue o desenho
 |---|---|
 | `ui` | Coletar entradas, renderizar a recomendação, expor ações humanas e mostrar a trilha auditável |
 | `orchestration` | Coordenar o fluxo ponta a ponta, aplicar a máquina de estados e encadear os módulos |
-| `gemma` | Isolar o runtime do modelo, validar saídas estruturadas e controlar tool calling por contrato |
+| `gemma` | Isolar o runtime do modelo, validar saídas estruturadas e executar tools determinísticas via `ToolGateway` no fluxo `full` |
 | `adapters` | Ler CSV, ticket, nota e estados locais, convertendo tudo para objetos canônicos |
 | `domain` | Definir modelos, enums, regras duras, ranking, política e erros formais |
 | `services` | Implementar parsing, classificação de exceção, composição da decisão e mensagem ao motorista |
@@ -71,6 +71,10 @@ Persistência local mínima:
 - `operator_actions`
 - `benchmark_runs`
 - `artifact_index`
+
+`app.orchestration.factory.build_decision_orchestrator()` configura persistência local por ponto de entrada. Quando `enable_storage=True`, injeta `SQLiteStore` usando `PEQUIFLUX_SQLITE_PATH` ou `var/db/pequiflux.db`; quando `enable_logging=True`, injeta `JsonlLogger` usando `PEQUIFLUX_JSONL_LOG_PATH` ou `logs/events.jsonl`.
+
+O benchmark permanece arquivo-only por padrão: `app.cli.run_benchmark` grava `metrics.json`, `per_scenario.json` e `summary.csv` no diretório de saída, sem exigir SQLite.
 
 Os logs em JSONL devem registrar request, cenário, módulo, evento, latências e status, sem persistir prompt cru, chain-of-thought ou documento bruto.
 

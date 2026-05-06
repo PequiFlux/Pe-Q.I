@@ -95,7 +95,7 @@ Regras:
 
 ### `weather_state.json`
 
-Campos mínimos: `precipitation`, `severity`, `timestamp`.
+Campos mínimos: `precipitation`, `severity`. `timestamp` é opcional e pode ser usado quando o cenário precisar fixar explicitamente o horário do snapshot.
 
 ```json
 {
@@ -194,8 +194,6 @@ Em `bench/reports/extended/<run_id>/`:
 - `summary.csv`
 - `per_scenario.json`
 - `metrics.json` com `run_metadata` declarando runtime, manifest, contagem, variantes reportadas e nota de latência
-- gráficos de latência e comparação
-- amostras de payload auditável
 
 `bench/reports/sample/` é evidência pública congelada e não deve ser usado como saída viva do benchmark. Para snapshots experimentais próximos do sample público, use `bench/reports/extended-sample/<run_id>` ou um diretório temporário local.
 

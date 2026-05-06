@@ -16,7 +16,7 @@ Todos os cenários em `scenarios/cases/` são sintéticos e sanitizados. IDs com
 
 ## Modelo e Runtime
 
-Gemma é usado como camada de interpretação de documento e explicação controlada. A decisão operacional fica em regras determinísticas versionadas. Se o runtime de modelo faltar ou retornar saída inválida, o sistema falha fechado.
+Gemma é usado como camada de interpretação de documento e apoio a classificação ambígua. `reason_summary` e mensagem ao motorista são gerados de forma determinística a partir da decisão formal. A decisão operacional fica em regras determinísticas versionadas. Se o runtime de modelo faltar ou retornar saída inválida, o sistema falha fechado.
 
 ## O Que Pode Ser Reivindicado
 

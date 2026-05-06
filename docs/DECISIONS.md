@@ -536,3 +536,22 @@ Arquivos/módulos afetados:
 - `app/services/exception_classifier.py`
 - `tests/unit/test_exception_classifier.py`
 - `docs`
+
+### 2026-05-06 — Tools determinísticas passam pelo ToolGateway
+
+Contexto:
+O repositório já tinha `ToolGateway`, mas o fluxo `full` ainda chamava constraints, ranking e auditoria diretamente pelo orquestrador. Isso deixava a documentação de tool calling sem prova operacional no pipeline.
+
+Decisão:
+Executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` via `ToolGateway` no fluxo `full`, preservando regras determinísticas, whitelist, ordem por `FlowState`, validação de IDs locais e log estruturado. `compose_driver_message` permanece serviço determinístico fora da whitelist solicitável pelo modelo.
+
+Alternativas rejeitadas:
+Manter o gateway apenas como camada futura ou deixar o modelo decidir hard constraints.
+
+Impacto:
+O orquestrador continua sendo a fachada do fluxo, mas as tools críticas do variant `full` agora são executadas por um gateway auditável. Gemma interpreta documentos e ajuda em classificação ambígua; hard constraints e ranking seguem determinísticos.
+
+Arquivos/módulos afetados:
+- `app/orchestration/orchestrator.py`
+- `app/gemma/tool_gateway.py`
+- `docs`

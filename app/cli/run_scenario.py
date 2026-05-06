@@ -6,8 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from app.domain.models import DecisionRequest, FrontEndPayload
-from app.gemma.runtime_factory import build_gemma_adapter
-from app.orchestration.orchestrator import DecisionOrchestrator
+from app.orchestration.factory import build_decision_orchestrator
 from bench.validation import validate_payload
 
 
@@ -22,7 +21,7 @@ def main() -> None:
     case = _find_case(manifest, args.scenario)
     request = DecisionRequest.model_validate(case["request"])
 
-    orchestrator = DecisionOrchestrator(gemma_adapter=build_gemma_adapter())
+    orchestrator = build_decision_orchestrator(enable_storage=False, enable_logging=True)
     payload = orchestrator.run_decision(request)
 
     expected = json.loads(Path(case["files"]["expected_decision"]).read_text(encoding="utf-8"))

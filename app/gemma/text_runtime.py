@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.domain.errors import PequiFluxError
-from app.domain.models import ExceptionAssessment, ParsedTicket
+from app.domain.models import ExceptionAssessment, ParsedTicket, ToolCallIntent
 from app.services.structured_ticket_parser import (
     load_expected_ticket_fixture,
     parse_structured_ticket_text,
@@ -19,7 +19,20 @@ class TextTicketRuntime:
         prompt: str,
         response_model: type,
         metadata: dict[str, Any],
-    ) -> ParsedTicket | ExceptionAssessment:
+    ) -> ParsedTicket | ExceptionAssessment | ToolCallIntent:
+        if response_model is ToolCallIntent:
+            allowed_tools = metadata.get("allowed_tools") or []
+            request_id = metadata.get("request_id")
+            if not allowed_tools or not request_id:
+                raise PequiFluxError(
+                    "TEXT_RUNTIME_TOOL_METADATA_REQUIRED",
+                    "Text runtime requires request_id and allowed_tools for tool intent fixtures.",
+                )
+            return ToolCallIntent(
+                tool_name=allowed_tools[0],
+                request_id=str(request_id),
+                purpose="Deterministic CI tool intent.",
+            )
         if response_model is ExceptionAssessment:
             return ExceptionAssessment(
                 primary_exception="MANUAL_REVIEW_HINT",

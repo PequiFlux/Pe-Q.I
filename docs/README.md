@@ -7,7 +7,7 @@ Esta pasta converte o `technical_blueprint.md` em documentação operacional, mo
 - [`product.md`](./product.md): tese, problema, escopo e critérios de sucesso
 - [`decision-policy.md`](./decision-policy.md): constraints, política de ranking, verdade do sistema e semântica de decisão
 - [`architecture.md`](./architecture.md): módulos, fluxo, máquina de estados, persistência e observabilidade
-- [`gemma.md`](./gemma.md): papel do Gemma, prompting contract-first e tool calling contido
+- [`gemma.md`](./gemma.md): papel do Gemma, prompting contract-first e ToolGateway
 - [`contracts.md`](./contracts.md): payloads e contratos centrais de função
 - [`scenario-pack.md`](./scenario-pack.md): cenários obrigatórios, benchmark e relatórios
 - [`public-repo.md`](./public-repo.md): sanitização, publicação e checklist de repositório público

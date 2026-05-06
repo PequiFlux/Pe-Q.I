@@ -33,7 +33,7 @@ from app.ui.scenario_loader import (
     load_manifest,
 )
 from app.ui.styles import inject_styles
-from app.ui.ui_runner import run_payload_pair
+from app.ui.ui_runner import run_payload
 
 EXAMPLE_SCENARIO_ID = "S10_FIFO_BREAK_JUSTIFIED"
 INPUT_KEYS = {
@@ -44,6 +44,7 @@ INPUT_KEYS = {
     "resource_json": "yard_resource_json",
     "queue_upload": "yard_queue_upload",
     "ticket_upload": "yard_ticket_upload",
+    "upload_generation": "yard_upload_generation",
     "weather_mode": "yard_weather_mode",
     "resource_mode": "yard_resource_mode",
     "weather_precipitation": "yard_weather_precipitation",
@@ -83,7 +84,7 @@ def main() -> None:
             _render_error(error)
             return
         assert request is not None
-        payload, _ = run_payload_pair(request)
+        payload = run_payload(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
     else:
@@ -104,7 +105,7 @@ def main() -> None:
             _render_error(error)
             return
         assert request is not None
-        payload, _ = run_payload_pair(request)
+        payload = run_payload(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
 
@@ -138,10 +139,10 @@ def _render_intro() -> None:
 
 def _render_empty_state() -> None:
     st.markdown(
-        """
+        f"""
         <article class="empty-state">
           <strong>Preencha os campos ou clique em Carregar exemplo.</strong>
-          <p>Depois, use Analisar com Gemma 4 para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
+          <p>Depois, use {escape(_analyze_button_label())} para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
         </article>
         """,
         unsafe_allow_html=True,
@@ -177,7 +178,7 @@ def _render_operator_input(
                 uploaded_queue = st.file_uploader(
                     "Fila CSV: upload",
                     type=["csv"],
-                    key=INPUT_KEYS["queue_upload"],
+                    key=_upload_key("queue_upload"),
                     help="Colunas mínimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
                 )
                 queue_csv = _queue_csv_value(uploaded_queue)
@@ -191,7 +192,7 @@ def _render_operator_input(
                 uploaded_ticket = st.file_uploader(
                     "Ticket/documento: upload",
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
-                    key=INPUT_KEYS["ticket_upload"],
+                    key=_upload_key("ticket_upload"),
                     help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens são enviadas ao leitor local de documento.",
                 )
                 ticket_text = _ticket_text_value(uploaded_ticket)
@@ -222,7 +223,7 @@ def _render_operator_input(
                 unsafe_allow_html=True,
             )
             submitted = (
-                st.button("Analisar com Gemma 4", type="primary", width="stretch") or submitted
+                st.button(_analyze_button_label(), type="primary", width="stretch") or submitted
             )
 
     return {
@@ -287,7 +288,7 @@ def _render_resource_input() -> str:
         help="Separe IDs por vírgula. Ex.: DST-OPEN-01",
     )
     wet_destinations = st.text_input(
-        "Destinos para carga úmida",
+        "Destinos compatíveis com carga úmida",
         key=INPUT_KEYS["resource_wet"],
         help="Separe IDs por vírgula. Esses destinos aceitam dry e wet.",
     )
@@ -494,7 +495,13 @@ def _runtime_mode_note() -> str:
     return f"Runtime customizado: {runtime}."
 
 
-def _empty_defaults() -> dict[str, str]:
+def _analyze_button_label() -> str:
+    if os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama") == "text":
+        return "Analisar em modo teste"
+    return "Analisar com Gemma 4"
+
+
+def _empty_defaults() -> dict[str, Any]:
     return {
         "queue_csv": "",
         "ticket_text": "",
@@ -508,6 +515,7 @@ def _empty_defaults() -> dict[str, str]:
         "resource_available": "",
         "resource_blocked": "",
         "resource_wet": "",
+        "upload_generation": 0,
     }
 
 
@@ -521,8 +529,9 @@ def _ensure_input_state() -> None:
 
 
 def _clear_input_state() -> None:
-    for key in INPUT_KEYS.values():
-        st.session_state.pop(key, None)
+    for key in list(st.session_state.keys()):
+        if key in INPUT_KEYS.values() or _is_upload_widget_key(key):
+            st.session_state.pop(key, None)
     st.session_state.pop("active_case", None)
     st.session_state.pop("last_payload", None)
     st.session_state.pop("last_request", None)
@@ -541,6 +550,7 @@ def _state_defaults() -> dict[str, str]:
 
 
 def _load_example_into_state(case: dict[str, Any]) -> None:
+    _reset_uploaders()
     defaults = load_case_defaults(case)
     for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json"):
         st.session_state[INPUT_KEYS[field]] = defaults[field]
@@ -548,6 +558,25 @@ def _load_example_into_state(case: dict[str, Any]) -> None:
     st.session_state[INPUT_KEYS["resource_mode"]] = "JSON"
     st.session_state.pop("last_payload", None)
     st.session_state.pop("last_request", None)
+
+
+def _upload_key(field: str) -> str:
+    generation = st.session_state.get(INPUT_KEYS["upload_generation"], 0)
+    return f"{INPUT_KEYS[field]}_{generation}"
+
+
+def _reset_uploaders() -> None:
+    generation = int(st.session_state.get(INPUT_KEYS["upload_generation"], 0)) + 1
+    for key in list(st.session_state.keys()):
+        if _is_upload_widget_key(key):
+            st.session_state.pop(key, None)
+    st.session_state[INPUT_KEYS["upload_generation"]] = generation
+
+
+def _is_upload_widget_key(key: str) -> bool:
+    return key.startswith(f"{INPUT_KEYS['queue_upload']}_") or key.startswith(
+        f"{INPUT_KEYS['ticket_upload']}_"
+    )
 
 
 def _ui_autorun_enabled() -> bool:

@@ -2,14 +2,17 @@
 
 ## Papel no sistema
 
-Gemma é a camada de interpretação e explicação, não o árbitro final da decisão operacional.
+Gemma é a camada de interpretação documental e apoio a classificação ambígua, não o árbitro final da decisão operacional.
 
 Faz:
 
 - interpretar ticket PDF/imagem e produzir `ParsedTicket`
 - ajudar na classificação de exceções ambíguas
-- solicitar tools permitidas sob schema e ordem controlados
-- sintetizar `reason_summary` a partir da decisão formal
+- expor ambiguidade explicitamente quando a verdade não é suficiente
+
+`reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua.
+
+O `ToolGateway` está implementado e é usado no fluxo `full` para executar tools determinísticas sob whitelist, ordem de estados, validação de IDs locais e log estruturado.
 
 Não faz:
 
@@ -27,7 +30,7 @@ Requisitos:
 - multimodal local após setup/cache
 - saída estruturada validável
 - erros categorizáveis
-- integração com tool calling contido
+- integração com `ToolGateway` no fluxo `full`
 
 ## Runtime Docker
 
@@ -56,7 +59,7 @@ Se o runtime não responder ou o modelo não existir, o sistema falha fechado e 
 - nenhuma decisão final sem validação externa
 - nenhuma instrução derivada da nota do operador é executada diretamente
 
-## Tool Calling
+## ToolGateway
 
 Whitelist atual:
 
@@ -70,6 +73,8 @@ Regras:
 - validar ordem pela máquina de estados
 - validar IDs contra estado local
 - registrar tentativas em log estruturado
+
+No fluxo `full`, o orquestrador passa constraints, ranking e auditoria pelo `ToolGateway`. Gemma interpreta documentos e apoia classificação ambígua, mas não decide hard constraints. A mensagem ao motorista é composta por serviço determinístico local.
 
 ## Sem fallback
 

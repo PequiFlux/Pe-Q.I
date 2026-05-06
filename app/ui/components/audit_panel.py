@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
 
@@ -328,6 +329,7 @@ def tool_badges_card(payload: FrontEndPayload) -> str:
         f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status)}</span></div>'
         for name, technical, status in badges
     )
+    tool_call_items = _gemma_tool_call_items(payload)
     return f"""
     <article class="card tools-card">
       <div class="card-head">
@@ -335,5 +337,35 @@ def tool_badges_card(payload: FrontEndPayload) -> str:
         {chip("auditoria", "green")}
       </div>
       <div class="tool-grid">{items}</div>
+      {tool_call_items}
     </article>
+    """
+
+
+def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
+    if not payload.audit_record or not payload.audit_record.tool_calls:
+        return ""
+    labels = {
+        "requested": "solicitado",
+        "executed": "executado",
+        "error": "erro",
+    }
+    ordered_tools = [
+        "validate_hard_constraints",
+        "rank_candidates",
+        "generate_audit_payload",
+    ]
+    latest_by_tool = {record.tool_name: record.status for record in payload.audit_record.tool_calls}
+    items = "".join(
+        f"<li><span>{escape(tool_name)}</span> — <strong>{escape(labels.get(latest_by_tool[tool_name], latest_by_tool[tool_name]))}</strong></li>"
+        for tool_name in ordered_tools
+        if tool_name in latest_by_tool
+    )
+    if not items:
+        return ""
+    return f"""
+      <div class="tool-call-summary">
+        <h4>Gemma 4 solicitou:</h4>
+        <ol>{items}</ol>
+      </div>
     """
