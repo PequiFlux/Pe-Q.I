@@ -162,7 +162,7 @@ PEQUIFLUX_GEMMA_RUNTIME=text pytest -q
 
 ## Demo
 
-A demo padrão (cenário S10) demonstra o narrative central do projeto: **a quebra de FIFO é justificada por restrições operacionais**.
+A demo padrão (cenário S10) demonstra o argumento central do projeto: **a quebra de FIFO é justificada por restrições operacionais**.
 
 ```bash
 # Caminho minimo reprodutivel, sem GPU/Ollama
