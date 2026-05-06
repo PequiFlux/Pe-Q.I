@@ -18,14 +18,20 @@ from app.ui.components.common import (
 
 
 def recommended_decision_card(payload: FrontEndPayload) -> str:
-    recommended_truck = (
-        payload.recommended_truck.truck_id if payload.recommended_truck else "sem chamada"
-    )
+    status = str(payload.decision_status)
+    recommended_truck = payload.recommended_truck.truck_id if payload.recommended_truck else "-"
     destination = (
-        payload.recommended_destination.destination_id
-        if payload.recommended_destination
-        else "revisão humana"
+        payload.recommended_destination.destination_id if payload.recommended_destination else "-"
     )
+    if status.endswith("REVIEW_REQUIRED"):
+        title = "Decisão exige revisão humana"
+        summary = "O sistema encontrou verdade insuficiente ou conflito material para automatizar com segurança."
+    elif status.endswith("BLOCKED"):
+        title = "Sem despacho automático seguro"
+        summary = "Nenhum par caminhão-destino pode ser liberado automaticamente com as restrições atuais."
+    else:
+        title = f"{recommended_truck} deve ir para {destination}"
+        summary = "Recomendação operacional baseada no ticket interpretado, no estado do pátio e nas restrições críticas avaliadas."
     reason_items = "".join(
         f"<li>{escape(reason_detail_label(item))}</li>" for item in payload.reason_details[:3]
     )
@@ -33,12 +39,12 @@ def recommended_decision_card(payload: FrontEndPayload) -> str:
     <section class="decision-story single">
       <div class="story-main">
         <span class="eyebrow dark">Resultado da análise</span>
-        <h2>{escape(recommended_truck)} deve ir para {escape(destination)}</h2>
-        <p>Recomendação operacional baseada no ticket interpretado, no estado do pátio e nas restrições críticas avaliadas.</p>
+        <h2>{escape(title)}</h2>
+        <p>{escape(summary)}</p>
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile("Status", str(payload.decision_status), "Resultado atual antes da ação humana.")}
+        {story_tile("Status", status, "Resultado atual antes da ação humana.")}
         {story_tile("Caminhão", recommended_truck, f"Destino: {destination}", "action")}
         {story_tile("Motivo operacional", "verificável", reason_detail_label(payload.reason_summary), "proof")}
       </div>

@@ -125,7 +125,10 @@ def render_operator_action(payload: FrontEndPayload) -> None:
                 )
             }
         )
-        requested_destination = st.selectbox("Destino solicitado", destination_options)
+        if destination_options:
+            requested_destination = st.selectbox("Destino solicitado", destination_options)
+        else:
+            st.warning("Nenhum destino validado disponível para override.")
     if st.button("Registrar ação", type="primary"):
         try:
             finalized, updated_audit = finalize_operator_decision(
@@ -249,7 +252,7 @@ def _ticket_preview_text(ticket_path: Path, content_type: str) -> str:
             return "Texto indisponível no cache da execução."
         return " ".join(text.split())[:360] or "Ticket textual vazio."
     if content_type == "application/pdf":
-        return "PDF encaminhado ao leitor local; a UI nao mostra prompt nem OCR bruto."
+        return "PDF encaminhado ao leitor local; a UI não mostra prompt nem OCR bruto."
     return "Imagem encaminhada ao leitor local; interpretação multimodal ocorre no container."
 
 

@@ -11,14 +11,14 @@ Fala:
 
 ## 0:20-0:45 — Carregar Exemplo
 
-No bloco `Entrada operacional`, clique em `Carregar exemplo`. O botao `Limpar campos` fica ao lado para voltar ao estado vazio.
+No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos, e `Limpar campos` volta ao estado vazio.
 
 Fala:
 > Para a demo, eu carrego um pacote sintético versionado. Em operação, esses campos viriam do upload da fila CSV, do ticket PDF, imagem ou TXT, da nota do operador, e do clima/recursos em formulário simples ou JSON.
 
 ## 0:45-1:10 — Analisar
 
-Clique em `Analisar com Gemma 4`.
+Se tiver usado apenas `Carregar exemplo`, clique em `Analisar com Gemma 4`.
 
 Fala:
 > A execução interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisão auditável. Se faltar verdade material, o sistema fecha em bloqueio ou revisão, sem fallback operacional.
@@ -39,7 +39,7 @@ Fala:
 
 ## 2:20-2:45 — Ação Humana
 
-Mostrar aprovar, bloquear ou sobrescrever com motivo obrigatorio.
+Mostrar aprovar, bloquear ou sobrescrever com motivo obrigatório.
 
 Fala:
 > O sistema recomenda; o operador governa. Aprovar, bloquear ou sobrescrever exige motivo, e a persistência registra a ação humana junto da auditoria.

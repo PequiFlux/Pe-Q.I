@@ -50,6 +50,8 @@ INPUT_KEYS = {
     "weather_severity": "yard_weather_severity",
     "resource_available": "yard_resource_available",
     "resource_blocked": "yard_resource_blocked",
+    "resource_wet": "yard_resource_wet",
+    "analyze_example": "yard_analyze_example",
 }
 
 
@@ -164,7 +166,7 @@ def _render_operator_input(
             """,
             unsafe_allow_html=True,
         )
-        submitted = False
+        submitted = bool(st.session_state.pop(INPUT_KEYS["analyze_example"], False))
         with st.container():
             _render_input_actions(example_case)
             top_a, top_b = st.columns([1.08, 0.92], gap="large")
@@ -219,7 +221,9 @@ def _render_operator_input(
                 """,
                 unsafe_allow_html=True,
             )
-            submitted = st.button("Analisar com Gemma 4", type="primary", width="stretch")
+            submitted = (
+                st.button("Analisar com Gemma 4", type="primary", width="stretch") or submitted
+            )
 
     return {
         "submitted": submitted,
@@ -244,7 +248,7 @@ def _render_operator_note_input() -> str:
 def _render_weather_input() -> str:
     mode = st.radio(
         "Clima",
-        ["formulario", "JSON"],
+        ["formulário", "JSON"],
         horizontal=True,
         key=INPUT_KEYS["weather_mode"],
     )
@@ -266,7 +270,7 @@ def _render_weather_input() -> str:
 def _render_resource_input() -> str:
     mode = st.radio(
         "Recursos",
-        ["formulario", "JSON"],
+        ["formulário", "JSON"],
         horizontal=True,
         key=INPUT_KEYS["resource_mode"],
     )
@@ -282,6 +286,13 @@ def _render_resource_input() -> str:
         key=INPUT_KEYS["resource_blocked"],
         help="Separe IDs por vírgula. Ex.: DST-OPEN-01",
     )
+    wet_destinations = st.text_input(
+        "Destinos para carga úmida",
+        key=INPUT_KEYS["resource_wet"],
+        help="Separe IDs por vírgula. Esses destinos aceitam dry e wet.",
+    )
+    wet_ids = set(_split_ids(wet_destinations))
+    available_ids = list(dict.fromkeys([*_split_ids(available), *wet_ids]))
     resources = [
         {
             "resource_id": item,
@@ -290,9 +301,9 @@ def _render_resource_input() -> str:
             "resource_type": "covered_hopper",
             "exposure": "covered",
             "allowed_vehicle_types": ["truck", "bitrem"],
-            "supported_load_conditions": ["dry"],
+            "supported_load_conditions": ["dry", "wet"] if item in wet_ids else ["dry"],
         }
-        for item in _split_ids(available)
+        for item in available_ids
     ]
     resources.extend(
         {
@@ -354,11 +365,17 @@ def _split_ids(value: str) -> list[str]:
 
 
 def _render_input_actions(example_case: dict[str, Any]) -> None:
-    left, right = st.columns([0.18, 0.18], gap="small")
+    left, middle, right = st.columns([0.18, 0.22, 0.18], gap="small")
     with left:
         if st.button("Carregar exemplo", width="stretch"):
             _load_example_into_state(example_case)
             st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+            st.rerun()
+    with middle:
+        if st.button("Carregar e analisar exemplo", width="stretch"):
+            _load_example_into_state(example_case)
+            st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+            st.session_state[INPUT_KEYS["analyze_example"]] = True
             st.rerun()
     with right:
         if st.button("Limpar campos", width="stretch"):
@@ -462,9 +479,19 @@ def _sidebar_runtime_block() -> str:
     <div class="side-card compact">
       <div class="side-kicker">Execução</div>
       <p>{escape(runtime_label())}</p>
+      <p>{escape(_runtime_mode_note())}</p>
       <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
     </div>
     """
+
+
+def _runtime_mode_note() -> str:
+    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
+    if runtime == "text":
+        return "Modo teste: sem Gemma/Ollama; use TXT ou Carregar exemplo."
+    if runtime == "ollama":
+        return "Gemma 4 ativo via Ollama."
+    return f"Runtime customizado: {runtime}."
 
 
 def _empty_defaults() -> dict[str, str]:
@@ -480,6 +507,7 @@ def _empty_defaults() -> dict[str, str]:
         "weather_severity": "none",
         "resource_available": "",
         "resource_blocked": "",
+        "resource_wet": "",
     }
 
 

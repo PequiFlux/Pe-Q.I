@@ -62,7 +62,7 @@ def build_request_from_inputs(
             suffix = Path(uploaded.name).suffix.lower()
             content_type = CONTENT_TYPES.get(suffix)
             if content_type is None:
-                return None, f"Tipo de ticket nao suportado: {suffix}"
+                return None, f"Tipo de ticket não suportado: {suffix}"
             ticket_path = run_dir / f"ticket{suffix}"
             ticket_path.write_bytes(uploaded.getvalue())
         else:

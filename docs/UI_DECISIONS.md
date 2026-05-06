@@ -10,14 +10,22 @@ A interface principal deve parecer produto operacional, não painel de banca. O 
 
 A primeira tela segue quatro blocos:
 
-1. Nova decisão: botões `Carregar exemplo` e `Limpar campos`, fila CSV por upload, ticket/documento PDF/PNG/JPG/TXT por upload, nota do operador, clima em formulário simples ou JSON, e recursos em formulário simples ou JSON.
+1. Nova decisão: botões `Carregar exemplo`, `Carregar e analisar exemplo` e `Limpar campos`, fila CSV por upload, ticket/documento PDF/PNG/JPG/TXT por upload, nota do operador, clima em formulário simples ou JSON, e recursos em formulário simples ou JSON.
 2. Resultado: status, caminhão recomendado, destino recomendado, motivo operacional, documento interpretado, restrições críticas e mensagem ao motorista.
 3. Ação do operador: aprovar, bloquear ou sobrescrever com motivo.
 4. Auditoria técnica: JSON, matriz de validação, hashes, regras disparadas e latência.
 
 ### Demo discreta
 
-A UI mantém apenas dois comandos auxiliares no cabeçalho da entrada operacional: `Carregar exemplo` e `Limpar campos`. O exemplo preenche o pacote com um caso versionado do manifest e permite que avaliadores executem o fluxo como usuários finais. A demo não deve transformar a tela principal em benchmark, modo de banca ou painel comparativo.
+A UI mantém comandos auxiliares no cabeçalho da entrada operacional: `Carregar exemplo`, `Carregar e analisar exemplo` e `Limpar campos`. O exemplo preenche o pacote com um caso versionado do manifest e permite que avaliadores executem o fluxo como usuários finais. A demo não deve transformar a tela principal em benchmark, modo de banca ou painel comparativo.
+
+### Runtime explícito
+
+O sidebar precisa distinguir execução de teste e execução real. Com `PEQUIFLUX_GEMMA_RUNTIME=text`, a UI informa que é modo teste sem Gemma/Ollama e orienta o uso de TXT ou exemplo. Com `ollama`, informa que Gemma 4 está ativo via Ollama.
+
+### Recursos sem JSON obrigatório
+
+O formulário simples de recursos inclui destinos disponíveis, destinos bloqueados e destinos para carga úmida. Destinos marcados como carga úmida recebem `supported_load_conditions: ["dry", "wet"]`, evitando que o operador precise abrir JSON para modelar moega compatível com carga úmida.
 
 ### Sem benchmark na tela principal
 
