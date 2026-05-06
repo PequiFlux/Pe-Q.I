@@ -1,7 +1,486 @@
 {
   "$id": "schemas/FrontEndPayload.schema.json",
-  "type": "object",
+  "$defs": {
+    "AuditRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "variant": {
+          "enum": [
+            "fifo",
+            "heuristic",
+            "full"
+          ],
+          "title": "Variant",
+          "type": "string"
+        },
+        "hard_constraints_checked": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Hard Constraints Checked",
+          "type": "array"
+        },
+        "fired_rules": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fired Rules",
+          "type": "array"
+        },
+        "rejected_candidates": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Rejected Candidates",
+          "type": "array"
+        },
+        "recommended_pair": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommended Pair"
+        },
+        "fifo_break": {
+          "default": false,
+          "title": "Fifo Break",
+          "type": "boolean"
+        },
+        "provenance": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "operator_action": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operator Action"
+        },
+        "tool_calls": {
+          "items": {
+            "$ref": "#/$defs/ToolCallRecord"
+          },
+          "title": "Tool Calls",
+          "type": "array"
+        },
+        "latencies_ms": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Latencies Ms",
+          "type": "object"
+        },
+        "source_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Source Hashes",
+          "type": "object"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "request_id",
+        "scenario_id",
+        "variant"
+      ],
+      "title": "AuditRecord",
+      "type": "object"
+    },
+    "ConstraintFailure": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "severity",
+        "source",
+        "detail"
+      ],
+      "title": "ConstraintFailure",
+      "type": "object"
+    },
+    "DecisionStatus": {
+      "enum": [
+        "PREVIEW_READY",
+        "BLOCKED",
+        "REVIEW_REQUIRED",
+        "APPROVED",
+        "OVERRIDDEN"
+      ],
+      "title": "DecisionStatus",
+      "type": "string"
+    },
+    "DriverMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "template_id": {
+          "title": "Template Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message",
+        "template_id"
+      ],
+      "title": "DriverMessage",
+      "type": "object"
+    },
+    "GemmaVisibleSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "parsed_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parsed Fields",
+          "type": "array"
+        },
+        "exception_label": {
+          "title": "Exception Label",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "exception_label"
+      ],
+      "title": "GemmaVisibleSummary",
+      "type": "object"
+    },
+    "OperatorAction": {
+      "enum": [
+        "approve",
+        "block",
+        "override"
+      ],
+      "title": "OperatorAction",
+      "type": "string"
+    },
+    "QueueDiffEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "truck_id": {
+          "title": "Truck Id",
+          "type": "string"
+        },
+        "position_before": {
+          "title": "Position Before",
+          "type": "integer"
+        },
+        "position_after": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Position After"
+        },
+        "decision": {
+          "title": "Decision",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truck_id",
+        "position_before",
+        "position_after",
+        "decision",
+        "reason"
+      ],
+      "title": "QueueDiffEntry",
+      "type": "object"
+    },
+    "RecommendedDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "destination_id": {
+          "title": "Destination Id",
+          "type": "string"
+        },
+        "destination_type": {
+          "title": "Destination Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "destination_id",
+        "destination_type"
+      ],
+      "title": "RecommendedDestination",
+      "type": "object"
+    },
+    "RecommendedTruck": {
+      "additionalProperties": false,
+      "properties": {
+        "truck_id": {
+          "title": "Truck Id",
+          "type": "string"
+        },
+        "queue_position_before": {
+          "title": "Queue Position Before",
+          "type": "integer"
+        },
+        "queue_position_after": {
+          "title": "Queue Position After",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "truck_id",
+        "queue_position_before",
+        "queue_position_after"
+      ],
+      "title": "RecommendedTruck",
+      "type": "object"
+    },
+    "ToolCallRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "tool_name": {
+          "enum": [
+            "validate_hard_constraints",
+            "rank_candidates",
+            "generate_audit_payload"
+          ],
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "requested",
+            "executed",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "maxLength": 240,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        }
+      },
+      "required": [
+        "tool_name",
+        "request_id",
+        "state",
+        "status"
+      ],
+      "title": "ToolCallRecord",
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "variant": {
+      "enum": [
+        "fifo",
+        "heuristic",
+        "full"
+      ],
+      "title": "Variant",
+      "type": "string"
+    },
+    "decision_status": {
+      "$ref": "#/$defs/DecisionStatus"
+    },
+    "recommended_truck": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RecommendedTruck"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "recommended_destination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RecommendedDestination"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "considered_constraints": {
+      "items": {
+        "$ref": "#/$defs/ConstraintFailure"
+      },
+      "title": "Considered Constraints",
+      "type": "array"
+    },
+    "reason_summary": {
+      "title": "Reason Summary",
+      "type": "string"
+    },
+    "reason_details": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reason Details",
+      "type": "array"
+    },
+    "driver_message": {
+      "$ref": "#/$defs/DriverMessage"
+    },
+    "operator_actions": {
+      "items": {
+        "$ref": "#/$defs/OperatorAction"
+      },
+      "title": "Operator Actions",
+      "type": "array"
+    },
+    "queue_diff": {
+      "items": {
+        "$ref": "#/$defs/QueueDiffEntry"
+      },
+      "title": "Queue Diff",
+      "type": "array"
+    },
+    "gemma_visible_summary": {
+      "$ref": "#/$defs/GemmaVisibleSummary"
+    },
+    "latency_ms": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Latency Ms",
+      "type": "object"
+    },
+    "benchmark_tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Benchmark Tags",
+      "type": "array"
+    },
+    "benchmark_observed": {
+      "additionalProperties": true,
+      "title": "Benchmark Observed",
+      "type": "object"
+    },
+    "confidence_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Confidence Notes",
+      "type": "array"
+    },
+    "audit_record": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AuditRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
   "required": [
     "request_id",
     "scenario_id",
@@ -9,35 +488,8 @@
     "decision_status",
     "reason_summary",
     "driver_message",
-    "operator_actions",
-    "queue_diff",
-    "gemma_visible_summary",
-    "latency_ms",
-    "benchmark_tags",
-    "confidence_notes"
+    "gemma_visible_summary"
   ],
-  "properties": {
-    "request_id": { "type": "string" },
-    "scenario_id": { "type": "string" },
-    "variant": { "type": "string" },
-    "decision_status": { "type": "string" },
-    "reason_summary": { "type": "string" },
-    "driver_message": { "type": "object" },
-    "operator_actions": { "type": "array" },
-    "queue_diff": { "type": "array" },
-    "gemma_visible_summary": { "type": "object" },
-    "latency_ms": {
-      "type": "object",
-      "additionalProperties": { "type": "integer", "minimum": 0 }
-    },
-    "benchmark_tags": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "benchmark_observed": { "type": "object" },
-    "confidence_notes": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
-  }
+  "title": "FrontEndPayload",
+  "type": "object"
 }

@@ -12,7 +12,7 @@ Faz:
 
 `reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua.
 
-O `ToolGateway` está implementado e é usado no fluxo `full` para executar tools determinísticas sob whitelist, ordem de estados, validação de IDs locais e log estruturado.
+O `ToolGateway` está implementado e é usado no fluxo `full` para executar tools determinísticas sob whitelist, ordem de estados, validação de IDs locais e log estruturado. No fluxo atual, o orquestrador passa uma única tool permitida para cada estado; Gemma solicita essa tool permitida sob contrato, sem escolher livremente entre comandos.
 
 Não faz:
 
@@ -74,7 +74,7 @@ Regras:
 - validar IDs contra estado local
 - registrar tentativas em log estruturado
 
-No fluxo `full`, o orquestrador passa constraints, ranking e auditoria pelo `ToolGateway`. Gemma interpreta documentos e apoia classificação ambígua, mas não decide hard constraints. A mensagem ao motorista é composta por serviço determinístico local.
+No fluxo `full`, o orquestrador passa constraints, ranking e auditoria pelo `ToolGateway`. Em cada etapa, Gemma solicita a tool permitida para o estado atual sob whitelist; ele não decide livremente qual tool executar. Gemma interpreta documentos e apoia classificação ambígua, mas não decide hard constraints. A mensagem ao motorista é composta por serviço determinístico local.
 
 ## Sem fallback
 

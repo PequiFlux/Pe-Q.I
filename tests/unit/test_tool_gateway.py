@@ -97,15 +97,21 @@ def test_tool_gateway_logs_attempts_success_and_errors() -> None:
         logger=logger,
     )
 
-    assert gateway.execute("validate_hard_constraints", {}) == "ok"
+    assert gateway.execute("validate_hard_constraints", {"request_id": "REQ-001"}) == "ok"
 
     with pytest.raises(PequiFluxError, match="UNKNOWN_TOOL"):
-        gateway.execute("not_allowed", {})
+        gateway.execute("not_allowed", {"request_id": "REQ-002"})
 
     assert [event["status"] for event in logger.events] == [
         "attempted",
         "executed",
         "attempted",
         "error",
+    ]
+    assert [event["request_id"] for event in logger.events] == [
+        "REQ-001",
+        "REQ-001",
+        "REQ-002",
+        "REQ-002",
     ]
     assert logger.events[-1]["error_code"] == "UNKNOWN_TOOL"

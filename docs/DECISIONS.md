@@ -543,7 +543,7 @@ Contexto:
 O repositório já tinha `ToolGateway`, mas o fluxo `full` ainda chamava constraints, ranking e auditoria diretamente pelo orquestrador. Isso deixava a documentação de tool calling sem prova operacional no pipeline.
 
 Decisão:
-Executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` via `ToolGateway` no fluxo `full`, preservando regras determinísticas, whitelist, ordem por `FlowState`, validação de IDs locais e log estruturado. `compose_driver_message` permanece serviço determinístico fora da whitelist solicitável pelo modelo.
+Executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` via `ToolGateway` no fluxo `full`, preservando regras determinísticas, whitelist, ordem por `FlowState`, validação de IDs locais e log estruturado. Em cada etapa, o orquestrador passa uma única tool permitida em `allowed_tools`; Gemma solicita essa tool válida sob contrato, sem escolher livremente entre comandos. `compose_driver_message` permanece serviço determinístico fora da whitelist solicitável pelo modelo.
 
 Alternativas rejeitadas:
 Manter o gateway apenas como camada futura ou deixar o modelo decidir hard constraints.

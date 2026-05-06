@@ -35,8 +35,10 @@ def test_audit_record_accepts_typed_tool_call_records() -> None:
                 request_id="REQ-001",
                 state="VALIDATED",
                 status="executed",
+                purpose="Ordenar pares elegíveis.",
             )
         ],
     )
 
     assert audit.tool_calls[0].tool_name == "rank_candidates"
+    assert audit.tool_calls[0].purpose == "Ordenar pares elegíveis."

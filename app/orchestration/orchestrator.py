@@ -282,6 +282,7 @@ class DecisionOrchestrator:
                 ),
                 local_ids=local_ids,
                 tool_records=tool_records,
+                timers=timers,
             )
         else:
             validation = run_validation(request.request_id)
@@ -312,6 +313,7 @@ class DecisionOrchestrator:
                 ),
                 local_ids=local_ids,
                 tool_records=tool_records,
+                timers=timers,
             )
         else:
             ranking = run_ranking(request.request_id)
@@ -369,25 +371,29 @@ class DecisionOrchestrator:
                 preview=preview,
                 latencies_ms=timers,
                 source_hashes=loaded.source_hashes,
-                tool_calls=tool_records,
             )
 
-        if request.variant == "full" and ranked is not None:
+        if request.variant == "full":
+            context_summary = (
+                "Ranking is complete; audit payload must be generated from formal "
+                "decision artifacts."
+                if ranked is not None
+                else "Human review is required; audit payload must be generated from "
+                "interpreted context and formal review artifacts."
+            )
             audit = self._execute_gemma_tool(
                 request_id=request.request_id,
                 state_machine=state_machine,
                 allowed_tool="generate_audit_payload",
                 tools={"generate_audit_payload": run_audit},
-                context_summary=(
-                    "Ranking is complete; audit payload must be generated from formal "
-                    "decision artifacts."
-                ),
+                context_summary=context_summary,
                 local_ids=local_ids,
                 tool_records=tool_records,
+                timers=timers,
             )
         else:
             audit = run_audit(request.request_id)
-        return preview, _attach_tool_records(audit, tool_records)
+        return preview, _attach_tool_records(audit, tool_records, timers)
 
     def persist_and_log(
         self,
@@ -459,11 +465,10 @@ class DecisionOrchestrator:
             preview=preview,
             latencies_ms=timers,
             source_hashes=source_hashes,
-            tool_calls=tool_records,
         )
         return self.persist_and_log(
             preview=preview,
-            audit=_attach_tool_records(audit, tool_records),
+            audit=_attach_tool_records(audit, tool_records, timers),
             interpreted_context=blocked_context,
             state=state_machine.current_state,
         )
@@ -539,19 +544,37 @@ class DecisionOrchestrator:
         context_summary: str,
         local_ids: ToolLocalIds,
         tool_records: list[dict[str, Any]],
+        timers: dict[str, int],
     ):
-        intent = self.gemma_adapter.choose_tool(
-            request_id=request_id,
-            current_state=state_machine.current_state.value,
-            allowed_tools=[allowed_tool],
-            context_summary=context_summary,
-        )
+        choose_t0 = perf_counter()
+        try:
+            intent = self.gemma_adapter.choose_tool(
+                request_id=request_id,
+                current_state=state_machine.current_state.value,
+                allowed_tools=[allowed_tool],
+                context_summary=context_summary,
+            )
+        except PequiFluxError as exc:
+            timers[f"choose_tool_{allowed_tool}"] = int((perf_counter() - choose_t0) * 1000)
+            tool_records.append(
+                {
+                    "tool_name": allowed_tool,
+                    "request_id": request_id,
+                    "state": state_machine.current_state.value,
+                    "status": "error",
+                    "purpose": "",
+                    "error_code": exc.code,
+                }
+            )
+            raise
+        timers[f"choose_tool_{allowed_tool}"] = int((perf_counter() - choose_t0) * 1000)
         tool_records.append(
             {
                 "tool_name": intent.tool_name,
                 "request_id": intent.request_id,
                 "state": state_machine.current_state.value,
                 "status": "requested",
+                "purpose": intent.purpose,
             }
         )
 
@@ -562,22 +585,26 @@ class DecisionOrchestrator:
             local_ids=local_ids,
             logger=self.jsonl_logger,
         )
+        tool_t0 = perf_counter()
         try:
             result = gateway.execute(
                 intent.tool_name,
                 {"request_id": intent.request_id},
             )
         except PequiFluxError as exc:
+            timers[f"tool_{allowed_tool}"] = int((perf_counter() - tool_t0) * 1000)
             tool_records.append(
                 {
                     "tool_name": intent.tool_name,
                     "request_id": intent.request_id,
                     "state": state_machine.current_state.value,
                     "status": "error",
+                    "purpose": intent.purpose,
                     "error_code": exc.code,
                 }
             )
             raise
+        timers[f"tool_{allowed_tool}"] = int((perf_counter() - tool_t0) * 1000)
 
         tool_records.append(
             {
@@ -585,6 +612,7 @@ class DecisionOrchestrator:
                 "request_id": intent.request_id,
                 "state": state_machine.current_state.value,
                 "status": "executed",
+                "purpose": intent.purpose,
             }
         )
         return result
@@ -608,9 +636,15 @@ def _blocked_policy_rules(exc: PequiFluxError) -> list[str]:
     return []
 
 
-def _attach_tool_records(audit: AuditRecord, tool_records: list[dict[str, Any]]) -> AuditRecord:
+def _attach_tool_records(
+    audit: AuditRecord,
+    tool_records: list[dict[str, Any]],
+    timers: dict[str, int] | None = None,
+) -> AuditRecord:
     payload = audit.model_dump(mode="python")
     payload["tool_calls"] = list(tool_records)
+    if timers is not None:
+        payload["latencies_ms"] = dict(timers)
     return AuditRecord.model_validate(payload)
 
 

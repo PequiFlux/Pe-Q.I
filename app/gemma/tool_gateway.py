@@ -61,7 +61,8 @@ class ToolGateway:
         self._logger = logger
 
     def execute(self, tool_name: str, arguments: dict[str, Any]) -> Any:
-        self._log_attempt(tool_name=tool_name, status="attempted")
+        request_id = arguments.get("request_id") if isinstance(arguments, dict) else None
+        self._log_attempt(tool_name=tool_name, status="attempted", request_id=request_id)
         try:
             if tool_name not in self._tools:
                 raise PequiFluxError("UNKNOWN_TOOL", f"Tool not allowed: {tool_name}")
@@ -72,16 +73,31 @@ class ToolGateway:
             self._validate_local_ids(arguments)
             result = self._tools[tool_name](**arguments)
         except PequiFluxError as exc:
-            self._log_attempt(tool_name=tool_name, status="error", error_code=exc.code)
+            self._log_attempt(
+                tool_name=tool_name,
+                status="error",
+                request_id=request_id,
+                error_code=exc.code,
+            )
             raise
         except TimeoutError as exc:
-            self._log_attempt(tool_name=tool_name, status="error", error_code="TIMEOUT")
+            self._log_attempt(
+                tool_name=tool_name,
+                status="error",
+                request_id=request_id,
+                error_code="TIMEOUT",
+            )
             raise PequiFluxError("TIMEOUT", f"Tool timed out: {tool_name}") from exc
         except Exception as exc:
-            self._log_attempt(tool_name=tool_name, status="error", error_code="EXECUTION_ERROR")
+            self._log_attempt(
+                tool_name=tool_name,
+                status="error",
+                request_id=request_id,
+                error_code="EXECUTION_ERROR",
+            )
             raise PequiFluxError("EXECUTION_ERROR", f"Tool execution failed: {tool_name}") from exc
 
-        self._log_attempt(tool_name=tool_name, status="executed")
+        self._log_attempt(tool_name=tool_name, status="executed", request_id=request_id)
         return result
 
     def _validate_tool_order(self, tool_name: str) -> None:
@@ -130,7 +146,14 @@ class ToolGateway:
             request_ids=self._local_ids.request_ids,
         )
 
-    def _log_attempt(self, *, tool_name: str, status: str, error_code: str | None = None) -> None:
+    def _log_attempt(
+        self,
+        *,
+        tool_name: str,
+        status: str,
+        request_id: Any | None = None,
+        error_code: str | None = None,
+    ) -> None:
         if self._logger is None:
             return
         payload = {
@@ -139,6 +162,8 @@ class ToolGateway:
             "tool_name": tool_name,
             "status": status,
         }
+        if request_id is not None:
+            payload["request_id"] = str(request_id)
         if self._current_state is not None:
             payload["state"] = self._current_state
         if error_code is not None:

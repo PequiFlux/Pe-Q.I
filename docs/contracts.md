@@ -276,7 +276,7 @@ Registra:
 - proveniência
 - tool calls solicitadas/executadas/erro
 - hashes de origem
-- latências
+- latências, incluindo timers separados `choose_tool_<tool>` e `tool_<tool>` no fluxo `full`
 
 Referência:
 
@@ -290,7 +290,7 @@ Referência:
 - `request_id`
 - `purpose` opcional, limitado a 240 caracteres
 
-`app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`.
+`app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`. No fluxo operacional atual, o orquestrador passa `allowed_tools` com uma única tool válida por etapa; portanto Gemma solicita a tool permitida sob whitelist, não escolhe livremente entre várias ferramentas.
 
 `GemmaAdapter.choose_tool()` chama o runtime com esse prompt, valida `ToolCallIntent`, rejeita tool fora da allowlist com `MODEL_TOOL_NOT_ALLOWED` e rejeita `request_id` divergente com `MODEL_TOOL_REQUEST_ID_MISMATCH`.
 
@@ -304,6 +304,7 @@ No runtime textual de CI, `TextTicketRuntime` retorna a primeira tool em `allowe
 - `request_id`
 - `state`
 - `status`: `requested`, `executed` ou `error`
+- `purpose`: motivo compacto retornado pelo Gemma para a tool solicitada
 - `error_code` opcional
 
 `AuditRecord.tool_calls` mantém a lista tipada desses registros.
@@ -324,6 +325,8 @@ Referências:
 
 - [`app/services/decision_builder.py`](../app/services/decision_builder.py)
 - [`scenarios/schemas/FrontEndPayload.schema.json`](../scenarios/schemas/FrontEndPayload.schema.json)
+
+O schema público deve espelhar `FrontEndPayload.model_json_schema()` com o `$id` versionado acima.
 
 ## Funções centrais
 

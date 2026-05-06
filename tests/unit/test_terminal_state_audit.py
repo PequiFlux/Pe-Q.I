@@ -143,12 +143,15 @@ def test_orchestrator_executes_decision_tools_through_gateway(tmp_path: Path) ->
         for event in events
         if event.get("module") == "tool_gateway" and event.get("status") == "executed"
     }
+    gateway_events = [event for event in events if event.get("module") == "tool_gateway"]
 
     assert executed_tools >= {
         "validate_hard_constraints",
         "rank_candidates",
         "generate_audit_payload",
     }
+    assert gateway_events
+    assert {event.get("request_id") for event in gateway_events} == {request.request_id}
     assert payload.audit_record is not None
     audit_tool_statuses = {
         (record.tool_name, record.status) for record in payload.audit_record.tool_calls

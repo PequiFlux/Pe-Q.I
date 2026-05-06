@@ -3,11 +3,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.domain.enums import FlowState
 from app.domain.errors import PequiFluxError
 from app.domain.models import DecisionRequest, ToolCallIntent
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
+from app.gemma import tool_gateway
 from app.orchestration.orchestrator import DecisionOrchestrator
 
 
@@ -25,6 +28,56 @@ class RuntimeReturningTool:
 
     def summarize(self, *, prompt, metadata):
         return "summary"
+
+
+class TextRuntimeReturningDisallowedTool(TextTicketRuntime):
+    def generate_structured(self, *, prompt, response_model, metadata):
+        if response_model is ToolCallIntent:
+            return ToolCallIntent(
+                tool_name="rank_candidates",
+                request_id=str(metadata["request_id"]),
+                purpose="test disallowed tool",
+            )
+        return super().generate_structured(
+            prompt=prompt,
+            response_model=response_model,
+            metadata=metadata,
+        )
+
+
+class TextRuntimeReturningMismatchedRequestTool(TextTicketRuntime):
+    def generate_structured(self, *, prompt, response_model, metadata):
+        if response_model is ToolCallIntent:
+            allowed_tools = metadata.get("allowed_tools") or []
+            return ToolCallIntent(
+                tool_name=allowed_tools[0],
+                request_id="REQ-DIFFERENT",
+                purpose="test mismatched request",
+            )
+        return super().generate_structured(
+            prompt=prompt,
+            response_model=response_model,
+            metadata=metadata,
+        )
+
+
+def _scenario_request(scenario_id: str, *, variant: str) -> DecisionRequest:
+    manifest = json.loads(Path("scenarios/manifest.json").read_text(encoding="utf-8"))
+    case = next(item for item in manifest["cases"] if item["scenario_id"] == scenario_id)
+    return DecisionRequest.model_validate(case["request"]).model_copy(update={"variant": variant})
+
+
+def _run_scenario(
+    scenario_id: str,
+    *,
+    variant: str,
+    runtime=None,
+):
+    request = _scenario_request(scenario_id, variant=variant)
+    orchestrator = DecisionOrchestrator(
+        gemma_adapter=GemmaAdapter(runtime=runtime or TextTicketRuntime()),
+    )
+    return orchestrator.run_decision(request)
 
 
 def test_gemma_adapter_accepts_allowed_tool_call():
@@ -56,16 +109,7 @@ def test_gemma_adapter_rejects_disallowed_tool_call():
 
 
 def test_s10_full_payload_records_required_tool_calls():
-    manifest = json.loads(Path("scenarios/manifest.json").read_text(encoding="utf-8"))
-    case = next(
-        item for item in manifest["cases"] if item["scenario_id"] == "S10_FIFO_BREAK_JUSTIFIED"
-    )
-    request = DecisionRequest.model_validate(case["request"]).model_copy(update={"variant": "full"})
-    orchestrator = DecisionOrchestrator(
-        gemma_adapter=GemmaAdapter(runtime=TextTicketRuntime()),
-    )
-
-    payload = orchestrator.run_decision(request)
+    payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full")
 
     assert payload.audit_record is not None
     tool_names = {record.tool_name for record in payload.audit_record.tool_calls}
@@ -74,3 +118,113 @@ def test_s10_full_payload_records_required_tool_calls():
         "rank_candidates",
         "generate_audit_payload",
     }
+    assert {
+        record.purpose for record in payload.audit_record.tool_calls if record.status == "executed"
+    } == {"Deterministic CI tool intent."}
+    assert {
+        "choose_tool_validate_hard_constraints",
+        "tool_validate_hard_constraints",
+        "choose_tool_rank_candidates",
+        "tool_rank_candidates",
+        "choose_tool_generate_audit_payload",
+        "tool_generate_audit_payload",
+    } <= set(payload.latency_ms)
+    assert payload.audit_record.latencies_ms == payload.latency_ms
+
+
+def test_s10_full_payload_audits_tool_selection_error():
+    payload = _run_scenario(
+        "S10_FIFO_BREAK_JUSTIFIED",
+        variant="full",
+        runtime=TextRuntimeReturningDisallowedTool(),
+    )
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert [
+        (record.tool_name, record.status, record.purpose, record.error_code)
+        for record in payload.audit_record.tool_calls
+    ] == [
+        (
+            "validate_hard_constraints",
+            "error",
+            "",
+            "MODEL_TOOL_NOT_ALLOWED",
+        )
+    ]
+
+
+@pytest.mark.parametrize("variant", ["fifo", "heuristic"])
+def test_technical_variants_do_not_record_tool_calls(variant):
+    payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant=variant)
+
+    assert payload.audit_record is not None
+    assert payload.audit_record.tool_calls == []
+
+
+def test_s10_full_payload_blocks_and_audits_request_id_mismatch():
+    payload = _run_scenario(
+        "S10_FIFO_BREAK_JUSTIFIED",
+        variant="full",
+        runtime=TextRuntimeReturningMismatchedRequestTool(),
+    )
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert [
+        (record.tool_name, record.status, record.purpose, record.error_code)
+        for record in payload.audit_record.tool_calls
+    ] == [
+        (
+            "validate_hard_constraints",
+            "error",
+            "",
+            "MODEL_TOOL_REQUEST_ID_MISMATCH",
+        )
+    ]
+
+
+def test_s10_full_payload_blocks_and_audits_tool_order_error(monkeypatch):
+    monkeypatch.setitem(
+        tool_gateway.TOOL_STATE_ORDER,
+        "validate_hard_constraints",
+        {FlowState.RANKED.value},
+    )
+
+    payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full")
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert [
+        (record.tool_name, record.status, record.purpose, record.error_code)
+        for record in payload.audit_record.tool_calls
+    ] == [
+        (
+            "validate_hard_constraints",
+            "requested",
+            "Deterministic CI tool intent.",
+            None,
+        ),
+        (
+            "validate_hard_constraints",
+            "error",
+            "Deterministic CI tool intent.",
+            "TOOL_ORDER_ERROR",
+        ),
+    ]
+
+
+def test_s03_review_required_full_payload_runs_audit_tool():
+    payload = _run_scenario("S03_WET_LOAD", variant="full")
+
+    assert payload.decision_status == "REVIEW_REQUIRED"
+    assert payload.audit_record is not None
+    audit_tool_records = [
+        record
+        for record in payload.audit_record.tool_calls
+        if record.tool_name == "generate_audit_payload"
+    ]
+    assert [(record.status, record.purpose) for record in audit_tool_records] == [
+        ("requested", "Deterministic CI tool intent."),
+        ("executed", "Deterministic CI tool intent."),
+    ]

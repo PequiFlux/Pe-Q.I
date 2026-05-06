@@ -44,6 +44,7 @@ class ToolCallRecord(StrictModel):
     request_id: str
     state: str
     status: Literal["requested", "executed", "error"]
+    purpose: str = Field(default="", max_length=240)
     error_code: str | None = None
 
 

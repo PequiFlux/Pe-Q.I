@@ -410,7 +410,7 @@ Contrato: a classificação indica o quadro contextual dominante, mas não autor
 
 Entrada: `InterpretedContext` já reconciliado.  
 Saída: execução validada de tools permitidas.
-Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos. No fluxo `full`, o orquestrador executa constraints, ranking e auditoria por essa fronteira. A mensagem ao motorista permanece serviço determinístico local.
+Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos. No fluxo `full`, o orquestrador executa constraints, ranking e auditoria por essa fronteira. Em cada estado, o orquestrador oferece uma única tool permitida; Gemma solicita essa tool sob whitelist, sem escolha livre entre comandos. A mensagem ao motorista permanece serviço determinístico local.
 
 **Fronteira F — `Rules Engine -> Ranking`**
 
@@ -726,7 +726,7 @@ A submissão não precisa provar visão computacional geral. Ela precisa provar 
 
 ### 5.7 Função exata do ToolGateway
 
-O `ToolGateway` existe sob contenção rígida. O fluxo `full` usa o gateway para executar as tools determinísticas da decisão; o modelo interpreta documentos e contexto ambíguo, mas o código continua decidindo elegibilidade.
+O `ToolGateway` existe sob contenção rígida. O fluxo `full` usa o gateway para executar as tools determinísticas da decisão; o modelo interpreta documentos e contexto ambíguo, mas o código continua decidindo elegibilidade. No fluxo atual, Gemma solicita a tool permitida para o estado atual sob whitelist; ele não escolhe livremente entre várias ferramentas operacionais.
 
 Tools previstas na whitelist:
 
@@ -1391,6 +1391,7 @@ Padrão de IDs sintéticos:
           "request_id": {"type": "string"},
           "state": {"type": "string"},
           "status": {"type": "string"},
+          "purpose": {"type": "string"},
           "error_code": {"type": ["string", "null"]}
         }
       }
@@ -1461,6 +1462,7 @@ Padrão de IDs sintéticos:
       "request_id": "REQ-2026-0007",
       "state": "INTERPRETED",
       "status": "executed",
+      "purpose": "Hard constraints must be checked before ranking.",
       "error_code": null
     },
     {
@@ -1468,6 +1470,7 @@ Padrão de IDs sintéticos:
       "request_id": "REQ-2026-0007",
       "state": "VALIDATED",
       "status": "executed",
+      "purpose": "Ranking may only order eligible pairs.",
       "error_code": null
     }
   ],
