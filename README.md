@@ -649,4 +649,4 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 
 ## Licença
 
-Projeto desenvolvido para a Gemma 4 Good Hackathon. Consulte o repositório para detalhes de licença.
+MIT. Consulte [`LICENSE`](LICENSE).
