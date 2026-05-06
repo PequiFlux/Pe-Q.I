@@ -5,6 +5,13 @@ from typing import Any
 from app.domain.models import FrontEndPayload
 
 
+FULL_PREVIEW_READY_TOOLS = {
+    "validate_hard_constraints",
+    "rank_candidates",
+    "generate_audit_payload",
+}
+
+
 def validate_payload(payload: FrontEndPayload, expected: dict[str, Any]) -> None:
     errors: list[str] = []
     if payload.decision_status != expected["expected_status"]:
@@ -42,5 +49,32 @@ def validate_payload(payload: FrontEndPayload, expected: dict[str, Any]) -> None
     if missing_policy_rules:
         errors.append(f"missing policy rules={sorted(missing_policy_rules)}")
 
+    try:
+        validate_full_tool_contract(payload)
+    except SystemExit as exc:
+        errors.append(str(exc))
+
     if errors:
         raise SystemExit("Scenario validation failed: " + "; ".join(errors))
+
+
+def validate_full_tool_contract(payload: FrontEndPayload) -> None:
+    missing_tool_calls = _missing_required_tool_calls(payload)
+    if missing_tool_calls:
+        raise SystemExit(f"missing full tool calls={missing_tool_calls}")
+
+
+def _missing_required_tool_calls(payload: FrontEndPayload) -> list[str]:
+    if payload.variant != "full":
+        return []
+    executed_tools = {
+        record.tool_name
+        for record in (payload.audit_record.tool_calls if payload.audit_record else [])
+        if record.status == "executed"
+    }
+    if payload.decision_status == "PREVIEW_READY":
+        return sorted(FULL_PREVIEW_READY_TOOLS - executed_tools)
+    if payload.decision_status == "REVIEW_REQUIRED":
+        if "generate_audit_payload" not in executed_tools:
+            return ["generate_audit_payload"]
+    return []

@@ -8,6 +8,21 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 
 **Princípio central:** Gemma interpreta; regras determinísticas decidem; o operador humano aprova, bloqueia ou faz override; tudo fica auditável.
 
+## Contexto da hackathon
+
+Este repositório é a submissão **PequiFlux Yard Copilot** para a **Gemma 4 Good Hackathon**, competição focada em aplicações reais que usem Gemma 4 para gerar impacto mensurável, com demo funcional, código público, narrativa clara e evidência técnica.
+
+O projeto ataca um problema operacional de impacto em pátios logísticos: em situações de chuva, bloqueio documental, carga úmida, recurso indisponível ou prioridade contratual, seguir FIFO de forma cega pode chamar o caminhão errado, mandar carga para destino incompatível ou exigir intervenção informal sem auditoria. O PequiFlux transforma esse momento de exceção em uma decisão verificável.
+
+O uso de Gemma 4 é deliberadamente limitado e auditável:
+
+- interpreta ticket/documento em PDF, PNG, JPG ou TXT;
+- ajuda a classificar exceções ambíguas quando documento, nota do operador e estado local divergem;
+- atua como **Gemma Tool Planner** no variant `full`, escolhendo a próxima tool permitida pelo estado do workflow;
+- nunca decide hard constraints, nunca altera fila/recurso/clima e nunca executa comandos livres.
+
+O resultado esperado para a banca é simples: abrir a UI, carregar um exemplo, analisar com Gemma 4 ou modo teste reproduzível, ver caminhão/destino recomendados, entender o motivo operacional e conferir a trilha técnica em auditoria.
+
 ![PequiFlux Yard Copilot UI](assets/screenshots/pequiflux-ui.png)
 
 ## Prints da UI
@@ -51,6 +66,7 @@ make audit
 ## Sumário
 
 - [O que é](#o-que-é)
+- [Contexto da hackathon](#contexto-da-hackathon)
 - [Quickstart](#quickstart)
 - [Demo](#demo)
 - [Runtime Text vs Runtime Gemma](#runtime-text-vs-runtime-gemma)
@@ -300,6 +316,8 @@ Há dois artefatos conceitualmente distintos:
 
 `audit_completeness` é uma métrica de completude dos payloads que entram no benchmark comparativo, não um indicador universal de toda falha catastrófica. Em falhas pré-ingestão, como arquivo ausente antes de haver interpretação, hashes completos, latências e proveniência podem não existir; nesses casos a expectativa correta é falhar fechado com erro explícito, não preservar `audit_completeness = 1.0`.
 
+O `summary.csv` também exporta colunas de prova do Gemma Tool Planner: `tool_call_count`, `tool_call_success`, `tool_path`, `tool_error_count` e `planner_step_count`. O `metrics.json` agrega essa trilha por variante com `tool_call_success_rate`, `avg_tool_call_count`, `avg_planner_step_count`, `tool_error_count` e `tool_error_rate`. No variant `full`, elas mostram o caminho auditável das tools solicitadas pelo Gemma e executadas sob `ToolGateway`; em `raw_fifo`, `fifo_safe` e `heuristic`, permanecem zeradas.
+
 ### Critérios de sucesso
 
 - `constraint_violation_rate = 0` no sistema completo
@@ -322,9 +340,9 @@ O snapshot versionado em `bench/reports/sample/` fica congelado em 20 cenários.
 Ele é gerado com runtime textual/fixtures determinísticos para CI e mede contrato, comportamento, acurácia e separação entre variantes. As latências zeradas desse sample não representam performance real; latência deve ser lida apenas em execuções locais com Ollama/Gemma no trilho `extended`.
 O CLI recusa `bench/reports/sample/` como `--output-dir`; novos testes devem usar `bench/reports/extended-sample/<run_id>` ou um diretório temporário local.
 
-- `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`
+- `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`, `tool_call_success_rate = 0.95`, `avg_tool_call_count = 4.7`, `avg_planner_step_count = 2.35`, `tool_error_rate = 0.05`
 - `heuristic`: `decision_match_at_1 = 0.85`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.85`, `audit_completeness = 0.85`
-- `fifo_safe`: `decision_match_at_1 = 0.7`, `constraint_violation_rate = 0.0`
+- `fifo_safe`: `decision_match_at_1 = 0.75`, `constraint_violation_rate = 0.0`
 - `raw_fifo`: `decision_match_at_1 = 0.25`, `constraint_violation_rate = 0.35`
 - `S03_WET_LOAD`, `S11_IMAGE_ROTATED_WET_LOAD` e `S12_PDF_SCANNED_DOCUMENT_BLOCK`: `heuristic` fecha em `BLOCKED` por falta de texto extraível; `full` chega ao resultado esperado via sidecar multimodal de CI.
 
@@ -407,6 +425,8 @@ queue.csv + ticket + nota + clima + recursos
     v
 [ UI ]               -- operador vê recomendação, valida e finaliza
 ```
+
+No variant `full`, `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` são solicitadas pelo Gemma Tool Planner e executadas pelo `ToolGateway`; em `fifo_safe`/`heuristic`, essas etapas são chamadas diretamente pelo orquestrador.
 
 ### Máquina de estados
 

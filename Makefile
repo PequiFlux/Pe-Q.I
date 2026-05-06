@@ -11,7 +11,7 @@ help:
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make audit      Run blueprint audit inside Docker"
-	@echo "  make quality    Run the same Black, pytest, audit and text benchmark smoke gates as CI"
+	@echo "  make quality    Run Black, pytest, audit and validated text benchmark gates as CI"
 
 demo:
 	docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
@@ -48,7 +48,7 @@ benchmark-validate-text:
 	docker build --target test -t pequiflux-yard-copilot:test .
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 
-quality: format-check test audit benchmark-smoke
+quality: format-check test audit benchmark-validate-text
 
 prewarm:
 	docker compose --profile gemma-setup run --rm gemma-init

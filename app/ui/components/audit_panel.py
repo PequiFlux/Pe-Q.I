@@ -368,7 +368,8 @@ def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
         return ""
     return f"""
       <div class="tool-call-summary">
-        <h4>Gemma 4 solicitou:</h4>
+        <h4>Gemma Tool Planner</h4>
+        <p>FlowState → tool → status executado sob whitelist.</p>
         <ol class="tool-call-list">{items}</ol>
       </div>
     """
@@ -390,7 +391,7 @@ def _tool_call_audit_item(tool_name: str, records: list[Any], labels: dict[str, 
     return f"""
           <li class="tool-call-item {escape(status_class)}">
             <div class="tool-call-flow">
-              <span class="tool-call-name">{escape(tool_name)}</span>
+              <span class="tool-call-name">{escape(state)} → {escape(tool_name)}</span>
               <strong>{escape(status_flow)}</strong>
             </div>
             <div class="tool-call-meta">

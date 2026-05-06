@@ -44,13 +44,13 @@ else
   exit 1
 fi
 
-echo "==> text-runtime benchmark smoke"
+echo "==> text-runtime benchmark validation"
 if command -v python >/dev/null 2>&1; then
-  PEQUIFLUX_GEMMA_RUNTIME=text python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+  PEQUIFLUX_GEMMA_RUNTIME=text python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 elif command -v docker >/dev/null 2>&1; then
-  docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+  docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 else
-  echo "python e docker não encontrados. Não foi possível executar benchmark smoke." >&2
+  echo "python e docker não encontrados. Não foi possível executar benchmark validado." >&2
   exit 1
 fi
 

@@ -70,6 +70,7 @@ Procurar:
 - Validação de violação do FIFO bruto deve tratar par caminhão-destino ausente da matriz como inválido em `bench.rows.pair_rejected`; não interpretar destino desconhecido como “sem violação”.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
+- Métricas de tool calling no benchmark devem ser derivadas em `bench.rows.tool_call_metrics` a partir de `AuditRecord.tool_calls`; não recalcular caminho de tools em CLI, UI ou `bench.reporting`.
 - Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.
 - Caminhos reprodutíveis mínimos devem usar `demo-text`/`ui-text`; não fazer quickstart depender implicitamente do serviço `gemma`.
 - Checks públicos devem reutilizar `pytest`, `black`, `app.cli.blueprint_audit` e `app.cli.run_benchmark`; não criar runner paralelo de CI para métricas ou auditoria.
@@ -85,4 +86,5 @@ Procurar:
 - Comparação FIFO bruta da UI deve importar `raw_fifo_call` e `raw_queue_rows` de `app.services.raw_fifo`; não recriar wrappers ou leitura de CSV em `app/ui/components/common.py`.
 - A UI deve obter `DecisionOrchestrator` via `app/ui/ui_runner.py` e `st.cache_resource`; não chamar `build_gemma_adapter()` diretamente em componente ou composição de tela.
 - Novas mudanças no fluxo de decisão devem encaixar nas etapas `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` ou `persist_and_log`; não voltar a concentrar o pipeline inteiro em `run_decision()`.
+- Mecânica do Gemma Tool Planner deve ficar em `app/orchestration/tool_planner.py`: sessão, `execute_planned_tool`, plano de validação/ranking e plano de auditoria. `DecisionOrchestrator` só deve montar callbacks determinísticos e coordenar payload/persistência.
 - Estados de orquestração só podem mudar por `WorkflowStateMachine.transition_to` ou `WorkflowStateMachine.force_terminal`; não atribuir `current_state` diretamente fora da máquina de estados.

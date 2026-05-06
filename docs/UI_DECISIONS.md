@@ -49,7 +49,7 @@ Rótulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` fic
 
 ### Prova técnica colapsada
 
-A auditoria técnica explicita a prova de runtime sem benchmark: `Runtime`, `Etapa: parse_ticket_document`, `Tipo do arquivo`, `Status` e a lista `Gemma 4 solicitou` com `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` quando registradas em `AuditRecord.tool_calls`. Cada tool mostra a sequência auditável de status, o `purpose` retornado pelo Gemma e o estado do workflow. Esses sinais ficam dentro de `Ver auditoria técnica`, não na tela principal.
+A auditoria técnica explicita a prova de runtime sem benchmark: `Runtime`, `Etapa: parse_ticket_document`, `Tipo do arquivo`, `Status` e o bloco `Gemma Tool Planner` com `FlowState → tool → status` para `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` quando registradas em `AuditRecord.tool_calls`. Cada tool mostra a sequência auditável de status, o `purpose` retornado pelo Gemma e o estado do workflow. Esses sinais ficam dentro de `Ver auditoria técnica`, não na tela principal.
 
 ### Screenshot do README
 

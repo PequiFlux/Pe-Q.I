@@ -30,9 +30,13 @@ from app.domain.models import (
 from app.domain.policy import load_policy_profiles
 from app.domain.ranking import rank_candidates
 from app.gemma.adapter import GemmaAdapter
-from app.gemma.tool_gateway import ToolGateway, ToolLocalIds, available_tools_for_state
-from app.gemma.tool_schemas import TOOL_SCHEMAS
+from app.gemma.tool_gateway import ToolLocalIds
 from app.orchestration.state_machine import WorkflowStateMachine
+from app.orchestration.tool_planner import (
+    ToolPlanSession,
+    run_audit_plan,
+    run_validation_and_ranking_plan,
+)
 from app.orchestration.truth_resolver import resolve_truth
 from app.services.decision_builder import (
     build_blocked_preview,
@@ -67,15 +71,6 @@ class RankedStep:
     ranking: RankedCandidates
 
 
-@dataclass(frozen=True)
-class ToolExecutionStep:
-    tool_name: str
-    result: Any
-
-
-MAX_TOOL_STEPS = 4
-
-
 class DecisionOrchestrator:
     def __init__(
         self,
@@ -100,6 +95,7 @@ class DecisionOrchestrator:
         source_hashes: dict[str, str] = {}
         tool_records: list[dict[str, Any]] = []
         tool_step_counter = [0]
+        executed_tools: set[str] = set()
         interpreted_context_for_error: InterpretedContext | None = None
         try:
             loaded = self.load_inputs(request, state_machine, timers)
@@ -123,6 +119,7 @@ class DecisionOrchestrator:
                     state_machine=state_machine,
                     tool_records=tool_records,
                     tool_step_counter=tool_step_counter,
+                    executed_tools=executed_tools,
                 )
                 return self.persist_and_log(
                     preview=preview,
@@ -139,6 +136,7 @@ class DecisionOrchestrator:
                 timers=timers,
                 tool_records=tool_records,
                 tool_step_counter=tool_step_counter,
+                executed_tools=executed_tools,
             )
             preview, audit = self.build_payload(
                 request=request,
@@ -149,6 +147,7 @@ class DecisionOrchestrator:
                 state_machine=state_machine,
                 tool_records=tool_records,
                 tool_step_counter=tool_step_counter,
+                executed_tools=executed_tools,
             )
             if state_machine.current_state == FlowState.RANKED:
                 state_machine.transition_to(FlowState.PREVIEW_READY)
@@ -266,6 +265,7 @@ class DecisionOrchestrator:
         timers: dict[str, int],
         tool_records: list[dict[str, Any]],
         tool_step_counter: list[int],
+        executed_tools: set[str],
     ) -> RankedStep:
         local_ids = ToolLocalIds.from_iterables(
             request_ids={request.request_id},
@@ -276,7 +276,8 @@ class DecisionOrchestrator:
         ranking: RankedCandidates | None = None
 
         def run_validation(request_id: str) -> ValidationResult:
-            return validate_hard_constraints(
+            nonlocal validation
+            validation = validate_hard_constraints(
                 request_id=request_id,
                 normalized_queue=loaded.normalized_queue,
                 parsed_ticket=interpreted.parsed_ticket_for_constraints,
@@ -285,6 +286,7 @@ class DecisionOrchestrator:
                 candidate_destinations=request.candidate_destinations,
                 policy_profile=loaded.policy_profile,
             )
+            return validation
 
         def run_ranking(request_id: str) -> RankedCandidates:
             if validation is None:
@@ -313,61 +315,22 @@ class DecisionOrchestrator:
             timers["rank_candidates"] = int((perf_counter() - ranking_t0) * 1000)
             return RankedStep(validation=validation, ranking=ranking)
 
-        executed_tools: set[str] = set()
-        tools = {
-            "validate_hard_constraints": run_validation,
-            "rank_candidates": run_ranking,
-        }
-        while state_machine.current_state != FlowState.RANKED:
-            if state_machine.current_state == FlowState.INTERPRETED:
-                timer_key = "validate_hard_constraints"
-                context_summary = (
-                    "Ticket interpreted and truth resolved; hard constraints must be checked "
-                    "before ranking."
-                )
-            elif state_machine.current_state == FlowState.VALIDATED:
-                timer_key = "rank_candidates"
-                context_summary = (
-                    "Hard constraints were validated; ranking may only order eligible pairs."
-                )
-            else:
-                raise PequiFluxError(
-                    "NO_AVAILABLE_TOOL_STATE",
-                    f"No decision tool is available in state {state_machine.current_state.value}.",
-                )
-
-            step_t0 = perf_counter()
-            step = self._execute_gemma_tool(
-                request_id=request.request_id,
-                state_machine=state_machine,
-                allowed_tools=available_tools_for_state(state_machine.current_state),
-                tools=tools,
-                context_summary=context_summary,
-                local_ids=local_ids,
-                tool_records=tool_records,
-                timers=timers,
-                tool_step_counter=tool_step_counter,
-                executed_tools=executed_tools,
-            )
-            executed_tools.add(step.tool_name)
-            if step.tool_name == "validate_hard_constraints":
-                validation = step.result
-                state_machine.transition_to(FlowState.VALIDATED)
-            elif step.tool_name == "rank_candidates":
-                ranking = step.result
-                state_machine.transition_to(FlowState.RANKED)
-            else:
-                raise PequiFluxError(
-                    "UNEXPECTED_TOOL_RESULT",
-                    f"Unexpected tool {step.tool_name} in decision planning.",
-                )
-            timers[timer_key] = int((perf_counter() - step_t0) * 1000)
-
-        if validation is None or ranking is None:
-            raise PequiFluxError(
-                "INCOMPLETE_TOOL_PLAN",
-                "Gemma tool planner did not complete validation and ranking.",
-            )
+        session = ToolPlanSession(
+            request_id=request.request_id,
+            gemma_adapter=self.gemma_adapter,
+            state_machine=state_machine,
+            local_ids=local_ids,
+            tool_records=tool_records,
+            timers=timers,
+            logger=self.jsonl_logger,
+            step_counter=tool_step_counter,
+            executed_tools=executed_tools,
+        )
+        validation, ranking = run_validation_and_ranking_plan(
+            session=session,
+            run_validation=run_validation,
+            run_ranking=run_ranking,
+        )
         return RankedStep(validation=validation, ranking=ranking)
 
     def build_payload(
@@ -381,6 +344,7 @@ class DecisionOrchestrator:
         state_machine: WorkflowStateMachine,
         tool_records: list[dict[str, Any]],
         tool_step_counter: list[int],
+        executed_tools: set[str],
     ) -> tuple[DecisionPreview, AuditRecord]:
         if ranked is None:
             preview = build_review_required_preview(
@@ -424,35 +388,22 @@ class DecisionOrchestrator:
             )
 
         if request.variant == "full":
-            context_summary = (
-                "Ranking is complete; audit payload must be generated from formal "
-                "decision artifacts."
-                if ranked is not None
-                else "Human review is required; audit payload must be generated from "
-                "interpreted context and formal review artifacts."
-            )
-            step_t0 = perf_counter()
-            step = self._execute_gemma_tool(
+            session = ToolPlanSession(
                 request_id=request.request_id,
                 state_machine=state_machine,
-                allowed_tools=available_tools_for_state(state_machine.current_state),
-                tools={"generate_audit_payload": run_audit},
-                context_summary=context_summary,
+                gemma_adapter=self.gemma_adapter,
                 local_ids=local_ids,
                 tool_records=tool_records,
                 timers=timers,
-                tool_step_counter=tool_step_counter,
-                executed_tools={record["tool_name"] for record in tool_records},
+                logger=self.jsonl_logger,
+                step_counter=tool_step_counter,
+                executed_tools=executed_tools,
             )
-            if step.tool_name != "generate_audit_payload":
-                raise PequiFluxError(
-                    "UNEXPECTED_TOOL_RESULT",
-                    f"Unexpected tool {step.tool_name} while generating audit payload.",
-                )
-            audit = step.result
-            timers["generate_audit_payload"] = int((perf_counter() - step_t0) * 1000)
-            if state_machine.current_state == FlowState.RANKED:
-                state_machine.transition_to(FlowState.PREVIEW_READY)
+            audit = run_audit_plan(
+                session=session,
+                run_audit=run_audit,
+                ranked_present=ranked is not None,
+            )
         else:
             audit = run_audit(request.request_id)
         return preview, _attach_tool_records(audit, tool_records, timers)
@@ -595,118 +546,6 @@ class DecisionOrchestrator:
                 "decision_summary": summary,
             }
         )
-
-    def _execute_gemma_tool(
-        self,
-        *,
-        request_id: str,
-        state_machine: WorkflowStateMachine,
-        allowed_tools: list[str],
-        tools: dict[str, Any],
-        context_summary: str,
-        local_ids: ToolLocalIds,
-        tool_records: list[dict[str, Any]],
-        timers: dict[str, int],
-        tool_step_counter: list[int],
-        executed_tools: set[str],
-    ) -> ToolExecutionStep:
-        if tool_step_counter[0] >= MAX_TOOL_STEPS:
-            raise PequiFluxError(
-                "MODEL_TOOL_STEP_LIMIT_EXCEEDED",
-                f"Gemma tool planner exceeded {MAX_TOOL_STEPS} steps.",
-            )
-        if not allowed_tools:
-            raise PequiFluxError(
-                "NO_AVAILABLE_TOOLS",
-                f"No tools are available in state {state_machine.current_state.value}.",
-            )
-        allowed_label = allowed_tools[0] if len(allowed_tools) == 1 else "planner"
-        choose_t0 = perf_counter()
-        try:
-            intent = self.gemma_adapter.choose_tool(
-                request_id=request_id,
-                current_state=state_machine.current_state.value,
-                allowed_tools=allowed_tools,
-                context_summary=context_summary,
-            )
-        except PequiFluxError as exc:
-            timers[f"choose_tool_{allowed_label}"] = int((perf_counter() - choose_t0) * 1000)
-            tool_records.append(
-                {
-                    "tool_name": allowed_label,
-                    "request_id": request_id,
-                    "state": state_machine.current_state.value,
-                    "status": "error",
-                    "purpose": "",
-                    "error_code": exc.code,
-                }
-            )
-            raise
-        timers[f"choose_tool_{intent.tool_name}"] = int((perf_counter() - choose_t0) * 1000)
-        tool_records.append(
-            {
-                "tool_name": intent.tool_name,
-                "request_id": intent.request_id,
-                "state": state_machine.current_state.value,
-                "status": "requested",
-                "purpose": intent.purpose,
-            }
-        )
-        if intent.tool_name in executed_tools:
-            tool_records.append(
-                {
-                    "tool_name": intent.tool_name,
-                    "request_id": intent.request_id,
-                    "state": state_machine.current_state.value,
-                    "status": "error",
-                    "purpose": intent.purpose,
-                    "error_code": "MODEL_TOOL_REPEATED",
-                }
-            )
-            raise PequiFluxError(
-                "MODEL_TOOL_REPEATED",
-                f"Gemma requested repeated tool {intent.tool_name}.",
-            )
-        tool_step_counter[0] += 1
-
-        gateway = ToolGateway(
-            tools,
-            tool_schemas=TOOL_SCHEMAS,
-            current_state=state_machine.current_state,
-            local_ids=local_ids,
-            logger=self.jsonl_logger,
-        )
-        tool_t0 = perf_counter()
-        try:
-            result = gateway.execute(
-                intent.tool_name,
-                {"request_id": intent.request_id},
-            )
-        except PequiFluxError as exc:
-            timers[f"tool_{intent.tool_name}"] = int((perf_counter() - tool_t0) * 1000)
-            tool_records.append(
-                {
-                    "tool_name": intent.tool_name,
-                    "request_id": intent.request_id,
-                    "state": state_machine.current_state.value,
-                    "status": "error",
-                    "purpose": intent.purpose,
-                    "error_code": exc.code,
-                }
-            )
-            raise
-        timers[f"tool_{intent.tool_name}"] = int((perf_counter() - tool_t0) * 1000)
-
-        tool_records.append(
-            {
-                "tool_name": intent.tool_name,
-                "request_id": intent.request_id,
-                "state": state_machine.current_state.value,
-                "status": "executed",
-                "purpose": intent.purpose,
-            }
-        )
-        return ToolExecutionStep(tool_name=intent.tool_name, result=result)
 
 
 def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:

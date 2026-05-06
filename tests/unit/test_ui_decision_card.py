@@ -126,7 +126,11 @@ def test_tool_badges_card_shows_gemma_requested_tool_sequence() -> None:
         )
     )
 
-    assert "Gemma 4 solicitou:" in html
+    assert "Gemma Tool Planner" in html
+    assert "FlowState → tool → status executado sob whitelist." in html
+    assert "INTERPRETED → validate_hard_constraints" in html
+    assert "VALIDATED → rank_candidates" in html
+    assert "RANKED → generate_audit_payload" in html
     assert "validate_hard_constraints" in html
     assert "rank_candidates" in html
     assert "generate_audit_payload" in html

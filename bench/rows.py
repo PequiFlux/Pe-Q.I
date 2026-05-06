@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 from app.domain.models import DecisionRequest, FrontEndPayload
@@ -24,6 +25,12 @@ REQUIRED_SOURCE_HASHES = {
     "resource_state",
 }
 TERMINAL_AUDIT_STATUSES = {"BLOCKED", "REVIEW_REQUIRED"}
+FULL_PREVIEW_READY_TOOL_PATH = (
+    "validate_hard_constraints",
+    "rank_candidates",
+    "generate_audit_payload",
+)
+FULL_TERMINAL_TOOL_PATH = ("generate_audit_payload",)
 
 
 def build_raw_fifo_row(
@@ -60,6 +67,7 @@ def build_raw_fifo_row(
         "fifo_break_expected": expected["fifo_break_expected"],
         "fifo_break_justified": False,
         "rejected_count": 0,
+        **_empty_tool_call_metrics(),
         "latency_ms_total": 0,
     }
 
@@ -103,8 +111,57 @@ def build_payload_row(
         "rejected_count": (
             len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
         ),
+        **tool_call_metrics(payload),
         "latency_ms_total": sum(payload.latency_ms.values()),
     }
+
+
+def tool_call_metrics(payload: FrontEndPayload) -> dict[str, Any]:
+    records = list(payload.audit_record.tool_calls if payload.audit_record else [])
+    executed_tools = _unique_in_order(
+        record.tool_name for record in records if record.status == "executed"
+    )
+    tool_error_count = sum(1 for record in records if record.status == "error")
+    planner_step_count = sum(1 for record in records if record.status == "requested")
+    required_tools = _required_tool_path(payload)
+    return {
+        "tool_call_count": len(records),
+        "tool_call_success": bool(required_tools)
+        and tool_error_count == 0
+        and all(tool in executed_tools for tool in required_tools),
+        "tool_path": ">".join(executed_tools),
+        "tool_error_count": tool_error_count,
+        "planner_step_count": planner_step_count,
+    }
+
+
+def _empty_tool_call_metrics() -> dict[str, Any]:
+    return {
+        "tool_call_count": 0,
+        "tool_call_success": False,
+        "tool_path": "",
+        "tool_error_count": 0,
+        "planner_step_count": 0,
+    }
+
+
+def _required_tool_path(payload: FrontEndPayload) -> tuple[str, ...]:
+    if str(payload.variant) != "full":
+        return ()
+    status = str(payload.decision_status)
+    if status == "PREVIEW_READY":
+        return FULL_PREVIEW_READY_TOOL_PATH
+    if status in TERMINAL_AUDIT_STATUSES:
+        return FULL_TERMINAL_TOOL_PATH
+    return ()
+
+
+def _unique_in_order(values: Iterable[str]) -> list[str]:
+    unique_values: list[str] = []
+    for value in values:
+        if value not in unique_values:
+            unique_values.append(value)
+    return unique_values
 
 
 def matches_expected(payload: FrontEndPayload, expected: dict[str, Any]) -> bool:

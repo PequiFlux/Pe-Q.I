@@ -25,6 +25,11 @@ def test_summary_csv_escapes_commas_in_fields() -> None:
                 "recommended_destination": "DST-COV-01",
                 "fifo_break": False,
                 "rejected_count": 1,
+                "tool_call_count": 2,
+                "tool_call_success": True,
+                "tool_path": "validate_hard_constraints",
+                "tool_error_count": 0,
+                "planner_step_count": 1,
                 "latency_ms_total": 12.5,
             }
         ]
@@ -34,3 +39,4 @@ def test_summary_csv_escapes_commas_in_fields() -> None:
 
     assert rows[0]["observed_primary_exception"] == "RAIN, OPEN_DESTINATION"
     assert rows[0]["expected_primary_exception"] == "RAIN, OPEN_DESTINATION"
+    assert rows[0]["tool_path"] == "validate_hard_constraints"

@@ -38,9 +38,13 @@ Esta é a visão arquitetural oficial do repositório. O código segue o desenho
 4. `services.exception_classifier` classifica a exceção operacional primária e acumula exceções secundárias/recursos afetados.
 5. `orchestration.truth_resolver` aplica a hierarquia de verdade e materializa conflitos.
 6. `domain.constraints.validate_hard_constraints` produz a matriz de elegibilidade.
+   No variant `full`, esta etapa é solicitada pelo Gemma Tool Planner e executada pelo `ToolGateway`; em `fifo`/`heuristic`, é chamada diretamente.
 7. `domain.ranking.rank_candidates` ordena somente pares elegíveis.
+   No variant `full`, esta etapa é solicitada pelo Gemma Tool Planner e executada pelo `ToolGateway`; em `fifo`/`heuristic`, é chamada diretamente.
 8. `services.decision_builder` monta `DecisionPreview` e `FrontEndPayload`.
+   O builder permanece determinístico; ele consome apenas artefatos formais produzidos pelas etapas anteriores.
 9. `audit.service` gera o payload reconstruível.
+   No variant `full`, `generate_audit_payload` é solicitada pelo Gemma Tool Planner em `RANKED`/`REVIEW_REQUIRED` e executada pelo `ToolGateway`; em `fifo`/`heuristic` e bloqueios terminais fail-closed, a auditoria é gerada diretamente.
 10. `storage/*` persiste decisão, auditoria e ação humana.
 
 ## Máquina de estados

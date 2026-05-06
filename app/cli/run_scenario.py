@@ -60,6 +60,15 @@ def _summary(payload: FrontEndPayload) -> dict[str, Any]:
         "latency_ms": payload.latency_ms,
         "benchmark_tags": payload.benchmark_tags,
         "confidence_notes": payload.confidence_notes,
+        "tool_calls": [
+            record.model_dump(mode="json")
+            for record in (payload.audit_record.tool_calls if payload.audit_record else [])
+        ],
+        "tool_path": [
+            record.tool_name
+            for record in (payload.audit_record.tool_calls if payload.audit_record else [])
+            if record.status == "executed"
+        ],
     }
 
 

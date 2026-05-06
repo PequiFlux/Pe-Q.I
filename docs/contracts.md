@@ -292,6 +292,8 @@ Referência:
 
 `app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`. No fluxo operacional `full`, o orquestrador calcula `allowed_tools` com `available_tools_for_state(state)`; Gemma escolhe a próxima tool válida sob máquina de estados, e o loop é limitado a 4 tool steps.
 
+Estados `BLOCKED` por erro terminal não expõem tool ao planner. Nesses casos, o orquestrador gera auditoria diretamente por caminho fail-closed para preservar motivo, proveniência e hashes sem depender de nova escolha do modelo.
+
 `GemmaAdapter.choose_tool()` chama o runtime com esse prompt, valida `ToolCallIntent`, rejeita tool fora da allowlist com `MODEL_TOOL_NOT_ALLOWED` e rejeita `request_id` divergente com `MODEL_TOOL_REQUEST_ID_MISMATCH`.
 
 No runtime textual de CI, `TextTicketRuntime` retorna a primeira tool em `allowed_tools` com `purpose="Deterministic CI tool intent."`; se `request_id` ou `allowed_tools` não vierem nos metadados, falha fechado com `TEXT_RUNTIME_TOOL_METADATA_REQUIRED`.

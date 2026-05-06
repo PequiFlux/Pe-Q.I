@@ -13,7 +13,7 @@ services:
       retries: 12
 
   gemma-init:
-    image: "${OLLAMA_IMAGE:-alpine/ollama:latest}"
+    image: "${OLLAMA_IMAGE:-ollama/ollama:latest}"
     depends_on:
       gemma:
         condition: service_healthy

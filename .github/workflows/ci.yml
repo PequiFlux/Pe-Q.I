@@ -36,5 +36,5 @@ jobs:
       - name: Blueprint audit
         run: python -m app.cli.blueprint_audit
 
-      - name: Text-runtime benchmark smoke
-        run: python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
+      - name: Text-runtime benchmark validation
+        run: python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate

@@ -21,6 +21,11 @@ SUMMARY_CSV_FIELDS = [
     "recommended_destination",
     "fifo_break",
     "rejected_count",
+    "tool_call_count",
+    "tool_call_success",
+    "tool_path",
+    "tool_error_count",
+    "planner_step_count",
     "latency_ms_total",
 ]
 

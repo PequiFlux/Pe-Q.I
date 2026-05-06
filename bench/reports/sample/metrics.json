@@ -17,8 +17,10 @@
   "variant_metrics": {
     "fifo_safe": {
       "audit_completeness": 1.0,
+      "avg_planner_step_count": 0.0,
+      "avg_tool_call_count": 0.0,
       "constraint_violation_rate": 0.0,
-      "decision_match_at_1": 0.7,
+      "decision_match_at_1": 0.75,
       "exception_f1": 0.735,
       "failed_count": 0,
       "fifo_break_justified_precision": 1.0,
@@ -28,10 +30,15 @@
       "p95_latency_ms": 0,
       "passed_count": 20,
       "scenario_count": 20,
-      "ticket_field_accuracy": 0.0
+      "ticket_field_accuracy": 0.0,
+      "tool_call_success_rate": 0.0,
+      "tool_error_count": 0,
+      "tool_error_rate": 0.0
     },
     "full": {
       "audit_completeness": 1.0,
+      "avg_planner_step_count": 2.35,
+      "avg_tool_call_count": 4.7,
       "constraint_violation_rate": 0.0,
       "decision_match_at_1": 1.0,
       "exception_f1": 1.0,
@@ -43,10 +50,15 @@
       "p95_latency_ms": 0,
       "passed_count": 20,
       "scenario_count": 20,
-      "ticket_field_accuracy": 0.969
+      "ticket_field_accuracy": 0.969,
+      "tool_call_success_rate": 0.95,
+      "tool_error_count": 1,
+      "tool_error_rate": 0.05
     },
     "heuristic": {
       "audit_completeness": 0.85,
+      "avg_planner_step_count": 0.0,
+      "avg_tool_call_count": 0.0,
       "constraint_violation_rate": 0.0,
       "decision_match_at_1": 0.85,
       "exception_f1": 0.678,
@@ -58,10 +70,15 @@
       "p95_latency_ms": 0,
       "passed_count": 20,
       "scenario_count": 20,
-      "ticket_field_accuracy": 0.85
+      "ticket_field_accuracy": 0.85,
+      "tool_call_success_rate": 0.0,
+      "tool_error_count": 0,
+      "tool_error_rate": 0.0
     },
     "raw_fifo": {
       "audit_completeness": 0.0,
+      "avg_planner_step_count": 0.0,
+      "avg_tool_call_count": 0.0,
       "constraint_violation_rate": 0.35,
       "decision_match_at_1": 0.25,
       "exception_f1": 0.0,
@@ -73,7 +90,10 @@
       "p95_latency_ms": 0,
       "passed_count": 20,
       "scenario_count": 20,
-      "ticket_field_accuracy": 0.0
+      "ticket_field_accuracy": 0.0,
+      "tool_call_success_rate": 0.0,
+      "tool_error_count": 0,
+      "tool_error_rate": 0.0
     }
   }
 }

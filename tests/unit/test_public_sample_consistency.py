@@ -27,6 +27,10 @@ EXPECTED_README_METRICS = {
         "exception_f1": 1.0,
         "ticket_field_accuracy": 0.969,
         "audit_completeness": 1.0,
+        "tool_call_success_rate": 0.95,
+        "avg_tool_call_count": 4.7,
+        "avg_planner_step_count": 2.35,
+        "tool_error_rate": 0.05,
     },
     "heuristic": {
         "decision_match_at_1": 0.85,
@@ -35,7 +39,7 @@ EXPECTED_README_METRICS = {
         "audit_completeness": 0.85,
     },
     "fifo_safe": {
-        "decision_match_at_1": 0.7,
+        "decision_match_at_1": 0.75,
         "constraint_violation_rate": 0.0,
     },
     "raw_fifo": {
@@ -62,6 +66,13 @@ def test_public_sample_metrics_summary_and_readme_stay_consistent() -> None:
     assert len(summary_rows) == EXPECTED_SUMMARY_DATA_ROWS
     assert EXPECTED_SUMMARY_DATA_ROWS == EXPECTED_SCENARIO_COUNT * len(EXPECTED_VARIANTS)
     assert {row["variant"] for row in summary_rows} == EXPECTED_VARIANTS
+    assert {
+        "tool_call_count",
+        "tool_call_success",
+        "tool_path",
+        "tool_error_count",
+        "planner_step_count",
+    } <= set(summary_rows[0])
 
     rows_by_scenario: dict[str, set[str]] = defaultdict(set)
     for row in summary_rows:
@@ -73,6 +84,13 @@ def test_public_sample_metrics_summary_and_readme_stay_consistent() -> None:
         variant_metrics = metrics["variant_metrics"][variant]
         assert variant_metrics["scenario_count"] == EXPECTED_SCENARIO_COUNT
         assert variant_metrics["passed_count"] == EXPECTED_SCENARIO_COUNT
+        assert {
+            "tool_call_success_rate",
+            "avg_tool_call_count",
+            "avg_planner_step_count",
+            "tool_error_count",
+            "tool_error_rate",
+        } <= set(variant_metrics)
         for metric_name, expected_value in expected_metrics.items():
             assert variant_metrics[metric_name] == expected_value
             assert _readme_metric(readme_text, variant, metric_name) == expected_value

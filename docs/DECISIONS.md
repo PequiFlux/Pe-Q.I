@@ -4,6 +4,26 @@ Registrar apenas decisões duráveis. Este arquivo não é changelog.
 
 ## Decisões
 
+### 2026-05-06 — Sample público inclui contrato de Gemma Tool Planner
+
+Contexto:
+O variant `full` passou a usar Gemma Tool Planner sob `ToolGateway`, mas o snapshot público ainda mostrava apenas métricas clássicas de decisão, constraints, exceção, acurácia e latência. Isso enfraquecia a evidência versionada da tese de tools.
+
+Decisão:
+Regenerar `bench/reports/sample/` com o mesmo pack congelado de 20 cenários, adicionando colunas de tool calling no `summary.csv` e métricas agregadas no `metrics.json`. Manter o bloqueio do CLI contra escrita direta em `bench/reports/sample/`; novas regenerações devem continuar passando por diretório temporário ou `extended-sample` e revisão explícita.
+
+Alternativas rejeitadas:
+Deixar a prova de tools apenas na UI e em runs `extended`, mantendo o sample público sem o novo contrato.
+
+Impacto:
+A evidência pública passa a mostrar `tool_call_success_rate`, médias de calls/steps, erros e `tool_path` por linha, sem expandir o scenario pack congelado.
+
+Arquivos/módulos afetados:
+- `bench/metrics.py`
+- `bench/reports/sample/`
+- `tests/unit/test_public_sample_consistency.py`
+- `README.md`
+
 ### 2026-05-05 — Benchmark público congelado e trilho extended interno
 
 Contexto:
@@ -135,10 +155,10 @@ Arquivos/módulos afetados:
 ### 2026-05-05 — CI público usa runtime textual e quality gate mínimo
 
 Contexto:
-O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível.
+O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível. Depois que o Gemma Tool Planner virou claim central, o benchmark sem validação deixou de ser suficiente para o quality gate público.
 
 Decisão:
-Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check app bench tests scripts`, `pytest -q`, `python -m app.cli.blueprint_audit` e smoke de benchmark com `PEQUIFLUX_GEMMA_RUNTIME=text` e `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo smoke textual.
+Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check app bench tests scripts`, `pytest -q`, `python -m app.cli.blueprint_audit` e benchmark textual validado com `PEQUIFLUX_GEMMA_RUNTIME=text`, sem `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo benchmark validado.
 
 Alternativas rejeitadas:
 Rodar `black --check .`, porque isso inclui documentação, assets e artefatos fora do escopo Python. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.
@@ -562,7 +582,10 @@ Contexto:
 O primeiro fluxo com `ToolGateway` passava uma única tool fixa em `allowed_tools` a cada etapa. Isso era seguro, mas limitava a evidência de planejamento do Gemma.
 
 Decisão:
-Evoluir o variant `full` para um Gemma Tool Planner. O orquestrador calcula `available_tools_for_state(state)` e o Gemma escolhe a próxima tool válida, fornecendo `purpose`; o `ToolGateway` continua validando whitelist, JSON Schema, `FlowState` e IDs locais. O loop é limitado a 4 tool steps e variants `fifo`/`heuristic` continuam sem `tool_calls`.
+Evoluir o variant `full` para um Gemma Tool Planner. O orquestrador calcula `available_tools_for_state(state)` e o Gemma escolhe a próxima tool válida, fornecendo `purpose`; o `ToolGateway` continua validando whitelist, JSON Schema, `FlowState` e IDs locais. O loop é limitado a 4 tool steps e variants `fifo`/`heuristic` continuam sem `tool_calls`. Estados `BLOCKED` por erro terminal não expõem `generate_audit_payload` ao planner; usam auditoria direta fail-closed.
+
+Atualização 2026-05-06:
+A sessão e a execução do planner ficam em `app/orchestration/tool_planner.py` (`ToolPlanSession`, `execute_planned_tool`, plano de validação/ranking e plano de auditoria). `DecisionOrchestrator` permanece a fachada do fluxo, mas só monta callbacks determinísticos, previews, auditoria final, persistência e log.
 
 Impacto:
 Hard constraints, ranking e auditoria permanecem determinísticos. O modelo não altera estado autoritativo, não recebe argumentos além de `request_id` e não executa comandos livres.

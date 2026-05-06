@@ -11,7 +11,7 @@ from app.domain.models import DecisionRequest, ToolCallIntent
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
 from app.gemma import tool_gateway
-from app.orchestration import orchestrator as orchestrator_module
+from app.orchestration import tool_planner as tool_planner_module
 from app.orchestration.orchestrator import DecisionOrchestrator
 
 
@@ -212,9 +212,37 @@ def test_s10_full_payload_blocks_and_audits_request_id_mismatch():
     ]
 
 
+def test_s10_full_payload_uses_valid_tool_name_for_multi_tool_planner_error(monkeypatch):
+    monkeypatch.setattr(
+        tool_planner_module,
+        "available_tools_for_state",
+        lambda state: ["validate_hard_constraints", "rank_candidates"],
+    )
+
+    payload = _run_scenario(
+        "S10_FIFO_BREAK_JUSTIFIED",
+        variant="full",
+        runtime=TextRuntimeReturningMismatchedRequestTool(),
+    )
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert [
+        (record.tool_name, record.status, record.purpose, record.error_code)
+        for record in payload.audit_record.tool_calls
+    ] == [
+        (
+            "validate_hard_constraints",
+            "error",
+            "",
+            "MODEL_TOOL_REQUEST_ID_MISMATCH",
+        )
+    ]
+
+
 def test_s10_full_payload_blocks_and_audits_tool_order_error(monkeypatch):
     monkeypatch.setattr(
-        orchestrator_module,
+        tool_planner_module,
         "available_tools_for_state",
         lambda state: ["validate_hard_constraints"],
     )
@@ -248,7 +276,7 @@ def test_s10_full_payload_blocks_and_audits_tool_order_error(monkeypatch):
 
 
 def test_s10_full_payload_blocks_when_tool_step_limit_is_exceeded(monkeypatch):
-    monkeypatch.setattr(orchestrator_module, "MAX_TOOL_STEPS", 1)
+    monkeypatch.setattr(tool_planner_module, "MAX_TOOL_STEPS", 1)
 
     payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full")
 

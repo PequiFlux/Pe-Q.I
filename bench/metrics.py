@@ -29,6 +29,15 @@ def compute_variant_metrics(rows: list[dict[str, Any]]) -> dict[str, float | int
         "exception_f1": round(_macro_f1(rows), 3),
         "fifo_break_justified_precision": round(_fifo_break_precision(rows), 3),
         "audit_completeness": _ratio(rows, "audit_complete"),
+        "tool_call_success_rate": _ratio(rows, "tool_call_success"),
+        "avg_tool_call_count": round(
+            _mean([float(item.get("tool_call_count", 0)) for item in rows]), 3
+        ),
+        "avg_planner_step_count": round(
+            _mean([float(item.get("planner_step_count", 0)) for item in rows]), 3
+        ),
+        "tool_error_count": int(sum(int(item.get("tool_error_count", 0)) for item in rows)),
+        "tool_error_rate": _positive_ratio(rows, "tool_error_count"),
         "latency_p50": _percentile([item["latency_ms_total"] for item in rows], 0.50),
         "latency_p95": _percentile([item["latency_ms_total"] for item in rows], 0.95),
         "p50_latency_ms": _percentile([item["latency_ms_total"] for item in rows], 0.50),
@@ -38,6 +47,10 @@ def compute_variant_metrics(rows: list[dict[str, Any]]) -> dict[str, float | int
 
 def _ratio(rows: list[dict[str, Any]], key: str) -> float:
     return round(sum(1 for item in rows if item[key]) / len(rows), 3) if rows else 0.0
+
+
+def _positive_ratio(rows: list[dict[str, Any]], key: str) -> float:
+    return round(sum(1 for item in rows if item.get(key, 0) > 0) / len(rows), 3) if rows else 0.0
 
 
 def _mean(values: list[float]) -> float:

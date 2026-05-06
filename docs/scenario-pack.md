@@ -185,6 +185,8 @@ Cobertura esperada do pack atual:
 - `latency_p95`
 - `audit_completeness`
 
+O `summary.csv` ainda inclui colunas de auditoria do Gemma Tool Planner no variant `full`: `tool_call_count`, `tool_call_success`, `tool_path`, `tool_error_count` e `planner_step_count`. O `metrics.json` agrega essa trilha com `tool_call_success_rate`, `avg_tool_call_count`, `avg_planner_step_count`, `tool_error_count` e `tool_error_rate`. Variantes `raw_fifo`, `fifo_safe` e `heuristic` não registram tool calls.
+
 Nota: a política atual do repositório remove o uso de fallback operacional. Se o benchmark precisar medir indisponibilidade, trate isso como `REVIEW_REQUIRED` ou `BLOCKED`, não como modo degradado.
 
 ## Saídas esperadas

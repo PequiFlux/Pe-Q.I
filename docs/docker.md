@@ -78,7 +78,7 @@ The full UI Compose path starts a local Ollama service named `gemma`, runs `gemm
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`
 - `GEMMA_MODEL=${GEMMA_MODEL:-gemma4:latest}`
-- `OLLAMA_IMAGE=${OLLAMA_IMAGE:-alpine/ollama:latest}`
+- `OLLAMA_IMAGE=${OLLAMA_IMAGE:-ollama/ollama:latest}`
 
 The `gemma` service declares `gpus: all`; use `demo-text`/`ui-text` on machines without a compatible Docker GPU setup. To use another Ollama image, set `OLLAMA_IMAGE` explicitly.
 

@@ -15,6 +15,7 @@ from bench.rows import (
     matches_expected,
     pair_rejected,
     ticket_field_accuracy,
+    tool_call_metrics,
 )
 
 
@@ -53,6 +54,11 @@ def test_build_raw_fifo_row_marks_constraint_violation_from_fifo_safe_audit() ->
     assert row["recommended_destination"] == "DST-OPEN-01"
     assert row["constraint_violation"] is True
     assert row["decision_match_at_1"] is False
+    assert row["tool_call_count"] == 0
+    assert row["tool_call_success"] is False
+    assert row["tool_path"] == ""
+    assert row["tool_error_count"] == 0
+    assert row["planner_step_count"] == 0
 
 
 def test_build_raw_fifo_row_marks_unknown_destination_as_constraint_violation() -> None:
@@ -102,6 +108,11 @@ def test_build_payload_row_and_expected_match_for_full_payload() -> None:
     assert row["constraint_violation"] is False
     assert row["fifo_break"] is True
     assert row["audit_complete"] is True
+    assert row["tool_call_count"] == 6
+    assert row["tool_call_success"] is True
+    assert row["tool_path"] == "validate_hard_constraints>rank_candidates>generate_audit_payload"
+    assert row["tool_error_count"] == 0
+    assert row["planner_step_count"] == 3
 
 
 def test_audit_complete_is_status_aware_for_preview_ready_payload() -> None:
@@ -139,6 +150,13 @@ def test_audit_complete_is_status_aware_for_review_required_payload() -> None:
     assert payload.audit_record is not None
     assert payload.audit_record.hard_constraints_checked == []
     assert audit_complete(payload) is True
+    assert tool_call_metrics(payload) == {
+        "tool_call_count": 2,
+        "tool_call_success": True,
+        "tool_path": "generate_audit_payload",
+        "tool_error_count": 0,
+        "planner_step_count": 1,
+    }
 
 
 def test_audit_complete_requires_terminal_context_for_review_required_payload() -> None:

@@ -58,6 +58,8 @@ def test_available_tools_for_state_returns_state_legal_tools() -> None:
     assert available_tools_for_state(FlowState.INTERPRETED) == ["validate_hard_constraints"]
     assert available_tools_for_state(FlowState.VALIDATED) == ["rank_candidates"]
     assert available_tools_for_state(FlowState.RANKED) == ["generate_audit_payload"]
+    assert available_tools_for_state(FlowState.REVIEW_REQUIRED) == ["generate_audit_payload"]
+    assert available_tools_for_state(FlowState.BLOCKED) == []
 
 
 def test_tool_gateway_rejects_schema_errors() -> None:

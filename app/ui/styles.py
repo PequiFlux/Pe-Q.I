@@ -706,6 +706,11 @@ def inject_styles() -> None:
             color: var(--ink);
             font-size: 13px;
           }
+          .tool-call-summary p {
+            margin: -4px 0 10px;
+            color: var(--muted);
+            font-size: 12px;
+          }
           .tool-call-summary ol {
             margin: 0;
             padding: 0;

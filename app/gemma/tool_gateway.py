@@ -16,7 +16,6 @@ TOOL_STATE_ORDER: dict[str, set[str]] = {
     "generate_audit_payload": {
         FlowState.RANKED.value,
         FlowState.REVIEW_REQUIRED.value,
-        FlowState.BLOCKED.value,
     },
 }
 
