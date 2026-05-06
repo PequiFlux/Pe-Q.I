@@ -13,6 +13,7 @@ from bench.rows import (
     build_raw_fifo_row,
     has_constraint_violation,
     matches_expected,
+    pair_rejected,
     ticket_field_accuracy,
 )
 
@@ -68,6 +69,18 @@ def test_build_raw_fifo_row_marks_unknown_destination_as_constraint_violation() 
     assert row["recommended_destination"] == "DST-GHOST-99"
     assert row["constraint_violation"] is True
     assert row["decision_match_at_1"] is False
+
+
+def test_pair_rejected_marks_unknown_destination_as_constraint_violation() -> None:
+    scenario_id = "S15_UNKNOWN_DESTINATION_IN_TICKET"
+    fifo_safe_payload = _orchestrator().run_decision(_request(scenario_id, "fifo"))
+
+    assert fifo_safe_payload.audit_record is not None
+    assert not any(
+        checked["truck_id"] == "TRK-051" and checked["destination_id"] == "DST-UNKNOWN"
+        for checked in fifo_safe_payload.audit_record.hard_constraints_checked
+    )
+    assert pair_rejected(fifo_safe_payload, "TRK-051", "DST-UNKNOWN") is True
 
 
 def test_build_payload_row_and_expected_match_for_full_payload() -> None:
