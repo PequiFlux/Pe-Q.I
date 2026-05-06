@@ -5,30 +5,30 @@ Este repositorio e uma prova de conceito tecnica para hackathon. Ele nao deve se
 ## Fora de Escopo
 
 - Nao ha dados reais de campo.
-- Nao ha integracao real com ERP, TMS, balanca, gate, OCR produtivo ou WhatsApp produtivo.
-- Nao ha operacao multiunidade, telemetria em tempo real ou otimizacao global de patio.
-- Nao ha garantia de latencia produtiva fora do ambiente demonstrado.
-- Nao ha autorizacao automatica para despacho sem operador humano.
+- Não há integração real com ERP, TMS, balança, gate, OCR produtivo ou WhatsApp produtivo.
+- Não há operação multiunidade, telemetria em tempo real ou otimização global de pátio.
+- Não há garantia de latência produtiva fora do ambiente demonstrado.
+- Não há autorização automática para despacho sem operador humano.
 
-## Dados e Cenarios
+## Dados e Cenários
 
-Todos os cenarios em `scenarios/cases/` sao sinteticos e sanitizados. IDs como `TRK-001`, `DST-COV-01` e `OP-DEMO-01` sao placeholders.
+Todos os cenários em `scenarios/cases/` são sintéticos e sanitizados. IDs como `TRK-001`, `DST-COV-01` e `OP-DEMO-01` são placeholders.
 
 ## Modelo e Runtime
 
-Gemma e usado como camada de interpretacao de documento e explicacao controlada. A decisao operacional fica em regras deterministicas versionadas. Se o runtime de modelo faltar ou retornar saida invalida, o sistema falha fechado.
+Gemma é usado como camada de interpretação de documento e explicação controlada. A decisão operacional fica em regras determinísticas versionadas. Se o runtime de modelo faltar ou retornar saída inválida, o sistema falha fechado.
 
 ## O Que Pode Ser Reivindicado
 
 - Working proof-of-concept local-first.
 - Benchmark sintetico reproduzivel.
-- Auditoria de decisoes e hard constraints.
-- Demonstracao de valor sobre FIFO puro em cenarios de excecao.
+- Auditoria de decisões e hard constraints.
+- Demonstração de valor sobre FIFO puro em cenários de exceção.
 
 ## O Que Nao Pode Ser Reivindicado
 
-- Validacao em campo.
+- Validação em campo.
 - Pronto para producao.
 - Substituicao do operador.
-- Integracao operacional completa.
+- Integração operacional completa.
 - Precisao real em ambiente industrial.

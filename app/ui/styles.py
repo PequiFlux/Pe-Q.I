@@ -570,9 +570,16 @@ def inject_styles() -> None:
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
             color: var(--ink);
             font-size: 13px;
+          }
+          .package-grid strong {
+            overflow-wrap: anywhere;
+            white-space: normal;
+          }
+          .mini-metrics strong,
+          .tool-badge strong {
+            white-space: nowrap;
           }
           .document-tile {
             display: grid;

@@ -14,7 +14,7 @@ def render_validation_matrix(payload: FrontEndPayload) -> None:
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>Heatmap de validacao</h3><p>Caminhoes nas linhas, destinos nas colunas: verde elegivel, vermelho bloqueado.</p></div>
+            <div><h3>Heatmap de validação</h3><p>Caminhões nas linhas, destinos nas colunas: verde elegível, vermelho bloqueado.</p></div>
             {chip("HC-01..HC-07", "green")}
           </div>
           {heatmap}
@@ -26,7 +26,7 @@ def render_validation_matrix(payload: FrontEndPayload) -> None:
 
 def _validation_heatmap(payload: FrontEndPayload) -> str:
     if payload.audit_record is None or not payload.audit_record.hard_constraints_checked:
-        return '<div class="heatmap-empty">Validacao indisponivel para este estado.</div>'
+        return '<div class="heatmap-empty">Validação indisponível para este estado.</div>'
     checks = payload.audit_record.hard_constraints_checked
     selected_pair = None
     if payload.recommended_truck and payload.recommended_destination:

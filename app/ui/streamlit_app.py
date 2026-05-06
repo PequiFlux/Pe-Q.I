@@ -19,7 +19,7 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.components.common import escape
+from app.ui.components.common import escape, runtime_label
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
@@ -67,7 +67,6 @@ def main() -> None:
 
     _render_intro()
     _ensure_input_state()
-    _render_input_actions(example_case)
     if payload := st.session_state.get("last_payload"):
         request = st.session_state.get("last_request")
     elif _ui_autorun_enabled():
@@ -90,7 +89,11 @@ def main() -> None:
         request = None
 
     active_case_id = st.session_state.get("active_case", "UI_INTERACTIVE")
-    inputs = _render_operator_input(expanded=True, use_expander=False)
+    inputs = _render_operator_input(
+        example_case=example_case,
+        expanded=True,
+        use_expander=False,
+    )
 
     if inputs["submitted"]:
         scenario_id = active_case_id if active_case_id in case_by_id else "UI_INTERACTIVE"
@@ -145,6 +148,7 @@ def _render_empty_state() -> None:
 
 def _render_operator_input(
     *,
+    example_case: dict[str, Any],
     expanded: bool,
     use_expander: bool = True,
 ) -> dict[str, Any]:
@@ -162,16 +166,17 @@ def _render_operator_input(
         )
         submitted = False
         with st.container():
+            _render_input_actions(example_case)
             top_a, top_b = st.columns([1.08, 0.92], gap="large")
             with top_a:
                 st.markdown(
-                    '<div class="panel-title">1 · Fila de caminhoes</div>', unsafe_allow_html=True
+                    '<div class="panel-title">1 · Fila de caminhões</div>', unsafe_allow_html=True
                 )
                 uploaded_queue = st.file_uploader(
                     "Fila CSV: upload",
                     type=["csv"],
                     key=INPUT_KEYS["queue_upload"],
-                    help="Colunas minimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
+                    help="Colunas mínimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
                 )
                 queue_csv = _queue_csv_value(uploaded_queue)
                 st.markdown(_queue_source_note(uploaded_queue, queue_csv), unsafe_allow_html=True)
@@ -185,7 +190,7 @@ def _render_operator_input(
                     "Ticket/documento: upload",
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
                     key=INPUT_KEYS["ticket_upload"],
-                    help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens sao enviadas ao leitor local de documento.",
+                    help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens são enviadas ao leitor local de documento.",
                 )
                 ticket_text = _ticket_text_value(uploaded_ticket)
                 st.markdown(
@@ -208,8 +213,8 @@ def _render_operator_input(
             st.markdown(
                 f"""
                 <div class="run-strip">
-                  <div><strong>Runtime:</strong> {escape(_runtime_label())}</div>
-                  <div class="run-note">A execucao grava arquivos temporarios em cache/ui_sessions dentro do container.</div>
+                  <div><strong>Runtime:</strong> {escape(runtime_label())}</div>
+                  <div class="run-note">A execução grava arquivos temporários em cache/ui_sessions dentro do container.</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -246,7 +251,7 @@ def _render_weather_input() -> str:
     if mode == "JSON":
         return st.text_area("Clima JSON", height=140, key=INPUT_KEYS["weather_json"])
     precipitation = st.selectbox(
-        "Precipitacao",
+        "Precipitação",
         ["none", "rain"],
         key=INPUT_KEYS["weather_precipitation"],
     )
@@ -270,12 +275,12 @@ def _render_resource_input() -> str:
     available = st.text_input(
         "Destinos disponíveis",
         key=INPUT_KEYS["resource_available"],
-        help="Separe IDs por virgula. Ex.: DST-COV-01, DST-COV-02",
+        help="Separe IDs por vírgula. Ex.: DST-COV-01, DST-COV-02",
     )
     blocked = st.text_input(
         "Destinos bloqueados",
         key=INPUT_KEYS["resource_blocked"],
-        help="Separe IDs por virgula. Ex.: DST-OPEN-01",
+        help="Separe IDs por vírgula. Ex.: DST-OPEN-01",
     )
     resources = [
         {
@@ -416,7 +421,7 @@ def _render_error(error: str) -> None:
     st.markdown(
         f"""
         <article class="error-card">
-          <strong>Entrada invalida</strong>
+          <strong>Entrada inválida</strong>
           <p>{escape(error)}</p>
         </article>
         """,
@@ -456,7 +461,7 @@ def _sidebar_runtime_block() -> str:
     return f"""
     <div class="side-card compact">
       <div class="side-kicker">Execução</div>
-      <p>{escape(_runtime_label())}</p>
+      <p>{escape(runtime_label())}</p>
       <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
     </div>
     """
@@ -515,13 +520,6 @@ def _load_example_into_state(case: dict[str, Any]) -> None:
     st.session_state[INPUT_KEYS["resource_mode"]] = "JSON"
     st.session_state.pop("last_payload", None)
     st.session_state.pop("last_request", None)
-
-
-def _runtime_label() -> str:
-    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
-    if runtime == "ollama":
-        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:latest')}"
-    return runtime
 
 
 def _ui_autorun_enabled() -> bool:

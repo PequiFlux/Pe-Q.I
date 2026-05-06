@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import os
 from typing import Any
 
 from app.domain.models import FrontEndPayload
@@ -24,26 +25,39 @@ def tool_status(payload: FrontEndPayload, latency_key: str) -> str:
     return "skipped"
 
 
+def runtime_label() -> str:
+    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
+    if runtime == "ollama":
+        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:latest')}"
+    return runtime
+
+
+def audit_status_label(status: str) -> str:
+    if status == "ok":
+        return "OK"
+    return status.upper()
+
+
 def constraints_summary(payload: FrontEndPayload) -> str:
     if payload.audit_record is None:
-        return "Auditoria indisponivel porque o fluxo fechou antes da validacao."
+        return "Auditoria indisponível porque o fluxo fechou antes da validação."
     checked = len(payload.audit_record.hard_constraints_checked)
     rejected = len(payload.audit_record.rejected_candidates)
-    return f"{checked} pares avaliados; {rejected} rejeitados por restricao dura."
+    return f"{checked} pares avaliados; {rejected} rejeitados por restrição dura."
 
 
 def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]]:
     if payload.audit_record is None:
-        return [("auditoria", "Fluxo fechou antes da matriz de restricoes.")]
+        return [("auditoria", "Fluxo fechou antes da matriz de restrições.")]
     failures: dict[str, str] = {}
     for rejected in payload.audit_record.rejected_candidates:
         for failure in rejected.get("failed_constraints", []):
             failures.setdefault(
-                failure.get("constraint_id", "restricao"),
+                failure.get("constraint_id", "restrição"),
                 failure.get("detail", "Par bloqueado por regra operacional."),
             )
     if not failures:
-        return [("nenhuma", "Nenhuma alternativa foi bloqueada por restricao dura.")]
+        return [("nenhuma", "Nenhuma alternativa foi bloqueada por restrição dura.")]
     return list(failures.items())
 
 
@@ -80,16 +94,16 @@ def gemma_short_summary(payload: FrontEndPayload) -> str:
     visible = [str(part) for part in parts if part]
     if visible:
         return ", ".join(visible[:3])
-    return ", ".join(payload.gemma_visible_summary.parsed_fields[:3]) or "campos indisponiveis"
+    return ", ".join(payload.gemma_visible_summary.parsed_fields[:3]) or "campos indisponíveis"
 
 
 def _exception_label_short(label: str) -> str:
     labels = {
         "RAIN_ON_OPEN_DESTINATION": "chuva em moega aberta",
-        "WET_LOAD": "carga umida",
+        "WET_LOAD": "carga úmida",
         "DOCUMENT_BLOCK": "documento bloqueado",
-        "MANUAL_REVIEW_HINT": "revisao humana",
-        "NO_EXCEPTION": "sem excecao",
+        "MANUAL_REVIEW_HINT": "revisão humana",
+        "NO_EXCEPTION": "sem exceção",
     }
     return labels.get(label, label.lower().replace("_", " "))
 
@@ -101,7 +115,7 @@ def ranking_summary(payload: FrontEndPayload) -> str:
             f"{payload.recommended_destination.destination_id}; "
             f"{len(payload.queue_diff)} itens no diff da fila."
         )
-    return "Sem par recomendado; decisao exige bloqueio ou revisao."
+    return "Sem par recomendado; decisão exige bloqueio ou revisão."
 
 
 def operator_actions_label(actions: list[Any]) -> str:
@@ -119,26 +133,15 @@ def operator_action_label(action: str) -> str:
 
 def reason_detail_label(text: str) -> str:
     translations = {
-        "FIFO ordering preserved when possible.": "Ordem de chegada preservada quando possivel.",
+        "FIFO ordering preserved when possible.": "Ordem de chegada preservada quando possível.",
         "Long wait time increased ranking priority.": "Tempo de espera elevou a prioridade na fila.",
         "FIFO break justified by Long wait time increased ranking priority.": (
-            "Quebra de FIFO justificada por tempo de espera e criterio verificavel."
+            "Quebra de FIFO justificada por tempo de espera e critério verificável."
         ),
     }
     if text in translations:
         return translations[text]
     return text
-
-
-def first_skipped_truck(payload: FrontEndPayload) -> str | None:
-    held = [
-        entry
-        for entry in payload.queue_diff
-        if entry.decision in {"blocked", "unchanged"} and entry.position_before == 1
-    ]
-    if not held:
-        return None
-    return min(held, key=lambda entry: entry.position_before).truck_id
 
 
 def story_tile(label: str, value: str, detail: str, kind: str = "muted") -> str:

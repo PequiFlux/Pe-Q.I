@@ -38,15 +38,6 @@ def load_case_defaults(case: dict[str, Any]) -> dict[str, str]:
     }
 
 
-def judge_request(case: dict[str, Any]) -> DecisionRequest:
-    request = DecisionRequest.model_validate(case["request"]).model_copy(update={"variant": "full"})
-    if request.scenario_id == "S03_WET_LOAD":
-        return request.model_copy(
-            update={"operator_note": "Carga umida confirmada; usar moega compativel."}
-        )
-    return request
-
-
 def build_request_from_inputs(
     inputs: dict[str, Any],
     scenario_id: str,
@@ -103,4 +94,4 @@ def build_request_from_inputs(
     except ValidationError as exc:
         return None, f"Entrada fora do contrato Pydantic: {exc}"
     except OSError as exc:
-        return None, f"Falha ao preparar arquivos da execucao: {exc}"
+        return None, f"Falha ao preparar arquivos da execução: {exc}"
