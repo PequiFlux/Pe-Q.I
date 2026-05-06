@@ -25,7 +25,7 @@ Mapa vivo do repositório PequiFlux Yard Copilot.
 
 - Cenário CLI/UI: adapters carregam fixtures; entrypoints usam `build_decision_orchestrator()` para configurar runtime e persistência; `DecisionOrchestrator` executa `load_inputs -> interpret_context -> validate_and_rank -> build_payload -> persist_and_log`; domínio aplica constraints/ranking quando há verdade suficiente; serviços constroem decisão; auditoria registra resultado terminal.
 - Benchmark: `app.cli.run_benchmark` executa casos de `scenarios/manifest.json`; `bench.rows`, `bench.variants`, `bench.validation`, `bench.reporting` e `bench.metrics` concentram montagem, nomes públicos, validação, CSV e métricas.
-- LLM/tools: `app/gemma` interpreta contexto e documentos; no fluxo `full`, `ToolGateway` executa constraints, ranking e auditoria; mensagem ao motorista é serviço determinístico local; saída ausente ou inválida deve gerar erro/revisão explícita, nunca fallback de decisão.
+- LLM/tools: `app/gemma` interpreta contexto e documentos; no fluxo `full`, Gemma atua como Tool Planner escolhendo a próxima tool entre as disponíveis para o `FlowState`, e `ToolGateway` executa constraints, ranking e auditoria sob whitelist/schema/estado; mensagem ao motorista é serviço determinístico local; saída ausente ou inválida deve gerar erro/revisão explícita, nunca fallback de decisão.
 
 ## Áreas sensíveis
 

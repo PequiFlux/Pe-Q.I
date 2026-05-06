@@ -21,7 +21,7 @@ Esta é a visão arquitetural oficial do repositório. O código segue o desenho
 |---|---|
 | `ui` | Coletar entradas, renderizar a recomendação, expor ações humanas e mostrar a trilha auditável |
 | `orchestration` | Coordenar o fluxo ponta a ponta, aplicar a máquina de estados e encadear os módulos |
-| `gemma` | Isolar o runtime do modelo, validar saídas estruturadas e executar tools determinísticas via `ToolGateway` no fluxo `full` |
+| `gemma` | Isolar o runtime do modelo, validar saídas estruturadas e planejar a próxima tool permitida para o `FlowState`; execução continua no `ToolGateway` no fluxo `full` |
 | `adapters` | Ler CSV, ticket, nota e estados locais, convertendo tudo para objetos canônicos |
 | `domain` | Definir modelos, enums, regras duras, ranking, política e erros formais |
 | `services` | Implementar parsing, classificação de exceção, composição da decisão e mensagem ao motorista |

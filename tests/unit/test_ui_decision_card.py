@@ -83,19 +83,43 @@ def test_tool_badges_card_shows_gemma_requested_tool_sequence() -> None:
                         "tool_name": "validate_hard_constraints",
                         "request_id": "REQ-UI-CARD",
                         "state": "INTERPRETED",
+                        "status": "requested",
+                        "purpose": "Deterministic CI tool intent.",
+                    },
+                    {
+                        "tool_name": "validate_hard_constraints",
+                        "request_id": "REQ-UI-CARD",
+                        "state": "INTERPRETED",
                         "status": "executed",
+                        "purpose": "Deterministic CI tool intent.",
+                    },
+                    {
+                        "tool_name": "rank_candidates",
+                        "request_id": "REQ-UI-CARD",
+                        "state": "VALIDATED",
+                        "status": "requested",
+                        "purpose": "Ranking may only order eligible pairs.",
                     },
                     {
                         "tool_name": "rank_candidates",
                         "request_id": "REQ-UI-CARD",
                         "state": "VALIDATED",
                         "status": "executed",
+                        "purpose": "Ranking may only order eligible pairs.",
+                    },
+                    {
+                        "tool_name": "generate_audit_payload",
+                        "request_id": "REQ-UI-CARD",
+                        "state": "RANKED",
+                        "status": "requested",
+                        "purpose": "Audit payload must be generated from formal artifacts.",
                     },
                     {
                         "tool_name": "generate_audit_payload",
                         "request_id": "REQ-UI-CARD",
                         "state": "RANKED",
                         "status": "executed",
+                        "purpose": "Audit payload must be generated from formal artifacts.",
                     },
                 ],
             },
@@ -106,4 +130,6 @@ def test_tool_badges_card_shows_gemma_requested_tool_sequence() -> None:
     assert "validate_hard_constraints" in html
     assert "rank_candidates" in html
     assert "generate_audit_payload" in html
-    assert html.count("executado") == 3
+    assert "solicitado → executado" in html
+    assert "Motivo: Deterministic CI tool intent." in html
+    assert "Estado: INTERPRETED" in html

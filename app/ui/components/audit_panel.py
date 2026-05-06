@@ -355,17 +355,56 @@ def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
         "rank_candidates",
         "generate_audit_payload",
     ]
-    latest_by_tool = {record.tool_name: record.status for record in payload.audit_record.tool_calls}
+    grouped: dict[str, list[Any]] = {}
+    for record in payload.audit_record.tool_calls:
+        grouped.setdefault(record.tool_name, []).append(record)
+    tool_names = [tool_name for tool_name in ordered_tools if tool_name in grouped]
+    tool_names.extend(tool_name for tool_name in grouped if tool_name not in ordered_tools)
+
     items = "".join(
-        f"<li><span>{escape(tool_name)}</span> — <strong>{escape(labels.get(latest_by_tool[tool_name], latest_by_tool[tool_name]))}</strong></li>"
-        for tool_name in ordered_tools
-        if tool_name in latest_by_tool
+        _tool_call_audit_item(tool_name, grouped[tool_name], labels) for tool_name in tool_names
     )
     if not items:
         return ""
     return f"""
       <div class="tool-call-summary">
         <h4>Gemma 4 solicitou:</h4>
-        <ol>{items}</ol>
+        <ol class="tool-call-list">{items}</ol>
       </div>
     """
+
+
+def _tool_call_audit_item(tool_name: str, records: list[Any], labels: dict[str, str]) -> str:
+    status_flow = " → ".join(
+        labels.get(status, status)
+        for status in _unique_in_order(record.status for record in records)
+    )
+    latest = records[-1]
+    purpose = next((record.purpose for record in reversed(records) if record.purpose), "")
+    state = latest.state
+    error_code = next((record.error_code for record in reversed(records) if record.error_code), "")
+    status_class = "error" if error_code else latest.status
+    error_html = (
+        f'<span class="tool-call-error">Erro: {escape(error_code)}</span>' if error_code else ""
+    )
+    return f"""
+          <li class="tool-call-item {escape(status_class)}">
+            <div class="tool-call-flow">
+              <span class="tool-call-name">{escape(tool_name)}</span>
+              <strong>{escape(status_flow)}</strong>
+            </div>
+            <div class="tool-call-meta">
+              <span>Motivo: {escape(purpose or "não informado")}</span>
+              <span>Estado: {escape(state)}</span>
+              {error_html}
+            </div>
+          </li>
+    """
+
+
+def _unique_in_order(values) -> list[str]:
+    unique: list[str] = []
+    for value in values:
+        if value not in unique:
+            unique.append(value)
+    return unique

@@ -11,6 +11,7 @@ from app.domain.models import DecisionRequest, ToolCallIntent
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
 from app.gemma import tool_gateway
+from app.orchestration import orchestrator as orchestrator_module
 from app.orchestration.orchestrator import DecisionOrchestrator
 
 
@@ -54,6 +55,20 @@ class TextRuntimeReturningMismatchedRequestTool(TextTicketRuntime):
                 request_id="REQ-DIFFERENT",
                 purpose="test mismatched request",
             )
+        return super().generate_structured(
+            prompt=prompt,
+            response_model=response_model,
+            metadata=metadata,
+        )
+
+
+class CapturingToolPlannerRuntime(TextTicketRuntime):
+    def __init__(self) -> None:
+        self.tool_requests: list[dict] = []
+
+    def generate_structured(self, *, prompt, response_model, metadata):
+        if response_model is ToolCallIntent:
+            self.tool_requests.append(dict(metadata))
         return super().generate_structured(
             prompt=prompt,
             response_model=response_model,
@@ -132,6 +147,19 @@ def test_s10_full_payload_records_required_tool_calls():
     assert payload.audit_record.latencies_ms == payload.latency_ms
 
 
+def test_s10_full_tool_planner_offers_legal_tools_by_state():
+    runtime = CapturingToolPlannerRuntime()
+
+    payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full", runtime=runtime)
+
+    assert payload.decision_status == "PREVIEW_READY"
+    assert [(item["current_state"], item["allowed_tools"]) for item in runtime.tool_requests] == [
+        ("INTERPRETED", ["validate_hard_constraints"]),
+        ("VALIDATED", ["rank_candidates"]),
+        ("RANKED", ["generate_audit_payload"]),
+    ]
+
+
 def test_s10_full_payload_audits_tool_selection_error():
     payload = _run_scenario(
         "S10_FIFO_BREAK_JUSTIFIED",
@@ -185,6 +213,11 @@ def test_s10_full_payload_blocks_and_audits_request_id_mismatch():
 
 
 def test_s10_full_payload_blocks_and_audits_tool_order_error(monkeypatch):
+    monkeypatch.setattr(
+        orchestrator_module,
+        "available_tools_for_state",
+        lambda state: ["validate_hard_constraints"],
+    )
     monkeypatch.setitem(
         tool_gateway.TOOL_STATE_ORDER,
         "validate_hard_constraints",
@@ -211,6 +244,20 @@ def test_s10_full_payload_blocks_and_audits_tool_order_error(monkeypatch):
             "Deterministic CI tool intent.",
             "TOOL_ORDER_ERROR",
         ),
+    ]
+
+
+def test_s10_full_payload_blocks_when_tool_step_limit_is_exceeded(monkeypatch):
+    monkeypatch.setattr(orchestrator_module, "MAX_TOOL_STEPS", 1)
+
+    payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full")
+
+    assert payload.decision_status == "BLOCKED"
+    assert payload.audit_record is not None
+    assert "exceeded 1 steps" in payload.reason_summary
+    assert [(record.tool_name, record.status) for record in payload.audit_record.tool_calls] == [
+        ("validate_hard_constraints", "requested"),
+        ("validate_hard_constraints", "executed"),
     ]
 
 

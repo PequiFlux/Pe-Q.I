@@ -21,6 +21,15 @@ TOOL_STATE_ORDER: dict[str, set[str]] = {
 }
 
 
+def available_tools_for_state(state: FlowState | str) -> list[str]:
+    state_value = _state_value(state)
+    return [
+        tool_name
+        for tool_name, allowed_states in TOOL_STATE_ORDER.items()
+        if state_value in allowed_states
+    ]
+
+
 @dataclass(frozen=True)
 class ToolLocalIds:
     truck_ids: set[str] = field(default_factory=set)

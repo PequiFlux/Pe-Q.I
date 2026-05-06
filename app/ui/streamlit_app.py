@@ -422,7 +422,7 @@ def _render_technical_audit_expander(
     request: DecisionRequest,
     case: dict[str, Any],
 ) -> None:
-    with st.expander("Ver auditoria técnica", expanded=False):
+    with st.expander("Ver auditoria técnica", expanded=_ui_autorun_enabled()):
         render_input_evidence(payload, request, case)
         st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
         left, right = st.columns([1.15, 0.85], gap="large")

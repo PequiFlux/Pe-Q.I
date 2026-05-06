@@ -20,6 +20,10 @@ O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino 
 |---|---|
 | <img src="assets/screenshots/pequiflux-ui-03-result.png" alt="Resultado da análise com decisão PREVIEW_READY" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-audit-expanded.png" alt="Painel de auditoria técnica aberto" width="420"> |
 
+| Trilha de tools solicitadas pelo Gemma |
+|---|
+| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Painel avançado com tools solicitadas pelo Gemma, status, motivo e estado" width="860"> |
+
 ## Para avaliadores
 
 | Em dois minutos | Onde ver |
@@ -91,7 +95,7 @@ O que Gemma 4 prova nesta submissão — três pontos onde um baseline heurísti
 2. **Classificação da exceção** — quando documento, nota e estado precisam ser reconciliados
 3. **Tools controladas** — no fluxo `full`, constraints, ranking e auditoria passam por whitelist, ordem de estados e log estruturado
 
-`reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua. O `ToolGateway` está implementado e é usado no fluxo `full` para executar `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado.
+`reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua. No fluxo `full`, Gemma atua como Tool Planner: escolhe a próxima tool entre as disponíveis para o `FlowState`, e o `ToolGateway` executa `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, schema, ordem de estados, validação de IDs locais e log estruturado.
 
 ---
 
@@ -225,7 +229,7 @@ O sistema oferece dois runtimes de interpretação, selecionados por `PEQUIFLUX_
 | Parsing | Multimodal real — PDF renderizado em imagem + texto extraído |
 | Classificação de exceção | Modelo interpreta documento + nota + estado e classifica |
 | `reason_summary` | Gerado de forma determinística a partir da decisão formal |
-| ToolGateway | No fluxo `full`, executa `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado |
+| Gemma Tool Planner + ToolGateway | No fluxo `full`, Gemma escolhe a próxima tool legal para o `FlowState`; o gateway executa `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado |
 | Temperatura | `0` (determinístico na inferência) |
 | Formato de saída | JSON estruturado validado contra Pydantic schema |
 | Requisitos | GPU ou CPU com latência aceitável; Ollama ativo; modelo previamente puxado |
@@ -277,7 +281,7 @@ Há dois artefatos conceitualmente distintos:
 
 | Variante | Gemma? | Comportamento |
 |----------|--------|---------------|
-| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e tools determinísticas via `ToolGateway`; `reason_summary` é determinístico |
+| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e Gemma Tool Planner sob `ToolGateway`; `reason_summary` é determinístico |
 | `heuristic` | Não | Mesmo rules engine determinístico; parser de texto estruturado; explicação por template |
 | `fifo_safe` | Não | FIFO entre pares elegíveis; ignora interpretação documental, mas respeita hard constraints |
 | `raw_fifo` | Não | FIFO bruto por `arrival_ts` e `declared_destination`; ignora contexto e constraints |
@@ -475,7 +479,7 @@ Se a verdade é insuficiente, a decisão é `BLOCKED` ou `REVIEW_REQUIRED` com m
 
 | Variante | Gemma? | Comportamento |
 |----------|--------|---------------|
-| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e tools determinísticas via `ToolGateway`; `reason_summary` é determinístico |
+| `full` | Sim (Ollama) | Parsing multimodal, classificação de exceção e Gemma Tool Planner sob `ToolGateway`; `reason_summary` é determinístico |
 | `heuristic` | Não | Rules engine determinístico; parser de texto; templates de explicação |
 | `fifo` | Não | Variante operacional FIFO segura: preserva fila entre pares elegíveis e ainda respeita hard constraints |
 
@@ -632,7 +636,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Evidência | Caminho |
 |---|---|
 | Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
-| Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-example-loaded.png`](assets/screenshots/pequiflux-ui-02-example-loaded.png), [`assets/screenshots/pequiflux-ui-03-result.png`](assets/screenshots/pequiflux-ui-03-result.png), [`assets/screenshots/pequiflux-ui-04-audit-expanded.png`](assets/screenshots/pequiflux-ui-04-audit-expanded.png) |
+| Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-example-loaded.png`](assets/screenshots/pequiflux-ui-02-example-loaded.png), [`assets/screenshots/pequiflux-ui-03-result.png`](assets/screenshots/pequiflux-ui-03-result.png), [`assets/screenshots/pequiflux-ui-04-audit-expanded.png`](assets/screenshots/pequiflux-ui-04-audit-expanded.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
 | Relatórios extended internos | `bench/reports/extended/<run_id>/` |
 | Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |

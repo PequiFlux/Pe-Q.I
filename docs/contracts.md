@@ -290,7 +290,7 @@ Referência:
 - `request_id`
 - `purpose` opcional, limitado a 240 caracteres
 
-`app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`. No fluxo operacional atual, o orquestrador passa `allowed_tools` com uma única tool válida por etapa; portanto Gemma solicita a tool permitida sob whitelist, não escolhe livremente entre várias ferramentas.
+`app.gemma.prompts.build_tool_call_prompt()` monta o prompt contract-first para essa seleção: o modelo deve retornar exatamente um objeto JSON compatível com `ToolCallIntent`, usando somente tools permitidas para o estado atual e sem argumentos além de `request_id`. No fluxo operacional `full`, o orquestrador calcula `allowed_tools` com `available_tools_for_state(state)`; Gemma escolhe a próxima tool válida sob máquina de estados, e o loop é limitado a 4 tool steps.
 
 `GemmaAdapter.choose_tool()` chama o runtime com esse prompt, valida `ToolCallIntent`, rejeita tool fora da allowlist com `MODEL_TOOL_NOT_ALLOWED` e rejeita `request_id` divergente com `MODEL_TOOL_REQUEST_ID_MISMATCH`.
 

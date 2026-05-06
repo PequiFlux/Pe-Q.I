@@ -410,7 +410,7 @@ Contrato: a classificação indica o quadro contextual dominante, mas não autor
 
 Entrada: `InterpretedContext` já reconciliado.  
 Saída: execução validada de tools permitidas.
-Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos. No fluxo `full`, o orquestrador executa constraints, ranking e auditoria por essa fronteira. Em cada estado, o orquestrador oferece uma única tool permitida; Gemma solicita essa tool sob whitelist, sem escolha livre entre comandos. A mensagem ao motorista permanece serviço determinístico local.
+Contrato: o gateway bloqueia tool name fora da whitelist, argumentos fora do schema, IDs inexistentes, ordem indevida e qualquer tentativa de acesso arbitrário a paths/comandos. No fluxo `full`, Gemma atua como Tool Planner: recebe as tools legalmente disponíveis para o `FlowState`, escolhe a próxima tool e fornece `purpose`; o `ToolGateway` executa constraints, ranking e auditoria por essa fronteira. A mensagem ao motorista permanece serviço determinístico local.
 
 **Fronteira F — `Rules Engine -> Ranking`**
 
@@ -726,7 +726,7 @@ A submissão não precisa provar visão computacional geral. Ela precisa provar 
 
 ### 5.7 Função exata do ToolGateway
 
-O `ToolGateway` existe sob contenção rígida. O fluxo `full` usa o gateway para executar as tools determinísticas da decisão; o modelo interpreta documentos e contexto ambíguo, mas o código continua decidindo elegibilidade. No fluxo atual, Gemma solicita a tool permitida para o estado atual sob whitelist; ele não escolhe livremente entre várias ferramentas operacionais.
+O `ToolGateway` existe sob contenção rígida. O fluxo `full` usa o gateway para executar as tools determinísticas da decisão; o modelo interpreta documentos e contexto ambíguo, mas o código continua decidindo elegibilidade. No fluxo atual, Gemma escolhe a próxima tool entre as ferramentas legalmente disponíveis para o `FlowState`, com loop limitado a 4 steps. Ele não altera estado autoritativo nem executa comandos livres.
 
 Tools previstas na whitelist:
 

@@ -12,7 +12,7 @@ Faz:
 
 `reason_summary` é gerado de forma determinística a partir da decisão formal; Gemma interpreta documentos e ajuda em classificação ambígua.
 
-O `ToolGateway` está implementado e é usado no fluxo `full` para executar tools determinísticas sob whitelist, ordem de estados, validação de IDs locais e log estruturado. No fluxo atual, o orquestrador passa uma única tool permitida para cada estado; Gemma solicita essa tool permitida sob contrato, sem escolher livremente entre comandos.
+O `ToolGateway` está implementado e é usado no fluxo `full` para executar tools determinísticas sob whitelist, ordem de estados, validação de IDs locais e log estruturado. No fluxo atual, Gemma atua como Tool Planner: recebe todas as tools legalmente disponíveis para o `FlowState` atual, escolhe a próxima tool válida e fornece `purpose`.
 
 Não faz:
 
@@ -59,7 +59,7 @@ Se o runtime não responder ou o modelo não existir, o sistema falha fechado e 
 - nenhuma decisão final sem validação externa
 - nenhuma instrução derivada da nota do operador é executada diretamente
 
-## ToolGateway
+## Gemma Tool Planner e ToolGateway
 
 Whitelist atual:
 
@@ -69,12 +69,14 @@ Whitelist atual:
 
 Regras:
 
+- o planner recebe somente tools legalmente disponíveis para o estado atual;
+- o loop de tools é limitado a 4 steps por decisão;
 - validar nome e argumentos antes de executar
 - validar ordem pela máquina de estados
 - validar IDs contra estado local
 - registrar tentativas em log estruturado
 
-No fluxo `full`, o orquestrador passa constraints, ranking e auditoria pelo `ToolGateway`. Em cada etapa, Gemma solicita a tool permitida para o estado atual sob whitelist; ele não decide livremente qual tool executar. Gemma interpreta documentos e apoia classificação ambígua, mas não decide hard constraints. A mensagem ao motorista é composta por serviço determinístico local.
+No fluxo `full`, o orquestrador passa constraints, ranking e auditoria pelo `ToolGateway`. Gemma escolhe a próxima tool entre as opções permitidas pelo `FlowState`; o gateway ainda valida whitelist, schema, estado e IDs locais antes da execução. Gemma interpreta documentos e apoia classificação ambígua, mas não decide hard constraints, não altera estado autoritativo e não executa comandos livres. A mensagem ao motorista é composta por serviço determinístico local.
 
 ## Sem fallback
 

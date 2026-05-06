@@ -708,19 +708,54 @@ def inject_styles() -> None:
           }
           .tool-call-summary ol {
             margin: 0;
-            padding-left: 22px;
+            padding: 0;
           }
-          .tool-call-summary li {
-            margin: 5px 0;
+          .tool-call-list {
+            display: grid;
+            gap: 8px;
+            list-style: none;
+          }
+          .tool-call-item {
+            margin: 0;
+            padding: 10px 11px;
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--slate-400);
+            border-radius: 12px;
+            background: #fff;
             color: var(--muted);
             font-size: 13px;
           }
-          .tool-call-summary li span {
+          .tool-call-item.executed {
+            border-left-color: var(--green-500);
+          }
+          .tool-call-item.error {
+            border-left-color: var(--red-600);
+            background: var(--red-50);
+          }
+          .tool-call-flow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .tool-call-name {
             color: var(--ink);
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            overflow-wrap: anywhere;
           }
-          .tool-call-summary li strong {
+          .tool-call-flow strong {
             color: var(--green-800);
+            font-weight: 900;
+            white-space: nowrap;
+          }
+          .tool-call-meta {
+            display: grid;
+            gap: 3px;
+            margin-top: 7px;
+            line-height: 1.35;
+          }
+          .tool-call-error {
+            color: var(--red-700);
             font-weight: 900;
           }
           .card {

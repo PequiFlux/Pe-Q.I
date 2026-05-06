@@ -555,3 +555,14 @@ Arquivos/módulos afetados:
 - `app/orchestration/orchestrator.py`
 - `app/gemma/tool_gateway.py`
 - `docs`
+
+### 2026-05-06 — Gemma Tool Planner sob máquina de estados
+
+Contexto:
+O primeiro fluxo com `ToolGateway` passava uma única tool fixa em `allowed_tools` a cada etapa. Isso era seguro, mas limitava a evidência de planejamento do Gemma.
+
+Decisão:
+Evoluir o variant `full` para um Gemma Tool Planner. O orquestrador calcula `available_tools_for_state(state)` e o Gemma escolhe a próxima tool válida, fornecendo `purpose`; o `ToolGateway` continua validando whitelist, JSON Schema, `FlowState` e IDs locais. O loop é limitado a 4 tool steps e variants `fifo`/`heuristic` continuam sem `tool_calls`.
+
+Impacto:
+Hard constraints, ranking e auditoria permanecem determinísticos. O modelo não altera estado autoritativo, não recebe argumentos além de `request_id` e não executa comandos livres.

@@ -4,7 +4,7 @@ import pytest
 
 from app.domain.enums import FlowState
 from app.domain.errors import PequiFluxError
-from app.gemma.tool_gateway import ToolGateway, ToolLocalIds
+from app.gemma.tool_gateway import ToolGateway, ToolLocalIds, available_tools_for_state
 
 
 class MemoryLogger:
@@ -52,6 +52,12 @@ def test_tool_gateway_validates_schema_and_executes_allowed_tool() -> None:
     )
 
     assert result["truck_id"] == "TRK-001"
+
+
+def test_available_tools_for_state_returns_state_legal_tools() -> None:
+    assert available_tools_for_state(FlowState.INTERPRETED) == ["validate_hard_constraints"]
+    assert available_tools_for_state(FlowState.VALIDATED) == ["rank_candidates"]
+    assert available_tools_for_state(FlowState.RANKED) == ["generate_audit_payload"]
 
 
 def test_tool_gateway_rejects_schema_errors() -> None:
