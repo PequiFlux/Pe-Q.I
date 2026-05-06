@@ -199,6 +199,38 @@ def test_manual_review_hint_secondary_forces_human_review() -> None:
     assert assessment.needs_human_review is True
 
 
+def test_manual_review_hint_sets_review_even_when_rain_is_primary() -> None:
+    assessment = classify_exception(
+        request_id="REQ-RAIN-MANUAL",
+        parsed_ticket=ParsedTicket(
+            truck_id="TRK-001",
+            vehicle_type=VehicleType.TRUCK,
+            document_status=DocumentStatus.CLEAR,
+            load_condition=LoadCondition.DRY,
+            parse_confidence=0.95,
+        ),
+        operator_note="Conferir manualmente antes de liberar destino aberto.",
+        weather_state=WeatherState(precipitation="rain", severity="high"),
+        resource_state=[
+            ResourceState(
+                resource_id="DST-OPEN-01",
+                status="available",
+                capacity_pct=80,
+                exposure="open",
+                allowed_vehicle_types=[VehicleType.TRUCK],
+                supported_load_conditions=[LoadCondition.DRY],
+            )
+        ],
+        queue_snapshot=_snapshot(),
+        gemma_adapter=None,
+    )
+
+    assert assessment.primary_exception == "RAIN_ON_OPEN_DESTINATION"
+    assert assessment.secondary_exceptions == ["MANUAL_REVIEW_HINT"]
+    assert assessment.affected_resources == ["DST-OPEN-01"]
+    assert assessment.needs_human_review is True
+
+
 def test_ambiguous_exception_uses_gemma_adapter_when_available() -> None:
     adapter = Adapter()
 
