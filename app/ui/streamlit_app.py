@@ -34,9 +34,10 @@ from app.ui.input_state import (
     queue_csv_value,
     queue_preview_html,
     queue_source_note,
+    reset_result_state,
     split_ids,
     state_defaults,
-    ticket_source_note,
+    ticket_source_note_with_fixture,
     ticket_text_value,
     ui_autorun_enabled,
     upload_key,
@@ -52,6 +53,8 @@ EXAMPLE_SCENARIO_ID = "S10_FIFO_BREAK_JUSTIFIED"
 INPUT_KEYS = {
     "queue_csv": "yard_queue_csv",
     "ticket_text": "yard_ticket_text",
+    "fixture_ticket_path": "yard_fixture_ticket_path",
+    "fixture_ticket_content_type": "yard_fixture_ticket_content_type",
     "operator_note": "yard_operator_note",
     "weather_json": "yard_weather_json",
     "resource_json": "yard_resource_json",
@@ -125,6 +128,7 @@ def main() -> None:
             _render_error(error)
             return
         assert request is not None
+        reset_result_state()
         payload = run_payload(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
@@ -217,7 +221,12 @@ def _render_operator_input(
                 )
                 ticket_text = ticket_text_value(INPUT_KEYS, uploaded_ticket)
                 st.markdown(
-                    ticket_source_note(uploaded_ticket, ticket_text), unsafe_allow_html=True
+                    ticket_source_note_with_fixture(
+                        uploaded_ticket,
+                        ticket_text,
+                        st.session_state.get(INPUT_KEYS["fixture_ticket_path"], ""),
+                    ),
+                    unsafe_allow_html=True,
                 )
 
             mid_a, mid_b, mid_c = st.columns([1, 1, 1], gap="large")

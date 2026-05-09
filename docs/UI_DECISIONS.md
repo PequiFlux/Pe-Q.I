@@ -45,7 +45,7 @@ A matriz de validação, sequência de tools solicitadas pelo Gemma, payload JSO
 
 ### Linguagem operacional
 
-Rótulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam na auditoria técnica. A primeira leitura usa: `Documento interpretado pelo Gemma 4`, `Restrições críticas`, `Fila`, `Mensagem ao motorista` e `Ação do operador`. O cartão principal mostra ticket, caminhão lido, tipo de carga, destino extraído, confiança e campos usados na decisão.
+Rótulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam na auditoria técnica. A primeira leitura usa `Documento interpretado`, `Restrições críticas`, `Fila`, `Mensagem ao motorista` e `Ação do operador`. Quando o runtime é `ollama`, a superfície pode explicitar `Gemma 4`; quando o runtime é `text`, a UI precisa assumir o modo teste de forma explícita, sem fingir parsing real. O cartão principal mostra ticket, caminhão lido, tipo de carga, destino extraído, confiança e campos usados na decisão.
 
 ### Prova técnica colapsada
 

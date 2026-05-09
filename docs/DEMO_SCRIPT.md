@@ -9,16 +9,16 @@ Mostrar a tela inicial de nova decisão.
 Fala:
 > Pe-Q.I decide qual caminhão chamar quando FIFO puro parece justo, mas fica errado diante de chuva, carga úmida ou documento bloqueado. Gemma interpreta o documento, regras determinísticas decidem, e o operador continua no controle.
 
-## 0:20-0:45 — Carregar Exemplo
+## 0:20-0:45 — Carregar Caso
 
-No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos, e `Limpar campos` volta ao estado vazio.
+No bloco `Entrada operacional`, clique em `Carregar e analisar caso`. O botão `Carregar caso` apenas preenche os campos, e `Limpar campos` volta ao estado vazio.
 
 Fala:
 > Para a demo, eu carrego um pacote sintético versionado. Em operação, esses campos viriam do upload da fila CSV, do ticket PDF, imagem ou TXT, da nota do operador, e do clima/recursos em formulário simples ou JSON.
 
 ## 0:45-1:10 — Analisar
 
-Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Em `make ui-text`, ele aparece como `Analisar em modo teste`; em `make ui`, aparece como `Analisar com Gemma 4`.
+Se tiver usado apenas `Carregar caso`, clique no botão de análise. Em `make ui-text`, ele aparece como `Analisar em modo teste`; em `make ui`, aparece como `Analisar com Gemma 4`.
 
 Fala:
 > A execução interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisão auditável. Se faltar verdade material, o sistema fecha em bloqueio ou revisão, sem fallback operacional.

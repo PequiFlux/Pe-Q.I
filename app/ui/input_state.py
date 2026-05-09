@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import os
+from pathlib import Path
 from typing import Any
 
 import streamlit as st
@@ -50,6 +51,20 @@ def ticket_source_note(uploaded_ticket: Any, ticket_text: str) -> str:
     return f'<div class="source-note">{escape(source)}</div>'
 
 
+def ticket_source_note_with_fixture(
+    uploaded_ticket: Any,
+    ticket_text: str,
+    fixture_ticket_path: str,
+) -> str:
+    if uploaded_ticket is not None or ticket_text:
+        return ticket_source_note(uploaded_ticket, ticket_text)
+    if fixture_ticket_path:
+        suffix = Path(fixture_ticket_path).suffix.lower().lstrip(".").upper() or "FILE"
+        source = f"Caso versionado carregado como fixture {suffix}."
+        return f'<div class="source-note">{escape(source)}</div>'
+    return ticket_source_note(uploaded_ticket, ticket_text)
+
+
 def split_ids(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
@@ -74,6 +89,8 @@ def empty_defaults() -> dict[str, Any]:
     return {
         "queue_csv": "",
         "ticket_text": "",
+        "fixture_ticket_path": "",
+        "fixture_ticket_content_type": "",
         "operator_note": "",
         "weather_json": '{\n  "precipitation": "none",\n  "severity": "none"\n}',
         "resource_json": "[]",
@@ -102,8 +119,7 @@ def clear_input_state(input_keys: dict[str, str]) -> None:
         if key in input_keys.values() or is_upload_widget_key(input_keys, key):
             st.session_state.pop(key, None)
     st.session_state.pop("active_case", None)
-    st.session_state.pop("last_payload", None)
-    st.session_state.pop("last_request", None)
+    reset_result_state()
     defaults = empty_defaults()
     for field, value in defaults.items():
         st.session_state.setdefault(input_keys[field], value)
@@ -113,19 +129,34 @@ def state_defaults(input_keys: dict[str, str]) -> dict[str, str]:
     ensure_input_state(input_keys)
     return {
         field: st.session_state[input_keys[field]]
-        for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json")
+        for field in (
+            "queue_csv",
+            "ticket_text",
+            "fixture_ticket_path",
+            "fixture_ticket_content_type",
+            "operator_note",
+            "weather_json",
+            "resource_json",
+        )
     }
 
 
 def load_case_into_state(input_keys: dict[str, str], case: dict[str, Any]) -> None:
     reset_uploaders(input_keys)
     defaults = load_case_defaults(case)
-    for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json"):
+    for field in (
+        "queue_csv",
+        "ticket_text",
+        "fixture_ticket_path",
+        "fixture_ticket_content_type",
+        "operator_note",
+        "weather_json",
+        "resource_json",
+    ):
         st.session_state[input_keys[field]] = defaults[field]
     st.session_state[input_keys["weather_mode"]] = "JSON"
     st.session_state[input_keys["resource_mode"]] = "JSON"
-    st.session_state.pop("last_payload", None)
-    st.session_state.pop("last_request", None)
+    reset_result_state()
 
 
 def upload_key(input_keys: dict[str, str], field: str) -> str:
@@ -149,3 +180,10 @@ def is_upload_widget_key(input_keys: dict[str, str], key: str) -> bool:
 
 def ui_autorun_enabled() -> bool:
     return os.getenv("PEQUIFLUX_UI_AUTORUN", "").strip().lower() in {"1", "true", "yes"}
+
+
+def reset_result_state() -> None:
+    st.session_state.pop("last_payload", None)
+    st.session_state.pop("last_request", None)
+    st.session_state.pop("operator_finalization", None)
+    st.session_state.pop("operator_audit_update", None)

@@ -27,6 +27,18 @@ class SQLiteStore:
             self._insert_audit_record(connection, audit)
             connection.commit()
 
+    def save_decision_bundle(self, preview: DecisionPreview, audit: AuditRecord) -> None:
+        with sqlite3.connect(self.path) as connection:
+            connection.execute("BEGIN")
+            try:
+                self._insert_decision_record(connection, preview)
+                self._insert_audit_record(connection, audit)
+            except Exception:
+                connection.rollback()
+                raise
+            else:
+                connection.commit()
+
     def save_operator_action(self, decision_id: str, action: OperatorDecision) -> None:
         with sqlite3.connect(self.path) as connection:
             self._insert_operator_action(connection, decision_id, action)

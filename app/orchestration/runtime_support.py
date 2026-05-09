@@ -102,8 +102,7 @@ def persist_records(
     if sqlite_store is None:
         return
     sqlite_store.initialize()
-    sqlite_store.save_decision(preview)
-    sqlite_store.save_audit_record(audit)
+    sqlite_store.save_decision_bundle(preview, audit)
 
 
 def log_decision(

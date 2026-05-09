@@ -26,10 +26,32 @@ def tool_status(payload: FrontEndPayload, latency_key: str) -> str:
 
 
 def runtime_label() -> str:
-    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
+    runtime = runtime_mode()
     if runtime == "ollama":
         return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:e2b')}"
     return runtime
+
+
+def runtime_mode() -> str:
+    return os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
+
+
+def document_interpreter_title() -> str:
+    if runtime_mode() == "ollama":
+        return "Documento interpretado pelo Gemma 4"
+    return "Documento interpretado pelo runtime de teste"
+
+
+def document_interpreter_badge() -> str:
+    if runtime_mode() == "ollama":
+        return "Gemma 4"
+    return "modo teste"
+
+
+def document_interpreter_detail() -> str:
+    if runtime_mode() == "ollama":
+        return "Resultado avançado da leitura estruturada, sem chat nem chain-of-thought."
+    return "Leitura determinística de fixture para validação reproduzível, sem Ollama ou Gemma."
 
 
 def audit_status_label(status: str) -> str:

@@ -10,6 +10,8 @@ from app.ui.components.common import (
     chip,
     confidence_value,
     constraint_failure_summary,
+    document_interpreter_badge,
+    document_interpreter_title,
     escape,
     reason_detail_label,
     story_tile,
@@ -158,8 +160,8 @@ def gemma_extraction_card(payload: FrontEndPayload, request: DecisionRequest) ->
     return f"""
     <article class="card narrative-card">
       <div class="card-head">
-        <div><h3>Documento interpretado pelo Gemma 4</h3><p>Campos do ticket que entram na decisão, sem expor prompt ou JSON.</p></div>
-        {chip("Gemma 4", "purple")}
+        <div><h3>{escape(document_interpreter_title())}</h3><p>Campos do ticket que entram na decisão, sem expor prompt ou JSON.</p></div>
+        {chip(document_interpreter_badge(), "purple")}
       </div>
       <div class="package-grid">{items}</div>
     </article>

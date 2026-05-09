@@ -10,16 +10,16 @@ Atualizado em: 2026-05-09
 | Graphify | ok | Ferramenta presente no ambiente anterior de setup; sem impacto nos gates obrigatórios da hackathon |
 | code-review-graph | ok | Ferramenta presente no ambiente anterior de setup; sem impacto nos gates obrigatórios da hackathon |
 | Docker | ok | `docker build --target test -t pequiflux-yard-copilot:test .` passou em 2026-05-09 |
-| Test image | ok | `docker run --rm pequiflux-yard-copilot:test` passou com `127 passed` em 2026-05-09 |
+| Test image | ok | `docker run --rm pequiflux-yard-copilot:test` passou com `142 passed` em 2026-05-09 |
 | Blueprint audit | ok | `docker run --rm pequiflux-yard-copilot:test python -m app.cli.blueprint_audit` passou com 8 checks em 2026-05-09 |
 | Benchmark textual validado | ok | `docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate` passou com 20/20 cenários em 2026-05-09 |
 | Demo textual | ok | `docker compose run --rm demo-text python -m app.cli.run_scenario --scenario S10_FIFO_BREAK_JUSTIFIED` passou em 2026-05-09 |
-| UI textual | ok | `docker compose --profile ui-text up -d ui-text` + `curl http://127.0.0.1:8501/_stcore/health` retornou `ok` em 2026-05-09 |
+| UI textual | ok | `docker compose --profile ui-text up -d ui-text` + `curl http://127.0.0.1:8501/_stcore/health` retornou `ok` em 2026-05-09 após limpeza prévia com `docker compose down --remove-orphans` |
 | Bootstrap | ok | `bash scripts/bootstrap.sh` passou em 2026-05-09 |
 | Gemma service | ok | `docker compose --profile gemma-setup up -d gemma` deixou o serviço `gemma` saudável em 2026-05-09 |
 | Gemma init | ok | `docker compose --profile gemma-setup run --rm gemma-init` concluiu o pull de `gemma4:e2b` em 2026-05-09 |
 | Demo Gemma/Ollama | ok | `docker compose run --rm demo python -m app.cli.run_scenario --scenario S10_FIFO_BREAK_JUSTIFIED` passou em 2026-05-09 |
-| UI Gemma/Ollama | ok | `docker compose --profile ui up -d ui` + `curl http://127.0.0.1:8501/_stcore/health` retornou `ok` em 2026-05-09 |
+| UI Gemma/Ollama | ok | `docker compose --profile ui up -d ui` + `curl http://127.0.0.1:8501/_stcore/health` retornou `ok` em 2026-05-09 em stack limpa |
 | Black | ok | Declarado em `requirements-dev.txt`/`pyproject.toml`; o gate oficial roda via Docker pelo `scripts/check-quality.sh` |
 | SonarScanner | parcial | Continua opcional e fora do gate mínimo; exige `SONAR_TOKEN` no ambiente |
 

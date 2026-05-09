@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from app.ui.components.scenario_catalog import scenario_label
@@ -66,6 +67,71 @@ def test_build_request_from_inputs_accepts_txt_upload_in_text_runtime(
     assert request is not None
     assert request.ticket_content_type == "text/plain"
     assert Path(request.ticket_ref).exists()
+
+
+def test_build_request_from_inputs_accepts_multimodal_fixture_in_text_runtime(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+    monkeypatch.setattr(scenario_loader, "UI_WORK_DIR", tmp_path / "ui")
+    fixture_dir = tmp_path / "fixture"
+    fixture_dir.mkdir()
+    fixture_ticket = fixture_dir / "ticket.png"
+    fixture_ticket.write_bytes(b"fake-image")
+    (fixture_dir / "expected_ticket.json").write_text(
+        json.dumps(
+            {
+                "ticket_id": "TCK-001",
+                "truck_id": "TRK-001",
+                "vehicle_type": "truck",
+                "document_status": "ok",
+                "document_block_flags": [],
+                "load_condition": "wet",
+                "contract_priority_flag": False,
+                "destination_constraints": [],
+                "parse_confidence": 0.91,
+                "ambiguities": [],
+                "evidence_refs": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    request, error = scenario_loader.build_request_from_inputs(
+        _inputs(ticket_text="", fixture_ticket_path=str(fixture_ticket)),
+        "S03_WET_LOAD",
+        "full",
+    )
+
+    assert error is None
+    assert request is not None
+    assert request.ticket_content_type == "image/png"
+    assert Path(request.ticket_ref).exists()
+    assert Path(request.ticket_ref).with_name("expected_ticket.json").exists()
+
+
+def test_build_request_from_inputs_generates_unique_request_ids(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(scenario_loader, "UI_WORK_DIR", tmp_path / "ui")
+
+    first, first_error = scenario_loader.build_request_from_inputs(
+        _inputs(),
+        "S01_BASELINE",
+        "full",
+    )
+    second, second_error = scenario_loader.build_request_from_inputs(
+        _inputs(),
+        "S01_BASELINE",
+        "full",
+    )
+
+    assert first_error is None
+    assert second_error is None
+    assert first is not None
+    assert second is not None
+    assert first.request_id != second.request_id
+    assert Path(first.ticket_ref).parent != Path(second.ticket_ref).parent
 
 
 def test_scenario_label_includes_id_and_description() -> None:

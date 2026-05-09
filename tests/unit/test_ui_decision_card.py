@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from app.domain.models import FrontEndPayload
-from app.ui.components.audit_panel import tool_badges_card
-from app.ui.components.decision_card import recommended_decision_card
+from app.ui.components.audit_panel import render_gemma_context, tool_badges_card
+from app.ui.components.decision_card import gemma_extraction_card, recommended_decision_card
 
 
 def _payload(status: str, *, audit_record: dict | None = None) -> FrontEndPayload:
@@ -67,6 +67,36 @@ def test_recommended_decision_card_title_matches_blocked() -> None:
 
     assert "Sem despacho automático seguro" in html
     assert "deve ir para" not in html
+
+
+def test_gemma_extraction_card_uses_test_runtime_label(monkeypatch) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+
+    html = gemma_extraction_card(
+        _payload("PREVIEW_READY"),
+        type("Request", (), {"ticket_ref": "ticket.txt"})(),
+    )
+
+    assert "Documento interpretado pelo runtime de teste" in html
+    assert "modo teste" in html
+
+
+def test_render_gemma_context_uses_test_runtime_label(monkeypatch) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+    calls: list[str] = []
+
+    def fake_markdown(value: str, **_: object) -> None:
+        calls.append(value)
+
+    monkeypatch.setattr("app.ui.components.audit_panel.st.markdown", fake_markdown)
+
+    render_gemma_context(
+        _payload("PREVIEW_READY"),
+        type("Request", (), {"ticket_content_type": "text/plain"})(),
+    )
+
+    assert calls
+    assert "Documento interpretado pelo runtime de teste" in calls[0]
 
 
 def test_tool_badges_card_shows_gemma_requested_tool_sequence() -> None:

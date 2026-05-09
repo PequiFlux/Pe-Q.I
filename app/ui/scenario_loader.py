@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from pydantic import ValidationError
 
@@ -36,6 +38,8 @@ def load_case_defaults(case: dict[str, Any]) -> dict[str, str]:
         "operator_note": Path(files["operator_note"]).read_text(encoding="utf-8").strip(),
         "weather_json": Path(files["weather_state"]).read_text(encoding="utf-8"),
         "resource_json": Path(files["resource_state"]).read_text(encoding="utf-8"),
+        "fixture_ticket_path": str(ticket_path),
+        "fixture_ticket_content_type": _content_type_for_suffix(ticket_path.suffix.lower()) or "",
     }
 
 
@@ -44,7 +48,7 @@ def build_request_from_inputs(
     scenario_id: str,
     variant: str,
 ) -> tuple[DecisionRequest | None, str | None]:
-    request_id = f"REQ-UI-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    request_id = f"REQ-UI-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}-{uuid4().hex[:8]}"
     run_dir = UI_WORK_DIR / request_id
     try:
         validation_error = validate_ui_inputs(inputs)
@@ -64,15 +68,28 @@ def build_request_from_inputs(
         uploaded = inputs["uploaded_ticket"]
         if uploaded is not None:
             suffix = Path(uploaded.name).suffix.lower()
-            content_type = CONTENT_TYPES.get(suffix)
+            content_type = _content_type_for_suffix(suffix)
             if content_type is None:
                 return None, f"Tipo de ticket não suportado: {suffix}"
             ticket_path = run_dir / f"ticket{suffix}"
             ticket_path.write_bytes(uploaded.getvalue())
-        else:
+        elif str(inputs.get("ticket_text") or "").strip():
             content_type = "text/plain"
             ticket_path = run_dir / "ticket.txt"
             ticket_path.write_text(inputs["ticket_text"], encoding="utf-8")
+        else:
+            fixture_ticket_path = Path(str(inputs.get("fixture_ticket_path") or "")).expanduser()
+            suffix = fixture_ticket_path.suffix.lower()
+            content_type = _content_type_for_suffix(suffix)
+            if content_type is None:
+                return None, f"Tipo de ticket não suportado: {suffix or '(sem extensão)'}"
+            if not fixture_ticket_path.exists():
+                return None, f"Fixture do ticket não encontrado: {fixture_ticket_path}"
+            ticket_path = run_dir / f"ticket{suffix}"
+            shutil.copyfile(fixture_ticket_path, ticket_path)
+            expected_ticket_path = fixture_ticket_path.with_name("expected_ticket.json")
+            if expected_ticket_path.exists():
+                shutil.copyfile(expected_ticket_path, run_dir / "expected_ticket.json")
 
         return (
             DecisionRequest.model_validate(
@@ -106,11 +123,12 @@ def validate_ui_inputs(inputs: dict[str, Any]) -> str | None:
     ticket_text = str(inputs.get("ticket_text") or "").strip()
     weather_json = str(inputs.get("weather_json") or "").strip()
     resource_json = str(inputs.get("resource_json") or "").strip()
+    fixture_ticket_path = str(inputs.get("fixture_ticket_path") or "").strip()
     uploaded = inputs.get("uploaded_ticket")
 
     if not queue_csv:
         return "Fila CSV obrigatória."
-    if uploaded is None and not ticket_text:
+    if uploaded is None and not ticket_text and not fixture_ticket_path:
         return "Ticket/documento obrigatório."
     if not weather_json:
         return "Clima obrigatório."
@@ -120,7 +138,7 @@ def validate_ui_inputs(inputs: dict[str, Any]) -> str | None:
         return None
 
     suffix = Path(str(uploaded.name)).suffix.lower()
-    content_type = CONTENT_TYPES.get(suffix)
+    content_type = _content_type_for_suffix(suffix)
     if content_type is None:
         return f"Tipo de ticket não suportado: {suffix}"
     if runtime_mode() == "text" and content_type != "text/plain":
@@ -133,3 +151,7 @@ def validate_ui_inputs(inputs: dict[str, Any]) -> str | None:
 
 def runtime_mode() -> str:
     return os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
+
+
+def _content_type_for_suffix(suffix: str) -> str | None:
+    return CONTENT_TYPES.get(suffix)

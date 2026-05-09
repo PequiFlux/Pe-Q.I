@@ -4,7 +4,10 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from app.domain.enums import DecisionStatus
+from app.domain.models import AuditRecord
 from app.domain.models import DecisionRequest
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.text_runtime import TextTicketRuntime
@@ -14,13 +17,28 @@ from app.storage.sqlite_store import SQLiteStore
 
 
 def _make_orchestrator_with_storage(tmp_path: Path) -> DecisionOrchestrator:
-    db_path = str(tmp_path / "pequiflux.db")
+    return _make_orchestrator(
+        tmp_path,
+        sqlite_store=SQLiteStore(path=str(tmp_path / "pequiflux.db")),
+    )
+
+
+def _make_orchestrator(
+    tmp_path: Path,
+    *,
+    sqlite_store: SQLiteStore,
+) -> DecisionOrchestrator:
     log_path = str(tmp_path / "events.jsonl")
     return DecisionOrchestrator(
         gemma_adapter=GemmaAdapter(runtime=TextTicketRuntime()),
-        sqlite_store=SQLiteStore(path=db_path),
+        sqlite_store=sqlite_store,
         jsonl_logger=JsonlLogger(path=log_path),
     )
+
+
+class FailingAuditStore(SQLiteStore):
+    def _insert_audit_record(self, connection: sqlite3.Connection, audit: AuditRecord) -> None:
+        raise RuntimeError("audit write failed")
 
 
 def _load_request(scenario_id: str) -> DecisionRequest:
@@ -164,3 +182,19 @@ def test_orchestrator_executes_decision_tools_through_gateway(tmp_path: Path) ->
         ("generate_audit_payload", "requested"),
         ("generate_audit_payload", "executed"),
     }
+
+
+def test_persist_records_rolls_back_partial_storage_on_failure(tmp_path: Path) -> None:
+    store = FailingAuditStore(path=str(tmp_path / "pequiflux.db"))
+    orchestrator = _make_orchestrator(tmp_path, sqlite_store=store)
+    request = _load_request("S01_BASELINE")
+
+    with pytest.raises(RuntimeError, match="audit write failed"):
+        orchestrator.run_decision(request)
+
+    with sqlite3.connect(tmp_path / "pequiflux.db") as connection:
+        decision_count = connection.execute("SELECT COUNT(*) FROM decision_records").fetchone()[0]
+        audit_count = connection.execute("SELECT COUNT(*) FROM audit_records").fetchone()[0]
+
+    assert decision_count == 0
+    assert audit_count == 0

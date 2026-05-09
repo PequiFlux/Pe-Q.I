@@ -16,6 +16,8 @@ from app.ui.components.common import (
     chip,
     confidence_value,
     constraints_summary,
+    document_interpreter_detail,
+    document_interpreter_title,
     display_status,
     escape,
     mini_metric,
@@ -81,7 +83,7 @@ def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> 
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>Documento interpretado pelo Gemma 4</h3><p>Resultado avançado da leitura estruturada, sem chat nem chain-of-thought.</p></div>
+            <div><h3>{escape(document_interpreter_title())}</h3><p>{escape(document_interpreter_detail())}</p></div>
             {chip("avançado", "purple")}
           </div>
           <div class="field-cloud">{fields}</div>
@@ -194,7 +196,7 @@ def render_driver_message(payload: FrontEndPayload) -> None:
 
 
 def _ui_sqlite_store() -> SQLiteStore:
-    return SQLiteStore(path=os.getenv("PEQUIFLUX_SQLITE_PATH", "var/db/pequiflux_ui.db"))
+    return SQLiteStore(path=os.getenv("PEQUIFLUX_SQLITE_PATH", "var/db/pequiflux.db"))
 
 
 def _input_package_card(request: DecisionRequest, case: dict[str, Any]) -> str:
