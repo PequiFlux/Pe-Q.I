@@ -26,6 +26,7 @@ from app.ui.components.decision_card import (
     queue_stack_card,
     recommended_decision_card,
 )
+from app.ui.components.scenario_catalog import scenario_label, scenario_note
 from app.ui.components.validation_matrix import render_validation_matrix
 from app.ui.scenario_loader import (
     build_request_from_inputs,
@@ -53,6 +54,7 @@ INPUT_KEYS = {
     "resource_blocked": "yard_resource_blocked",
     "resource_wet": "yard_resource_wet",
     "analyze_example": "yard_analyze_example",
+    "selected_case": "yard_selected_case",
 }
 
 
@@ -62,18 +64,24 @@ def main() -> None:
 
     manifest = load_manifest()
     case_by_id = {case["scenario_id"]: case for case in manifest["cases"]}
-    example_case = case_by_id[EXAMPLE_SCENARIO_ID]
+    st.session_state.setdefault(INPUT_KEYS["selected_case"], EXAMPLE_SCENARIO_ID)
+    selected_case_id = st.session_state[INPUT_KEYS["selected_case"]]
+    if selected_case_id not in case_by_id:
+        selected_case_id = EXAMPLE_SCENARIO_ID
+        st.session_state[INPUT_KEYS["selected_case"]] = selected_case_id
+    selected_case = case_by_id[selected_case_id]
 
     with st.sidebar:
         st.markdown(_brand_block(), unsafe_allow_html=True)
         st.markdown(_sidebar_runtime_block(), unsafe_allow_html=True)
+        _render_sidebar_case_picker(manifest["cases"])
 
     _render_intro()
     _ensure_input_state()
     if payload := st.session_state.get("last_payload"):
         request = st.session_state.get("last_request")
     elif _ui_autorun_enabled():
-        _load_example_into_state(example_case)
+        _load_example_into_state(case_by_id[EXAMPLE_SCENARIO_ID])
         st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
         request, error = build_request_from_inputs(
             {**_state_defaults(), "uploaded_ticket": None},
@@ -93,7 +101,7 @@ def main() -> None:
 
     active_case_id = st.session_state.get("active_case", "UI_INTERACTIVE")
     inputs = _render_operator_input(
-        example_case=example_case,
+        selected_case=selected_case,
         expanded=True,
         use_expander=False,
     )
@@ -141,7 +149,7 @@ def _render_empty_state() -> None:
     st.markdown(
         f"""
         <article class="empty-state">
-          <strong>Preencha os campos ou clique em Carregar exemplo.</strong>
+          <strong>Preencha os campos ou carregue um caso versionado.</strong>
           <p>Depois, use {escape(_analyze_button_label())} para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
         </article>
         """,
@@ -151,7 +159,7 @@ def _render_empty_state() -> None:
 
 def _render_operator_input(
     *,
-    example_case: dict[str, Any],
+    selected_case: dict[str, Any],
     expanded: bool,
     use_expander: bool = True,
 ) -> dict[str, Any]:
@@ -169,7 +177,7 @@ def _render_operator_input(
         )
         submitted = bool(st.session_state.pop(INPUT_KEYS["analyze_example"], False))
         with st.container():
-            _render_input_actions(example_case)
+            _render_input_actions(selected_case)
             top_a, top_b = st.columns([1.08, 0.92], gap="large")
             with top_a:
                 st.markdown(
@@ -366,16 +374,23 @@ def _split_ids(value: str) -> list[str]:
 
 
 def _render_input_actions(example_case: dict[str, Any]) -> None:
+    st.markdown(
+        """
+        <div class="panel-title">Caso versionado</div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(scenario_note(example_case), unsafe_allow_html=True)
     left, middle, right = st.columns([0.18, 0.22, 0.18], gap="small")
     with left:
-        if st.button("Carregar exemplo", width="stretch"):
+        if st.button("Carregar caso", width="stretch"):
             _load_example_into_state(example_case)
-            st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+            st.session_state["active_case"] = example_case["scenario_id"]
             st.rerun()
     with middle:
-        if st.button("Carregar e analisar exemplo", width="stretch"):
+        if st.button("Carregar e analisar caso", width="stretch"):
             _load_example_into_state(example_case)
-            st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
+            st.session_state["active_case"] = example_case["scenario_id"]
             st.session_state[INPUT_KEYS["analyze_example"]] = True
             st.rerun()
     with right:
@@ -486,10 +501,30 @@ def _sidebar_runtime_block() -> str:
     """
 
 
+def _render_sidebar_case_picker(cases: list[dict[str, Any]]) -> None:
+    st.markdown(
+        """
+        <div class="side-card compact">
+          <div class="side-kicker">Fixtures</div>
+          <p>Escolha o cenário versionado antes de carregar ou analisar o caso.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.selectbox(
+        "Cenário versionado",
+        options=[case["scenario_id"] for case in cases],
+        key=INPUT_KEYS["selected_case"],
+        format_func=lambda scenario_id: scenario_label(
+            next(case for case in cases if case["scenario_id"] == scenario_id)
+        ),
+    )
+
+
 def _runtime_mode_note() -> str:
     runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     if runtime == "text":
-        return "Modo teste: sem Gemma/Ollama; use TXT ou Carregar exemplo."
+        return "Modo teste: sem Gemma/Ollama; use TXT ou carregue um caso versionado."
     if runtime == "ollama":
         return "Gemma 4 ativo via Ollama."
     return f"Runtime customizado: {runtime}."

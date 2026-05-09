@@ -44,7 +44,7 @@ O resultado esperado para a banca é simples: abrir a UI, carregar um exemplo, a
 | Em dois minutos | Onde ver |
 |---|---|
 | Tese | Pe-Q.I recomenda quem chamar, para qual moega, por que o FIFO puro falharia e qual regra sustenta a decisão |
-| Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo |
+| Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo; `docker compose -f compose.yaml -f compose.gpu.yaml ...` para aceleração NVIDIA opcional |
 | Benchmark | `make bench` gera relatório interno em `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) permanece como snapshot público congelado |
 | Evidência visual | [`assets/screenshots/`](assets/screenshots/) e prints acima |
 | Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
@@ -120,7 +120,7 @@ O que Gemma 4 prova nesta submissão — três pontos onde um baseline heurísti
 ### Pré-requisitos
 
 - Docker e Docker Compose
-- (Para GPU) NVIDIA Container Toolkit
+- (Opcional, para aceleração GPU) NVIDIA Container Toolkit
 
 ### Build e execução mínima de um cenário
 
@@ -168,7 +168,7 @@ make ui-text
 
 Abra [http://localhost:8501](http://localhost:8501).
 
-Para a UI completa com Ollama/Gemma, rode `make ui`; o Compose sobe `gemma`, executa `gemma-init` para puxar `${GEMMA_MODEL:-gemma4:latest}` e então inicia a UI.
+Para a UI completa com Ollama/Gemma, rode `make ui`; o Compose sobe `gemma`, executa `gemma-init` para puxar `${GEMMA_MODEL:-gemma4:e2b}` e então inicia a UI.
 
 ### Benchmark completo com Gemma/Ollama
 
@@ -248,7 +248,7 @@ O sistema oferece dois runtimes de interpretação, selecionados por `PEQUIFLUX_
 | Gemma Tool Planner + ToolGateway | No fluxo `full`, Gemma escolhe a próxima tool legal para o `FlowState`; o gateway executa `validate_hard_constraints`, `rank_candidates` e `generate_audit_payload` sob whitelist, ordem de estados, validação de IDs locais e log estruturado |
 | Temperatura | `0` (determinístico na inferência) |
 | Formato de saída | JSON estruturado validado contra Pydantic schema |
-| Requisitos | GPU ou CPU com latência aceitável; Ollama ativo; modelo previamente puxado |
+| Requisitos | CPU ou GPU com latência aceitável; Ollama ativo; modelo previamente puxado |
 
 ### Runtime Text (`text`)
 
@@ -543,14 +543,14 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 |----------|---------|-----------|
 | `PEQUIFLUX_GEMMA_RUNTIME` | `ollama` no código; `text` na imagem Docker standalone | Backend Gemma: `ollama`, `text` ou `none` |
 | `GEMMA_BASE_URL` | `http://gemma:11434` | Endpoint da API Ollama |
-| `GEMMA_MODEL` | `gemma4:latest` | Identificador do modelo no Ollama |
+| `GEMMA_MODEL` | `gemma4:e2b` | Identificador default do modelo Gemma 4 no Ollama; troque para `gemma4:e4b` se o hardware comportar |
 | `GEMMA_TIMEOUT_SECONDS` | `45` | Timeout para chamadas Gemma |
-| `OLLAMA_IMAGE` | `ollama/ollama:latest` | Imagem Docker do Ollama (variante GPU para aceleração) |
+| `OLLAMA_IMAGE` | `ollama/ollama:latest` | Imagem Docker do Ollama usada pelo serviço `gemma` |
 | `OLLAMA_KEEP_ALIVE` | `24h` | Keep-alive do modelo no Ollama |
 | `PEQUIFLUX_IN_CONTAINER` | `0` | Setado para `1` pelo Dockerfile |
 | `PEQUIFLUX_SQLITE_PATH` | `var/db/pequiflux_ui.db` | Caminho do banco SQLite |
 
-`make demo-text` e `make ui-text` não sobem o serviço `gemma` e não exigem GPU. Para o modo completo, set `OLLAMA_IMAGE` para a variante desejada e instale o NVIDIA Container Toolkit se usar GPU.
+`make demo-text` e `make ui-text` não sobem o serviço `gemma` e não exigem GPU. Para o modo completo, o `compose.yaml` funciona em CPU por padrão. Se quiser aceleração NVIDIA, rode os mesmos comandos com o override `compose.gpu.yaml`, por exemplo `docker compose -f compose.yaml -f compose.gpu.yaml --profile ui up ui`.
 
 ---
 

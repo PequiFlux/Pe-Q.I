@@ -28,7 +28,7 @@ def tool_status(payload: FrontEndPayload, latency_key: str) -> str:
 def runtime_label() -> str:
     runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     if runtime == "ollama":
-        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:latest')}"
+        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:e2b')}"
     return runtime
 
 

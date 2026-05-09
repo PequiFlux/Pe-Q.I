@@ -35,7 +35,7 @@ class OllamaGemmaRuntime:
     def from_env(cls) -> "OllamaGemmaRuntime":
         return cls(
             base_url=os.getenv("GEMMA_BASE_URL", "http://gemma:11434"),
-            model=os.getenv("GEMMA_MODEL", "gemma4:latest"),
+            model=os.getenv("GEMMA_MODEL", "gemma4:e2b"),
             timeout_seconds=float(os.getenv("GEMMA_TIMEOUT_SECONDS", "45")),
         )
 

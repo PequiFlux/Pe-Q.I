@@ -300,6 +300,36 @@ def inject_styles() -> None:
             font-size: 12px;
             font-weight: 750;
           }
+          .scenario-note {
+            display: grid;
+            gap: 4px;
+            margin: 0 0 12px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, rgba(236,253,245,0.92), #fff);
+            border: 1px solid var(--line);
+          }
+          .scenario-note strong,
+          .scenario-note span,
+          .scenario-note em {
+            display: block;
+          }
+          .scenario-note strong {
+            color: var(--green-800);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+          }
+          .scenario-note span,
+          .scenario-note em {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+          }
+          .scenario-note em {
+            font-style: normal;
+            font-weight: 850;
+          }
           div[data-testid="stButton"] button {
             border-radius: 10px;
             border: 1px solid rgba(34,201,139,0.30);

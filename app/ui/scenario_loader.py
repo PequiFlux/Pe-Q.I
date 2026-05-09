@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -46,6 +47,9 @@ def build_request_from_inputs(
     request_id = f"REQ-UI-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
     run_dir = UI_WORK_DIR / request_id
     try:
+        validation_error = validate_ui_inputs(inputs)
+        if validation_error:
+            return None, validation_error
         run_dir.mkdir(parents=True, exist_ok=True)
         queue_path = run_dir / "queue.csv"
         weather_path = run_dir / "weather_state.json"
@@ -95,3 +99,37 @@ def build_request_from_inputs(
         return None, f"Entrada fora do contrato Pydantic: {exc}"
     except OSError as exc:
         return None, f"Falha ao preparar arquivos da execução: {exc}"
+
+
+def validate_ui_inputs(inputs: dict[str, Any]) -> str | None:
+    queue_csv = str(inputs.get("queue_csv") or "").strip()
+    ticket_text = str(inputs.get("ticket_text") or "").strip()
+    weather_json = str(inputs.get("weather_json") or "").strip()
+    resource_json = str(inputs.get("resource_json") or "").strip()
+    uploaded = inputs.get("uploaded_ticket")
+
+    if not queue_csv:
+        return "Fila CSV obrigatória."
+    if uploaded is None and not ticket_text:
+        return "Ticket/documento obrigatório."
+    if not weather_json:
+        return "Clima obrigatório."
+    if not resource_json:
+        return "Recursos obrigatórios."
+    if uploaded is None:
+        return None
+
+    suffix = Path(str(uploaded.name)).suffix.lower()
+    content_type = CONTENT_TYPES.get(suffix)
+    if content_type is None:
+        return f"Tipo de ticket não suportado: {suffix}"
+    if runtime_mode() == "text" and content_type != "text/plain":
+        return (
+            "Modo teste aceita upload apenas TXT. Para PDF/PNG/JPG, use Ollama ou um "
+            "cenário versionado com fixture multimodal."
+        )
+    return None
+
+
+def runtime_mode() -> str:
+    return os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
