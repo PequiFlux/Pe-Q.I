@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import hashlib
-import json
-from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -22,8 +19,6 @@ from app.domain.models import (
     InterpretedContext,
     ParsedTicket,
     PolicyProfile,
-    QueueSnapshot,
-    RankedCandidates,
     TruthResolution,
     ValidationResult,
 )
@@ -31,7 +26,15 @@ from app.domain.policy import load_policy_profiles
 from app.domain.ranking import rank_candidates
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.tool_gateway import ToolLocalIds
+from app.orchestration.runtime_support import (
+    attach_tool_records,
+    blocked_policy_rules,
+    build_source_hashes,
+    build_source_hashes_if_available,
+    finalize_payload,
+)
 from app.orchestration.state_machine import WorkflowStateMachine
+from app.orchestration.steps import InterpretedStep, LoadedInputs, RankedStep
 from app.orchestration.tool_planner import (
     ToolPlanSession,
     run_audit_plan,
@@ -41,34 +44,13 @@ from app.orchestration.truth_resolver import resolve_truth
 from app.services.decision_builder import (
     build_blocked_preview,
     build_decision_preview,
-    build_frontend_payload,
     build_review_required_preview,
 )
-from app.services.driver_message import compose_driver_message
 from app.services.exception_classifier import classify_exception
 from app.services.parser import parse_ticket_document
 from app.services.structured_ticket_parser import parse_structured_ticket_document
 from app.storage.jsonl_logger import JsonlLogger
 from app.storage.sqlite_store import SQLiteStore
-
-
-@dataclass(frozen=True)
-class LoadedInputs:
-    normalized_queue: QueueSnapshot
-    source_hashes: dict[str, str]
-    policy_profile: PolicyProfile
-
-
-@dataclass(frozen=True)
-class InterpretedStep:
-    interpreted_context: InterpretedContext
-    parsed_ticket_for_constraints: ParsedTicket | None
-
-
-@dataclass(frozen=True)
-class RankedStep:
-    validation: ValidationResult
-    ranking: RankedCandidates
 
 
 class DecisionOrchestrator:
@@ -160,7 +142,7 @@ class DecisionOrchestrator:
 
         except PequiFluxError as exc:
             if not source_hashes:
-                source_hashes = _build_source_hashes_if_available(request)
+                source_hashes = build_source_hashes_if_available(request)
             return self._build_blocked_payload(
                 request,
                 exc,
@@ -188,7 +170,7 @@ class DecisionOrchestrator:
         timers["normalize_queue_snapshot"] = int((perf_counter() - queue_t0) * 1000)
         return LoadedInputs(
             normalized_queue=normalized_queue,
-            source_hashes=_build_source_hashes(request),
+            source_hashes=build_source_hashes(request),
             policy_profile=self._policy_profile(request.policy_profile_version),
         )
 
@@ -406,7 +388,7 @@ class DecisionOrchestrator:
             )
         else:
             audit = run_audit(request.request_id)
-        return preview, _attach_tool_records(audit, tool_records, timers)
+        return preview, attach_tool_records(audit, tool_records, timers)
 
     def persist_and_log(
         self,
@@ -416,11 +398,13 @@ class DecisionOrchestrator:
         interpreted_context: InterpretedContext,
         state: FlowState,
     ) -> FrontEndPayload:
-        return self._finalize_payload(
+        return finalize_payload(
             preview=preview,
             audit=audit,
             interpreted_context=interpreted_context,
             state=state,
+            sqlite_store=self.sqlite_store,
+            jsonl_logger=self.jsonl_logger,
         )
 
     def _build_blocked_payload(
@@ -440,7 +424,7 @@ class DecisionOrchestrator:
             scenario_id=request.scenario_id,
             variant=request.variant,
             reason_summary=exc.message,
-            fired_rules=_blocked_policy_rules(exc),
+            fired_rules=blocked_policy_rules(exc),
         )
         blocked_context = InterpretedContext(
             parsed_ticket=ParsedTicket(),
@@ -481,7 +465,7 @@ class DecisionOrchestrator:
         )
         return self.persist_and_log(
             preview=preview,
-            audit=_attach_tool_records(audit, tool_records, timers),
+            audit=attach_tool_records(audit, tool_records, timers),
             interpreted_context=blocked_context,
             state=state_machine.current_state,
         )
@@ -494,112 +478,3 @@ class DecisionOrchestrator:
                 f"Unknown policy profile version: {version}",
             )
         return profile
-
-    def _finalize_payload(
-        self,
-        *,
-        preview,
-        audit,
-        interpreted_context: InterpretedContext,
-        state: FlowState,
-    ) -> FrontEndPayload:
-        driver_message = compose_driver_message(
-            request_id=preview.request_id,
-            decision_status=preview.decision_status,
-            recommended_truck=(
-                preview.recommended_truck.truck_id if preview.recommended_truck else None
-            ),
-            recommended_destination=(
-                preview.recommended_destination.destination_id
-                if preview.recommended_destination
-                else None
-            ),
-            reason_summary=preview.reason_summary,
-        )
-        payload = build_frontend_payload(
-            preview=preview,
-            audit=audit,
-            driver_message=driver_message,
-            interpreted_context=interpreted_context,
-        )
-        self._persist(preview, audit)
-        self._log(state, preview.request_id, preview.scenario_id, preview.reason_summary)
-        return payload
-
-    def _persist(self, preview, audit) -> None:
-        if self.sqlite_store is None:
-            return
-        self.sqlite_store.initialize()
-        self.sqlite_store.save_decision(preview)
-        self.sqlite_store.save_audit_record(audit)
-
-    def _log(self, state: FlowState, request_id: str, scenario_id: str, summary: str) -> None:
-        if self.jsonl_logger is None:
-            return
-        self.jsonl_logger.write(
-            {
-                "request_id": request_id,
-                "scenario_id": scenario_id,
-                "module": "orchestrator",
-                "state": state,
-                "event_type": "decision_computed",
-                "decision_summary": summary,
-            }
-        )
-
-
-def _build_source_hashes(request: DecisionRequest) -> dict[str, str]:
-    return {
-        "queue_csv_ref": _hash_file(request.queue_csv_ref),
-        "ticket_ref": _hash_file(request.ticket_ref),
-        "operator_note": _hash_text(request.operator_note),
-        "weather_state": _hash_json(request.weather_state.model_dump(mode="json")),
-        "resource_state": _hash_json(
-            [item.model_dump(mode="json") for item in request.resource_state]
-        ),
-    }
-
-
-def _blocked_policy_rules(exc: PequiFluxError) -> list[str]:
-    if exc.code in {"NO_ELIGIBLE_CANDIDATE", "EMPTY_VALIDATION_MATRIX"}:
-        return [PolicyRule.NO_VALID_PAIR_BLOCKS_AUTODISPATCH]
-    return []
-
-
-def _attach_tool_records(
-    audit: AuditRecord,
-    tool_records: list[dict[str, Any]],
-    timers: dict[str, int] | None = None,
-) -> AuditRecord:
-    payload = audit.model_dump(mode="python")
-    payload["tool_calls"] = list(tool_records)
-    if timers is not None:
-        payload["latencies_ms"] = dict(timers)
-    return AuditRecord.model_validate(payload)
-
-
-def _build_source_hashes_if_available(request: DecisionRequest) -> dict[str, str]:
-    try:
-        return _build_source_hashes(request)
-    except PequiFluxError:
-        return {}
-
-
-def _hash_file(path_ref: str) -> str:
-    path = Path(path_ref)
-    if not path.exists():
-        raise PequiFluxError("SOURCE_FILE_NOT_FOUND", f"Source file not found: {path_ref}")
-    return _sha256(path.read_bytes())
-
-
-def _hash_text(value: str) -> str:
-    return _sha256(value.encode("utf-8"))
-
-
-def _hash_json(value: Any) -> str:
-    canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-    return _sha256(canonical.encode("utf-8"))
-
-
-def _sha256(content: bytes) -> str:
-    return hashlib.sha256(content).hexdigest()

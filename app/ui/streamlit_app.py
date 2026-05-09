@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import csv
 import json
 import os
 from contextlib import nullcontext
@@ -28,9 +27,22 @@ from app.ui.components.decision_card import (
 )
 from app.ui.components.scenario_catalog import scenario_label, scenario_note
 from app.ui.components.validation_matrix import render_validation_matrix
+from app.ui.input_state import (
+    clear_input_state,
+    ensure_input_state,
+    load_case_into_state,
+    queue_csv_value,
+    queue_preview_html,
+    queue_source_note,
+    split_ids,
+    state_defaults,
+    ticket_source_note,
+    ticket_text_value,
+    ui_autorun_enabled,
+    upload_key,
+)
 from app.ui.scenario_loader import (
     build_request_from_inputs,
-    load_case_defaults,
     load_manifest,
 )
 from app.ui.styles import inject_styles
@@ -77,14 +89,14 @@ def main() -> None:
         _render_sidebar_case_picker(manifest["cases"])
 
     _render_intro()
-    _ensure_input_state()
+    ensure_input_state(INPUT_KEYS)
     if payload := st.session_state.get("last_payload"):
         request = st.session_state.get("last_request")
-    elif _ui_autorun_enabled():
-        _load_example_into_state(case_by_id[EXAMPLE_SCENARIO_ID])
+    elif ui_autorun_enabled():
+        load_case_into_state(INPUT_KEYS, case_by_id[EXAMPLE_SCENARIO_ID])
         st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
         request, error = build_request_from_inputs(
-            {**_state_defaults(), "uploaded_ticket": None},
+            {**state_defaults(INPUT_KEYS), "uploaded_ticket": None},
             EXAMPLE_SCENARIO_ID,
             "full",
         )
@@ -186,12 +198,12 @@ def _render_operator_input(
                 uploaded_queue = st.file_uploader(
                     "Fila CSV: upload",
                     type=["csv"],
-                    key=_upload_key("queue_upload"),
+                    key=upload_key(INPUT_KEYS, "queue_upload"),
                     help="Colunas mínimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
                 )
-                queue_csv = _queue_csv_value(uploaded_queue)
-                st.markdown(_queue_source_note(uploaded_queue, queue_csv), unsafe_allow_html=True)
-                st.markdown(_queue_preview(queue_csv), unsafe_allow_html=True)
+                queue_csv = queue_csv_value(INPUT_KEYS, uploaded_queue)
+                st.markdown(queue_source_note(uploaded_queue, queue_csv), unsafe_allow_html=True)
+                st.markdown(queue_preview_html(queue_csv), unsafe_allow_html=True)
 
             with top_b:
                 st.markdown(
@@ -200,12 +212,12 @@ def _render_operator_input(
                 uploaded_ticket = st.file_uploader(
                     "Ticket/documento: upload",
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
-                    key=_upload_key("ticket_upload"),
+                    key=upload_key(INPUT_KEYS, "ticket_upload"),
                     help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens são enviadas ao leitor local de documento.",
                 )
-                ticket_text = _ticket_text_value(uploaded_ticket)
+                ticket_text = ticket_text_value(INPUT_KEYS, uploaded_ticket)
                 st.markdown(
-                    _ticket_source_note(uploaded_ticket, ticket_text), unsafe_allow_html=True
+                    ticket_source_note(uploaded_ticket, ticket_text), unsafe_allow_html=True
                 )
 
             mid_a, mid_b, mid_c = st.columns([1, 1, 1], gap="large")
@@ -300,8 +312,8 @@ def _render_resource_input() -> str:
         key=INPUT_KEYS["resource_wet"],
         help="Separe IDs por vírgula. Esses destinos aceitam dry e wet.",
     )
-    wet_ids = set(_split_ids(wet_destinations))
-    available_ids = list(dict.fromkeys([*_split_ids(available), *wet_ids]))
+    wet_ids = set(split_ids(wet_destinations))
+    available_ids = list(dict.fromkeys([*split_ids(available), *wet_ids]))
     resources = [
         {
             "resource_id": item,
@@ -324,53 +336,9 @@ def _render_resource_input() -> str:
             "allowed_vehicle_types": ["truck", "bitrem"],
             "supported_load_conditions": ["dry"],
         }
-        for item in _split_ids(blocked)
+        for item in split_ids(blocked)
     )
     return json.dumps(resources)
-
-
-def _queue_csv_value(uploaded_queue: Any) -> str:
-    if uploaded_queue is None:
-        return st.session_state.get(INPUT_KEYS["queue_csv"], "")
-    try:
-        return uploaded_queue.getvalue().decode("utf-8")
-    except UnicodeDecodeError:
-        return ""
-
-
-def _ticket_text_value(uploaded_ticket: Any) -> str:
-    if uploaded_ticket is None:
-        return st.session_state.get(INPUT_KEYS["ticket_text"], "")
-    if not uploaded_ticket.name.lower().endswith(".txt"):
-        return ""
-    try:
-        return uploaded_ticket.getvalue().decode("utf-8")
-    except UnicodeDecodeError:
-        return ""
-
-
-def _queue_source_note(uploaded_queue: Any, queue_csv: str) -> str:
-    if uploaded_queue is not None:
-        source = f"Arquivo carregado: {uploaded_queue.name}"
-    elif queue_csv:
-        source = "Exemplo carregado como CSV de fixture."
-    else:
-        source = "Nenhuma fila carregada."
-    return f'<div class="source-note">{escape(source)}</div>'
-
-
-def _ticket_source_note(uploaded_ticket: Any, ticket_text: str) -> str:
-    if uploaded_ticket is not None:
-        source = f"Arquivo carregado: {uploaded_ticket.name}"
-    elif ticket_text:
-        source = "Exemplo carregado como ticket TXT de fixture."
-    else:
-        source = "Nenhum ticket carregado."
-    return f'<div class="source-note">{escape(source)}</div>'
-
-
-def _split_ids(value: str) -> list[str]:
-    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def _render_input_actions(example_case: dict[str, Any]) -> None:
@@ -384,18 +352,18 @@ def _render_input_actions(example_case: dict[str, Any]) -> None:
     left, middle, right = st.columns([0.18, 0.22, 0.18], gap="small")
     with left:
         if st.button("Carregar caso", width="stretch"):
-            _load_example_into_state(example_case)
+            load_case_into_state(INPUT_KEYS, example_case)
             st.session_state["active_case"] = example_case["scenario_id"]
             st.rerun()
     with middle:
         if st.button("Carregar e analisar caso", width="stretch"):
-            _load_example_into_state(example_case)
+            load_case_into_state(INPUT_KEYS, example_case)
             st.session_state["active_case"] = example_case["scenario_id"]
             st.session_state[INPUT_KEYS["analyze_example"]] = True
             st.rerun()
     with right:
         if st.button("Limpar campos", width="stretch"):
-            _clear_input_state()
+            clear_input_state(INPUT_KEYS)
             st.rerun()
 
 
@@ -437,7 +405,7 @@ def _render_technical_audit_expander(
     request: DecisionRequest,
     case: dict[str, Any],
 ) -> None:
-    with st.expander("Ver auditoria técnica", expanded=_ui_autorun_enabled()):
+    with st.expander("Ver auditoria técnica", expanded=ui_autorun_enabled()):
         render_input_evidence(payload, request, case)
         st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
         left, right = st.columns([1.15, 0.85], gap="large")
@@ -460,22 +428,6 @@ def _render_error(error: str) -> None:
         """,
         unsafe_allow_html=True,
     )
-
-
-def _queue_preview(queue_csv: str) -> str:
-    try:
-        rows = list(csv.DictReader(queue_csv.splitlines()))
-    except csv.Error:
-        rows = []
-    waiting = sum(1 for row in rows if (row.get("status") or "waiting").lower() == "waiting")
-    priority = sum(1 for row in rows if (row.get("contract_priority_flag") or "").lower() == "true")
-    return f"""
-    <div class="input-summary">
-      <div><strong>{len(rows)}</strong><span>linhas</span></div>
-      <div><strong>{waiting}</strong><span>aguardando</span></div>
-      <div><strong>{priority}</strong><span>prioridade</span></div>
-    </div>
-    """
 
 
 def _brand_block() -> str:
@@ -534,88 +486,6 @@ def _analyze_button_label() -> str:
     if os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama") == "text":
         return "Analisar em modo teste"
     return "Analisar com Gemma 4"
-
-
-def _empty_defaults() -> dict[str, Any]:
-    return {
-        "queue_csv": "",
-        "ticket_text": "",
-        "operator_note": "",
-        "weather_json": '{\n  "precipitation": "none",\n  "severity": "none"\n}',
-        "resource_json": "[]",
-        "weather_mode": "JSON",
-        "resource_mode": "JSON",
-        "weather_precipitation": "none",
-        "weather_severity": "none",
-        "resource_available": "",
-        "resource_blocked": "",
-        "resource_wet": "",
-        "upload_generation": 0,
-    }
-
-
-def _ensure_input_state() -> None:
-    defaults = _empty_defaults()
-    for field, value in defaults.items():
-        key = INPUT_KEYS[field]
-        if key in {INPUT_KEYS["queue_upload"], INPUT_KEYS["ticket_upload"]}:
-            continue
-        st.session_state.setdefault(key, value)
-
-
-def _clear_input_state() -> None:
-    for key in list(st.session_state.keys()):
-        if key in INPUT_KEYS.values() or _is_upload_widget_key(key):
-            st.session_state.pop(key, None)
-    st.session_state.pop("active_case", None)
-    st.session_state.pop("last_payload", None)
-    st.session_state.pop("last_request", None)
-    defaults = _empty_defaults()
-    for field, value in defaults.items():
-        key = INPUT_KEYS[field]
-        st.session_state.setdefault(key, value)
-
-
-def _state_defaults() -> dict[str, str]:
-    _ensure_input_state()
-    return {
-        field: st.session_state[INPUT_KEYS[field]]
-        for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json")
-    }
-
-
-def _load_example_into_state(case: dict[str, Any]) -> None:
-    _reset_uploaders()
-    defaults = load_case_defaults(case)
-    for field in ("queue_csv", "ticket_text", "operator_note", "weather_json", "resource_json"):
-        st.session_state[INPUT_KEYS[field]] = defaults[field]
-    st.session_state[INPUT_KEYS["weather_mode"]] = "JSON"
-    st.session_state[INPUT_KEYS["resource_mode"]] = "JSON"
-    st.session_state.pop("last_payload", None)
-    st.session_state.pop("last_request", None)
-
-
-def _upload_key(field: str) -> str:
-    generation = st.session_state.get(INPUT_KEYS["upload_generation"], 0)
-    return f"{INPUT_KEYS[field]}_{generation}"
-
-
-def _reset_uploaders() -> None:
-    generation = int(st.session_state.get(INPUT_KEYS["upload_generation"], 0)) + 1
-    for key in list(st.session_state.keys()):
-        if _is_upload_widget_key(key):
-            st.session_state.pop(key, None)
-    st.session_state[INPUT_KEYS["upload_generation"]] = generation
-
-
-def _is_upload_widget_key(key: str) -> bool:
-    return key.startswith(f"{INPUT_KEYS['queue_upload']}_") or key.startswith(
-        f"{INPUT_KEYS['ticket_upload']}_"
-    )
-
-
-def _ui_autorun_enabled() -> bool:
-    return os.getenv("PEQUIFLUX_UI_AUTORUN", "").strip().lower() in {"1", "true", "yes"}
 
 
 if __name__ == "__main__":
