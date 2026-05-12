@@ -119,6 +119,46 @@ class DocumentBundle(StrictModel):
     extracted_text: str | None = None
     rendered_pages: list[str] = Field(default_factory=list)
     candidate_truck_ids: list[str] = Field(default_factory=list)
+    document_views: list["DocumentView"] = Field(default_factory=list)
+    ocr_hints: list["OcrHint"] = Field(default_factory=list)
+
+
+class DocumentView(StrictModel):
+    view_id: str
+    source_ref: str
+    path: str
+    purpose: str
+    rotation_hint: int | None = None
+    sha256: str
+
+
+class OcrHint(StrictModel):
+    hint_id: str
+    source_ref: str
+    text: str
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    available: bool = True
+    error: str | None = None
+
+
+class FieldEvidence(StrictModel):
+    value: str | bool | float | list[str] | None = None
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    evidence: list[str] = Field(default_factory=list)
+    source: str
+
+
+class FieldExtractionResult(StrictModel):
+    fields: dict[str, FieldEvidence]
+    needs_review: bool = False
+    reason: str = ""
+
+
+class CalibrationResult(StrictModel):
+    threshold_version: str
+    manual_review_required: bool
+    reasons: list[str]
+    field_thresholds: dict[str, float]
 
 
 class ParsedTicket(StrictModel):
@@ -271,6 +311,7 @@ class AuditRecord(StrictModel):
     rejected_candidates: list[dict[str, Any]] = Field(default_factory=list)
     recommended_pair: dict[str, Any] | None = None
     fifo_break: bool = False
+    truth_resolution: TruthResolution | None = None
     provenance: list[dict[str, Any]] = Field(default_factory=list)
     operator_action: dict[str, Any] | None = None
     tool_calls: list[ToolCallRecord] = Field(default_factory=list)

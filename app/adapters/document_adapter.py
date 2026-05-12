@@ -7,6 +7,8 @@ from typing import Any
 
 from app.domain.errors import PequiFluxError
 from app.domain.models import DocumentBundle, TicketContentType
+from app.document.ocr_hints import generate_ocr_hints
+from app.document.preprocess import generate_document_views
 
 ALLOWED_CONTENT_TYPES: set[str] = {"application/pdf", "image/png", "image/jpeg", "text/plain"}
 DEFAULT_RENDER_DPI = 180
@@ -44,7 +46,7 @@ def build_document_bundle(
     elif content_type in {"image/png", "image/jpeg"}:
         rendered_pages = [str(path)]
 
-    return DocumentBundle(
+    bundle = DocumentBundle(
         request_id=request_id,
         document_ref=document_ref,
         content_type=content_type,
@@ -52,6 +54,20 @@ def build_document_bundle(
         extracted_text=extracted_text,
         rendered_pages=rendered_pages,
         candidate_truck_ids=candidate_truck_ids,
+    )
+    cache_path = Path(cache_dir) if cache_dir is not None else _default_cache_dir()
+    document_views = generate_document_views(
+        document_ref=document_ref,
+        content_type=content_type,
+        request_id=request_id,
+        rendered_pages=rendered_pages,
+        cache_dir=cache_path,
+    )
+    return bundle.model_copy(
+        update={
+            "document_views": document_views,
+            "ocr_hints": generate_ocr_hints(bundle),
+        }
     )
 
 
