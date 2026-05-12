@@ -74,7 +74,9 @@ def main() -> None:
     if model["failed_gates"]:
         st.dataframe(model["failed_gates"], hide_index=True, use_container_width=True)
     else:
-        st.success(copy_text("All submission gates passed.", "Todos os gates de submissão passaram."))
+        st.success(
+            copy_text("All submission gates passed.", "Todos os gates de submissão passaram.")
+        )
 
     st.subheader(copy_text("Failure examples", "Exemplos de falha"))
     st.dataframe(model["failure_examples"], hide_index=True, use_container_width=True)
