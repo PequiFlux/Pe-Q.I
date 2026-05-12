@@ -1,0 +1,2 @@
+scenario_id,variant,passed,decision_match_at_1,constraint_violation,ticket_field_accuracy,observed_primary_exception,expected_primary_exception,exception_match,fifo_break_justified,audit_complete,decision_status,recommended_truck,recommended_destination,fifo_break,rejected_count,tool_call_count,tool_call_success,tool_path,tool_error_count,planner_step_count,latency_ms_preprocess,latency_ms_model,latency_ms_rules,latency_ms_audit,latency_ms_total
+B1_clean_public_test_frozen,ollama,True,1.0,0.0,0.95,0.911,,,1.0,1.0,submission_ready,,,,,,1.0,,,,,,,,2052
