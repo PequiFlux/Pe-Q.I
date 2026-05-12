@@ -8,9 +8,11 @@ from app.services.raw_fifo import raw_queue_rows
 
 from app.ui.components.common import (
     chip,
+    copy_text,
     confidence_value,
     constraint_failure_summary,
     escape,
+    is_english,
     reason_detail_label,
     story_tile,
     truck_failure_rules,
@@ -24,29 +26,42 @@ def recommended_decision_card(payload: FrontEndPayload) -> str:
         payload.recommended_destination.destination_id if payload.recommended_destination else "-"
     )
     if status.endswith("REVIEW_REQUIRED"):
-        title = "Decisão exige revisão humana"
-        summary = "O sistema encontrou verdade insuficiente ou conflito material para automatizar com segurança."
+        title = copy_text("Decision requires human review", "Decisão exige revisão humana")
+        summary = copy_text(
+            "The system found insufficient truth or material conflict for safe automation.",
+            "O sistema encontrou verdade insuficiente ou conflito material para automatizar com segurança.",
+        )
     elif status.endswith("BLOCKED"):
-        title = "Sem despacho automático seguro"
-        summary = "Nenhum par caminhão-destino pode ser liberado automaticamente com as restrições atuais."
+        title = copy_text("No safe automatic dispatch", "Sem despacho automático seguro")
+        summary = copy_text(
+            "No truck-destination pair can be released automatically under the current constraints.",
+            "Nenhum par caminhão-destino pode ser liberado automaticamente com as restrições atuais.",
+        )
     else:
-        title = f"{recommended_truck} deve ir para {destination}"
-        summary = "Recomendação operacional baseada no ticket interpretado, no estado do pátio e nas restrições críticas avaliadas."
+        title = (
+            f"{recommended_truck} should go to {destination}"
+            if is_english()
+            else f"{recommended_truck} deve ir para {destination}"
+        )
+        summary = copy_text(
+            "Operational recommendation based on the interpreted ticket, yard state, and critical constraints checked.",
+            "Recomendação operacional baseada no ticket interpretado, no estado do pátio e nas restrições críticas avaliadas.",
+        )
     reason_items = "".join(
         f"<li>{escape(reason_detail_label(item))}</li>" for item in payload.reason_details[:3]
     )
     return f"""
     <section class="decision-story single">
       <div class="story-main">
-        <span class="eyebrow dark">Resultado da análise</span>
+        <span class="eyebrow dark">{escape(copy_text("Analysis result", "Resultado da análise"))}</span>
         <h2>{escape(title)}</h2>
         <p>{escape(summary)}</p>
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile("Status", status, "Resultado atual antes da ação humana.")}
-        {story_tile("Caminhão", recommended_truck, f"Destino: {destination}", "action")}
-        {story_tile("Motivo operacional", "verificável", reason_detail_label(payload.reason_summary), "proof")}
+        {story_tile("Status", status, copy_text("Current result before human action.", "Resultado atual antes da ação humana."))}
+        {story_tile(copy_text("Truck", "Caminhão"), recommended_truck, copy_text(f"Destination: {destination}", f"Destino: {destination}"), "action")}
+        {story_tile(copy_text("Operational reason", "Motivo operacional"), copy_text("verifiable", "verificável"), reason_detail_label(payload.reason_summary), "proof")}
       </div>
     </section>
     """
@@ -66,8 +81,8 @@ def queue_stack_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
     return f"""
     <section class="queue-focus">
       <div class="card-head">
-        <div><h3>Fila em decisão</h3><p>Os 5 primeiros caminhões como o operador vê: quem subiu, quem ficou aguardando e por qual restrição.</p></div>
-        {chip("fila operacional", "green")}
+        <div><h3>{escape(copy_text("Queue under decision", "Fila em decisão"))}</h3><p>{escape(copy_text("The first 5 trucks as the operator sees them: who moved up, who kept waiting, and which constraint explains it.", "Os 5 primeiros caminhões como o operador vê: quem subiu, quem ficou aguardando e por qual restrição."))}</p></div>
+        {chip(copy_text("operational queue", "fila operacional"), "green")}
       </div>
       <div class="queue-stack">{cards}</div>
     </section>
@@ -94,19 +109,22 @@ def _queue_stack_item(
         if diff_entry is None or diff_entry.position_after is None
         else str(diff_entry.position_after)
     )
-    destination = row.get("declared_destination") or "sem destino"
+    destination = row.get("declared_destination") or copy_text("no destination", "sem destino")
+    vehicle_type = row.get("vehicle_type") or copy_text("vehicle", "veículo")
+    destination_label = copy_text("destination", "destino")
+    position_label = copy_text("pos.", "pos.")
     return f"""
     <article class="queue-card {card_class}">
       <div class="queue-rank">#{escape(row["position"])}</div>
       <div>
         <strong>{escape(truck_id)}</strong>
-        <span>{escape(row.get("vehicle_type") or "veículo")} · destino {escape(destination)}</span>
+        <span>{escape(vehicle_type)} · {escape(destination_label)} {escape(destination)}</span>
       </div>
       <div class="queue-state">
         <em>{escape(label)}</em>
         <small>{escape(detail)}</small>
       </div>
-      <div class="queue-after">pos. {escape(after)}</div>
+      <div class="queue-after">{escape(position_label)} {escape(after)}</div>
     </article>
     """
 
@@ -120,36 +138,59 @@ def _queue_stack_state(
 ) -> tuple[str, str, str]:
     if diff_entry and diff_entry.decision == "called":
         before = diff_entry.position_before if diff_entry else "-"
-        return "promoted", "chamado agora", f"antes #{before}; saiu da fila"
+        return (
+            "promoted",
+            copy_text("called now", "chamado agora"),
+            copy_text(f"before #{before}; left the queue", f"antes #{before}; saiu da fila"),
+        )
     if diff_entry and diff_entry.decision == "blocked":
         rules = truck_failure_rules(payload, truck_id)
         detail = ", ".join(rules[:3]) if rules else diff_entry.reason
-        return "blocked", "bloqueado por restrição", detail
+        return "blocked", copy_text("blocked by constraint", "bloqueado por restrição"), detail
     if truck_id == first_id and truck_id != recommended_id:
         rules = truck_failure_rules(payload, truck_id)
         if rules:
-            return "blocked", "bloqueado por restrição", ", ".join(rules[:3])
-        return "waiting", "mantido aguardando", "sem critério suficiente para chamada automática"
+            return (
+                "blocked",
+                copy_text("blocked by constraint", "bloqueado por restrição"),
+                ", ".join(rules[:3]),
+            )
+        return (
+            "waiting",
+            copy_text("kept waiting", "mantido aguardando"),
+            copy_text(
+                "no sufficient criterion for automatic call",
+                "sem critério suficiente para chamada automática",
+            ),
+        )
     if diff_entry and diff_entry.decision == "unchanged":
-        return "waiting", "mantido aguardando", diff_entry.reason
+        return "waiting", copy_text("kept waiting", "mantido aguardando"), diff_entry.reason
     if diff_entry and diff_entry.decision == "shifted":
-        return "neutral", "avancou na fila", diff_entry.reason
-    return "neutral", "sem mudança", "ordem preservada até nova avaliação"
+        return "neutral", copy_text("moved up in queue", "avancou na fila"), diff_entry.reason
+    return (
+        "neutral",
+        copy_text("no change", "sem mudança"),
+        copy_text(
+            "order preserved until a new evaluation",
+            "ordem preservada até nova avaliação",
+        ),
+    )
 
 
 def gemma_extraction_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
     parsed = payload.benchmark_observed.get("parsed_ticket", {})
-    parsed_fields = ", ".join(payload.gemma_visible_summary.parsed_fields) or "não informado"
+    not_informed = copy_text("not informed", "não informado")
+    parsed_fields = ", ".join(payload.gemma_visible_summary.parsed_fields) or not_informed
     fields = [
         ("Ticket", parsed.get("ticket_id") or Path(request.ticket_ref).name),
-        ("Caminhão lido", parsed.get("truck_id") or "não informado"),
-        ("Tipo de carga", parsed.get("load_condition") or "unknown"),
+        (copy_text("Read truck", "Caminhão lido"), parsed.get("truck_id") or not_informed),
+        (copy_text("Load type", "Tipo de carga"), parsed.get("load_condition") or "unknown"),
         (
-            "Destino extraído",
-            ", ".join(parsed.get("destination_constraints") or []) or "não informado",
+            copy_text("Extracted destination", "Destino extraído"),
+            ", ".join(parsed.get("destination_constraints") or []) or not_informed,
         ),
-        ("Confiança", confidence_value(payload)),
-        ("Campos usados na decisão", parsed_fields),
+        (copy_text("Confidence", "Confiança"), confidence_value(payload)),
+        (copy_text("Fields used in the decision", "Campos usados na decisão"), parsed_fields),
     ]
     items = "".join(
         f"<div><span>{escape(label)}</span><strong>{escape(value)}</strong></div>"
@@ -158,7 +199,7 @@ def gemma_extraction_card(payload: FrontEndPayload, request: DecisionRequest) ->
     return f"""
     <article class="card narrative-card">
       <div class="card-head">
-        <div><h3>Documento interpretado pelo Gemma 4</h3><p>Campos do ticket que entram na decisão, sem expor prompt ou JSON.</p></div>
+        <div><h3>{escape(copy_text("Document interpreted by Gemma 4", "Documento interpretado pelo Gemma 4"))}</h3><p>{escape(copy_text("Ticket fields that enter the decision, without exposing prompt or JSON.", "Campos do ticket que entram na decisão, sem expor prompt ou JSON."))}</p></div>
         {chip("Gemma 4", "purple")}
       </div>
       <div class="package-grid">{items}</div>
@@ -176,8 +217,8 @@ def blocked_constraints_card(payload: FrontEndPayload) -> str:
     return f"""
     <article class="card narrative-card">
       <div class="card-head">
-        <div><h3>4. Quais restrições bloquearam alternativas</h3><p>{rejected} pares foram rejeitados antes de qualquer recomendação.</p></div>
-        {chip("regras duras", "green")}
+        <div><h3>{escape(copy_text("4. Which constraints blocked alternatives", "4. Quais restrições bloquearam alternativas"))}</h3><p>{escape(copy_text(f"{rejected} pairs were rejected before any recommendation.", f"{rejected} pares foram rejeitados antes de qualquer recomendação."))}</p></div>
+        {chip(copy_text("hard rules", "regras duras"), "green")}
       </div>
       <ul class="constraint-list">{items}</ul>
     </article>

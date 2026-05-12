@@ -4,7 +4,19 @@ import html
 import os
 from typing import Any
 
+import streamlit as st
+
 from app.domain.models import FrontEndPayload
+
+LANGUAGE_KEY = "yard_ui_language"
+
+
+def is_english() -> bool:
+    return st.session_state.get(LANGUAGE_KEY, "Português") == "English"
+
+
+def copy_text(english: str, portuguese: str) -> str:
+    return english if is_english() else portuguese
 
 
 def step_status(payload: FrontEndPayload, latency_key: str) -> str:
@@ -40,24 +52,51 @@ def audit_status_label(status: str) -> str:
 
 def constraints_summary(payload: FrontEndPayload) -> str:
     if payload.audit_record is None:
-        return "Auditoria indisponível porque o fluxo fechou antes da validação."
+        return copy_text(
+            "Audit unavailable because the flow closed before validation.",
+            "Auditoria indisponível porque o fluxo fechou antes da validação.",
+        )
     checked = len(payload.audit_record.hard_constraints_checked)
     rejected = len(payload.audit_record.rejected_candidates)
+    if is_english():
+        return f"{checked} pairs checked; {rejected} rejected by hard constraint."
     return f"{checked} pares avaliados; {rejected} rejeitados por restrição dura."
 
 
 def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]]:
     if payload.audit_record is None:
-        return [("auditoria", "Fluxo fechou antes da matriz de restrições.")]
+        return [
+            (
+                copy_text("audit", "auditoria"),
+                copy_text(
+                    "Flow closed before the constraint matrix.",
+                    "Fluxo fechou antes da matriz de restrições.",
+                ),
+            )
+        ]
     failures: dict[str, str] = {}
     for rejected in payload.audit_record.rejected_candidates:
         for failure in rejected.get("failed_constraints", []):
             failures.setdefault(
-                failure.get("constraint_id", "restrição"),
-                failure.get("detail", "Par bloqueado por regra operacional."),
+                failure.get("constraint_id", copy_text("constraint", "restrição")),
+                failure.get(
+                    "detail",
+                    copy_text(
+                        "Pair blocked by operational rule.",
+                        "Par bloqueado por regra operacional.",
+                    ),
+                ),
             )
     if not failures:
-        return [("nenhuma", "Nenhuma alternativa foi bloqueada por restrição dura.")]
+        return [
+            (
+                copy_text("none", "nenhuma"),
+                copy_text(
+                    "No alternative was blocked by a hard constraint.",
+                    "Nenhuma alternativa foi bloqueada por restrição dura.",
+                ),
+            )
+        ]
     return list(failures.items())
 
 
@@ -77,7 +116,7 @@ def truck_failure_rules(payload: FrontEndPayload, truck_id: str) -> list[str]:
 
 def primary_rule(payload: FrontEndPayload) -> str:
     failures = constraint_failure_summary(payload)
-    if failures and failures[0][0] != "nenhuma":
+    if failures and failures[0][0] not in {"nenhuma", "none"}:
         return failures[0][0]
     if payload.audit_record and payload.audit_record.fired_rules:
         return payload.audit_record.fired_rules[0]
@@ -94,28 +133,39 @@ def gemma_short_summary(payload: FrontEndPayload) -> str:
     visible = [str(part) for part in parts if part]
     if visible:
         return ", ".join(visible[:3])
-    return ", ".join(payload.gemma_visible_summary.parsed_fields[:3]) or "campos indisponíveis"
+    return ", ".join(payload.gemma_visible_summary.parsed_fields[:3]) or copy_text(
+        "fields unavailable", "campos indisponíveis"
+    )
 
 
 def _exception_label_short(label: str) -> str:
     labels = {
-        "RAIN_ON_OPEN_DESTINATION": "chuva em moega aberta",
-        "WET_LOAD": "carga úmida",
-        "DOCUMENT_BLOCK": "documento bloqueado",
-        "MANUAL_REVIEW_HINT": "revisão humana",
-        "NO_EXCEPTION": "sem exceção",
+        "RAIN_ON_OPEN_DESTINATION": copy_text("rain on open destination", "chuva em moega aberta"),
+        "WET_LOAD": copy_text("wet load", "carga úmida"),
+        "DOCUMENT_BLOCK": copy_text("blocked document", "documento bloqueado"),
+        "MANUAL_REVIEW_HINT": copy_text("human review", "revisão humana"),
+        "NO_EXCEPTION": copy_text("no exception", "sem exceção"),
     }
     return labels.get(label, label.lower().replace("_", " "))
 
 
 def ranking_summary(payload: FrontEndPayload) -> str:
     if payload.recommended_truck and payload.recommended_destination:
+        if is_english():
+            return (
+                f"{payload.recommended_truck.truck_id} -> "
+                f"{payload.recommended_destination.destination_id}; "
+                f"{len(payload.queue_diff)} items in the queue diff."
+            )
         return (
             f"{payload.recommended_truck.truck_id} -> "
             f"{payload.recommended_destination.destination_id}; "
             f"{len(payload.queue_diff)} itens no diff da fila."
         )
-    return "Sem par recomendado; decisão exige bloqueio ou revisão."
+    return copy_text(
+        "No recommended pair; decision requires block or review.",
+        "Sem par recomendado; decisão exige bloqueio ou revisão.",
+    )
 
 
 def operator_actions_label(actions: list[Any]) -> str:
@@ -124,14 +174,16 @@ def operator_actions_label(actions: list[Any]) -> str:
 
 def operator_action_label(action: str) -> str:
     labels = {
-        "approve": "aprovar",
-        "block": "bloquear",
-        "override": "sobrescrever",
+        "approve": copy_text("approve", "aprovar"),
+        "block": copy_text("block", "bloquear"),
+        "override": copy_text("override", "sobrescrever"),
     }
     return labels.get(action, action)
 
 
 def reason_detail_label(text: str) -> str:
+    if is_english():
+        return text
     translations = {
         "FIFO ordering preserved when possible.": "Ordem de chegada preservada quando possível.",
         "Long wait time increased ranking priority.": "Tempo de espera elevou a prioridade na fila.",

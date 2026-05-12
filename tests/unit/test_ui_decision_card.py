@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import streamlit as st
+
 from app.domain.models import FrontEndPayload
 from app.ui.components.audit_panel import tool_badges_card
+from app.ui.components.common import LANGUAGE_KEY
 from app.ui.components.decision_card import recommended_decision_card
 
 
@@ -137,3 +140,15 @@ def test_tool_badges_card_shows_gemma_requested_tool_sequence() -> None:
     assert "solicitado → executado" in html
     assert "Motivo: Deterministic CI tool intent." in html
     assert "Estado: INTERPRETED" in html
+
+
+def test_recommended_decision_card_can_render_english_copy() -> None:
+    st.session_state[LANGUAGE_KEY] = "English"
+    try:
+        html = recommended_decision_card(_payload("PREVIEW_READY"))
+    finally:
+        st.session_state[LANGUAGE_KEY] = "Português"
+
+    assert "TRK-005 should go to DST-COV-01" in html
+    assert "Analysis result" in html
+    assert "Operational reason" in html

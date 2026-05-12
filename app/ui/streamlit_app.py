@@ -19,7 +19,7 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.components.common import escape, runtime_label
+from app.ui.components.common import LANGUAGE_KEY, copy_text, escape, is_english, runtime_label
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
@@ -66,6 +66,7 @@ def main() -> None:
 
     with st.sidebar:
         st.markdown(_brand_block(), unsafe_allow_html=True)
+        _render_language_selector()
         st.markdown(_sidebar_runtime_block(), unsafe_allow_html=True)
 
     _render_intro()
@@ -118,18 +119,42 @@ def main() -> None:
 
 
 def _render_intro() -> None:
+    if _is_english():
+        title = "New yard decision"
+        summary = (
+            "Send queue, document, note, weather, and resources. The system interprets "
+            "the ticket, applies operational constraints, and returns an auditable "
+            "decision for human approval."
+        )
+        proof = [
+            ("Document", "interpreted"),
+            ("Rules", "checked"),
+            ("Operator", "approves or blocks"),
+        ]
+    else:
+        title = "Nova decisão de pátio"
+        summary = (
+            "Envie fila, documento, nota, clima e recursos. O sistema interpreta o "
+            "ticket, aplica restrições operacionais e devolve uma decisão auditável "
+            "para aprovação humana."
+        )
+        proof = [
+            ("Documento", "interpretado"),
+            ("Regras", "conferidas"),
+            ("Operador", "aprova ou bloqueia"),
+        ]
     st.markdown(
-        """
+        f"""
         <section class="hero">
           <div>
             <span class="eyebrow">PequiFlux Yard Copilot</span>
-            <h1>Nova decisão de pátio</h1>
-            <p>Envie fila, documento, nota, clima e recursos. O sistema interpreta o ticket, aplica restrições operacionais e devolve uma decisão auditável para aprovação humana.</p>
+            <h1>{escape(title)}</h1>
+            <p>{escape(summary)}</p>
           </div>
           <div class="hero-proof">
-            <div><strong>Documento</strong><span>interpretado</span></div>
-            <div><strong>Regras</strong><span>conferidas</span></div>
-            <div><strong>Operador</strong><span>aprova ou bloqueia</span></div>
+            <div><strong>{escape(proof[0][0])}</strong><span>{escape(proof[0][1])}</span></div>
+            <div><strong>{escape(proof[1][0])}</strong><span>{escape(proof[1][1])}</span></div>
+            <div><strong>{escape(proof[2][0])}</strong><span>{escape(proof[2][1])}</span></div>
           </div>
         </section>
         """,
@@ -138,11 +163,25 @@ def _render_intro() -> None:
 
 
 def _render_empty_state() -> None:
+    if _is_english():
+        title = "Fill in the fields or click Load example."
+        summary = (
+            f"Then use {escape(_analyze_button_label())} to generate status, truck, "
+            "destination, operational reason, interpreted document, critical "
+            "constraints, driver message, and human action."
+        )
+    else:
+        title = "Preencha os campos ou clique em Carregar exemplo."
+        summary = (
+            f"Depois, use {escape(_analyze_button_label())} para gerar status, caminhão, "
+            "destino, motivo operacional, documento interpretado, restrições críticas, "
+            "mensagem ao motorista e ação humana."
+        )
     st.markdown(
         f"""
         <article class="empty-state">
-          <strong>Preencha os campos ou clique em Carregar exemplo.</strong>
-          <p>Depois, use {escape(_analyze_button_label())} para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
+          <strong>{escape(title)}</strong>
+          <p>{summary}</p>
         </article>
         """,
         unsafe_allow_html=True,
@@ -156,13 +195,20 @@ def _render_operator_input(
     use_expander: bool = True,
 ) -> dict[str, Any]:
     wrapper = (
-        st.expander("Entrada operacional", expanded=expanded) if use_expander else nullcontext()
+        st.expander(_copy("Operational input", "Entrada operacional"), expanded=expanded)
+        if use_expander
+        else nullcontext()
     )
     with wrapper:
+        section_title = _copy("Operational input", "Entrada operacional")
+        section_note = _copy(
+            "Load the queue, ticket, note, and operational context before analysis.",
+            "Carregue a fila, o ticket, a nota e o contexto operacional antes da análise.",
+        )
         st.markdown(
-            """
+            f"""
             <div class="section-title compact-title">
-              <div><h2>Entrada operacional</h2><p>Carregue a fila, o ticket, a nota e o contexto operacional antes da análise.</p></div>
+              <div><h2>{escape(section_title)}</h2><p>{escape(section_note)}</p></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -173,13 +219,17 @@ def _render_operator_input(
             top_a, top_b = st.columns([1.08, 0.92], gap="large")
             with top_a:
                 st.markdown(
-                    '<div class="panel-title">1 · Fila de caminhões</div>', unsafe_allow_html=True
+                    f'<div class="panel-title">1 · {escape(_copy("Truck queue", "Fila de caminhões"))}</div>',
+                    unsafe_allow_html=True,
                 )
                 uploaded_queue = st.file_uploader(
-                    "Fila CSV: upload",
+                    _copy("Queue CSV: upload", "Fila CSV: upload"),
                     type=["csv"],
                     key=_upload_key("queue_upload"),
-                    help="Colunas mínimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
+                    help=_copy(
+                        "Minimum columns: truck_id, arrival_ts. Optional fields: status, vehicle_type, contract_priority_flag.",
+                        "Colunas mínimas: truck_id, arrival_ts. Campos opcionais: status, vehicle_type, contract_priority_flag.",
+                    ),
                 )
                 queue_csv = _queue_csv_value(uploaded_queue)
                 st.markdown(_queue_source_note(uploaded_queue, queue_csv), unsafe_allow_html=True)
@@ -187,13 +237,17 @@ def _render_operator_input(
 
             with top_b:
                 st.markdown(
-                    '<div class="panel-title">2 · Ticket ou documento</div>', unsafe_allow_html=True
+                    f'<div class="panel-title">2 · {escape(_copy("Ticket or document", "Ticket ou documento"))}</div>',
+                    unsafe_allow_html=True,
                 )
                 uploaded_ticket = st.file_uploader(
-                    "Ticket/documento: upload",
+                    _copy("Ticket/document: upload", "Ticket/documento: upload"),
                     type=["txt", "pdf", "png", "jpg", "jpeg"],
                     key=_upload_key("ticket_upload"),
-                    help="TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens são enviadas ao leitor local de documento.",
+                    help=_copy(
+                        "TXT works in test mode. With PEQUIFLUX_GEMMA_RUNTIME=ollama, images are sent to the local document reader.",
+                        "TXT funciona em modo teste. Com PEQUIFLUX_GEMMA_RUNTIME=ollama, imagens são enviadas ao leitor local de documento.",
+                    ),
                 )
                 ticket_text = _ticket_text_value(uploaded_ticket)
                 st.markdown(
@@ -204,20 +258,27 @@ def _render_operator_input(
             with mid_a:
                 operator_note = _render_operator_note_input()
             with mid_b:
-                st.markdown('<div class="panel-title">4 · Clima</div>', unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="panel-title">4 · {escape(_copy("Weather", "Clima"))}</div>',
+                    unsafe_allow_html=True,
+                )
                 weather_json = _render_weather_input()
             with mid_c:
                 st.markdown(
-                    '<div class="panel-title">5 · Recursos</div>',
+                    f'<div class="panel-title">5 · {escape(_copy("Resources", "Recursos"))}</div>',
                     unsafe_allow_html=True,
                 )
                 resource_json = _render_resource_input()
 
+            run_note = _copy(
+                "Execution writes temporary files to cache/ui_sessions inside the container.",
+                "A execução grava arquivos temporários em cache/ui_sessions dentro do container.",
+            )
             st.markdown(
                 f"""
                 <div class="run-strip">
                   <div><strong>Runtime:</strong> {escape(runtime_label())}</div>
-                  <div class="run-note">A execução grava arquivos temporários em cache/ui_sessions dentro do container.</div>
+                  <div class="run-note">{escape(run_note)}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -238,9 +299,12 @@ def _render_operator_input(
 
 
 def _render_operator_note_input() -> str:
-    st.markdown('<div class="panel-title">3 · Nota do operador</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="panel-title">3 · {escape(_copy("Operator note", "Nota do operador"))}</div>',
+        unsafe_allow_html=True,
+    )
     return st.text_area(
-        "Nota do operador",
+        _copy("Operator note", "Nota do operador"),
         height=140,
         key=INPUT_KEYS["operator_note"],
     )
@@ -248,20 +312,25 @@ def _render_operator_note_input() -> str:
 
 def _render_weather_input() -> str:
     mode = st.radio(
-        "Clima",
+        _copy("Weather", "Clima"),
         ["formulário", "JSON"],
+        format_func=lambda value: _copy("form", "formulário") if value == "formulário" else value,
         horizontal=True,
         key=INPUT_KEYS["weather_mode"],
     )
     if mode == "JSON":
-        return st.text_area("Clima JSON", height=140, key=INPUT_KEYS["weather_json"])
+        return st.text_area(
+            _copy("Weather JSON", "Clima JSON"),
+            height=140,
+            key=INPUT_KEYS["weather_json"],
+        )
     precipitation = st.selectbox(
-        "Precipitação",
+        _copy("Precipitation", "Precipitação"),
         ["none", "rain"],
         key=INPUT_KEYS["weather_precipitation"],
     )
     severity = st.selectbox(
-        "Severidade",
+        _copy("Severity", "Severidade"),
         ["none", "low", "medium", "high"],
         key=INPUT_KEYS["weather_severity"],
     )
@@ -270,27 +339,41 @@ def _render_weather_input() -> str:
 
 def _render_resource_input() -> str:
     mode = st.radio(
-        "Recursos",
+        _copy("Resources", "Recursos"),
         ["formulário", "JSON"],
+        format_func=lambda value: _copy("form", "formulário") if value == "formulário" else value,
         horizontal=True,
         key=INPUT_KEYS["resource_mode"],
     )
     if mode == "JSON":
-        return st.text_area("Recursos JSON", height=140, key=INPUT_KEYS["resource_json"])
+        return st.text_area(
+            _copy("Resources JSON", "Recursos JSON"),
+            height=140,
+            key=INPUT_KEYS["resource_json"],
+        )
     available = st.text_input(
-        "Destinos disponíveis",
+        _copy("Available destinations", "Destinos disponíveis"),
         key=INPUT_KEYS["resource_available"],
-        help="Separe IDs por vírgula. Ex.: DST-COV-01, DST-COV-02",
+        help=_copy(
+            "Separate IDs with commas. Example: DST-COV-01, DST-COV-02",
+            "Separe IDs por vírgula. Ex.: DST-COV-01, DST-COV-02",
+        ),
     )
     blocked = st.text_input(
-        "Destinos bloqueados",
+        _copy("Blocked destinations", "Destinos bloqueados"),
         key=INPUT_KEYS["resource_blocked"],
-        help="Separe IDs por vírgula. Ex.: DST-OPEN-01",
+        help=_copy(
+            "Separate IDs with commas. Example: DST-OPEN-01",
+            "Separe IDs por vírgula. Ex.: DST-OPEN-01",
+        ),
     )
     wet_destinations = st.text_input(
-        "Destinos compatíveis com carga úmida",
+        _copy("Wet-load compatible destinations", "Destinos compatíveis com carga úmida"),
         key=INPUT_KEYS["resource_wet"],
-        help="Separe IDs por vírgula. Esses destinos aceitam dry e wet.",
+        help=_copy(
+            "Separate IDs with commas. These destinations accept dry and wet loads.",
+            "Separe IDs por vírgula. Esses destinos aceitam dry e wet.",
+        ),
     )
     wet_ids = set(_split_ids(wet_destinations))
     available_ids = list(dict.fromkeys([*_split_ids(available), *wet_ids]))
@@ -343,21 +426,31 @@ def _ticket_text_value(uploaded_ticket: Any) -> str:
 
 def _queue_source_note(uploaded_queue: Any, queue_csv: str) -> str:
     if uploaded_queue is not None:
-        source = f"Arquivo carregado: {uploaded_queue.name}"
+        source = _copy(
+            f"Uploaded file: {uploaded_queue.name}", f"Arquivo carregado: {uploaded_queue.name}"
+        )
     elif queue_csv:
-        source = "Exemplo carregado como CSV de fixture."
+        source = _copy(
+            "Example loaded as fixture CSV.",
+            "Exemplo carregado como CSV de fixture.",
+        )
     else:
-        source = "Nenhuma fila carregada."
+        source = _copy("No queue loaded.", "Nenhuma fila carregada.")
     return f'<div class="source-note">{escape(source)}</div>'
 
 
 def _ticket_source_note(uploaded_ticket: Any, ticket_text: str) -> str:
     if uploaded_ticket is not None:
-        source = f"Arquivo carregado: {uploaded_ticket.name}"
+        source = _copy(
+            f"Uploaded file: {uploaded_ticket.name}", f"Arquivo carregado: {uploaded_ticket.name}"
+        )
     elif ticket_text:
-        source = "Exemplo carregado como ticket TXT de fixture."
+        source = _copy(
+            "Example loaded as fixture TXT ticket.",
+            "Exemplo carregado como ticket TXT de fixture.",
+        )
     else:
-        source = "Nenhum ticket carregado."
+        source = _copy("No ticket loaded.", "Nenhum ticket carregado.")
     return f'<div class="source-note">{escape(source)}</div>'
 
 
@@ -368,18 +461,20 @@ def _split_ids(value: str) -> list[str]:
 def _render_input_actions(example_case: dict[str, Any]) -> None:
     left, middle, right = st.columns([0.18, 0.22, 0.18], gap="small")
     with left:
-        if st.button("Carregar exemplo", width="stretch"):
+        if st.button(_copy("Load example", "Carregar exemplo"), width="stretch"):
             _load_example_into_state(example_case)
             st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
             st.rerun()
     with middle:
-        if st.button("Carregar e analisar exemplo", width="stretch"):
+        if st.button(
+            _copy("Load and analyze example", "Carregar e analisar exemplo"), width="stretch"
+        ):
             _load_example_into_state(example_case)
             st.session_state["active_case"] = EXAMPLE_SCENARIO_ID
             st.session_state[INPUT_KEYS["analyze_example"]] = True
             st.rerun()
     with right:
-        if st.button("Limpar campos", width="stretch"):
+        if st.button(_copy("Clear fields", "Limpar campos"), width="stretch"):
             _clear_input_state()
             st.rerun()
 
@@ -389,11 +484,17 @@ def _render_outputs(
     request: DecisionRequest,
     case: dict[str, Any],
 ) -> None:
+    title = _copy("2. Analysis result", "2. Resultado da análise")
+    note = _copy(
+        "Operational status, recommendation, document evidence, and critical constraints.",
+        "Status operacional, recomendação, evidências do documento e restrições críticas.",
+    )
+    chip_text = _copy("auditable decision", "decisão auditável")
     st.markdown(
-        """
+        f"""
         <div class="section-title">
-          <div><h2>2. Resultado da análise</h2><p>Status operacional, recomendação, evidências do documento e restrições críticas.</p></div>
-          <span class="chip success">decisão auditável</span>
+          <div><h2>{escape(title)}</h2><p>{escape(note)}</p></div>
+          <span class="chip success">{escape(chip_text)}</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -422,7 +523,9 @@ def _render_technical_audit_expander(
     request: DecisionRequest,
     case: dict[str, Any],
 ) -> None:
-    with st.expander("Ver auditoria técnica", expanded=_ui_autorun_enabled()):
+    with st.expander(
+        _copy("View technical audit", "Ver auditoria técnica"), expanded=_ui_autorun_enabled()
+    ):
         render_input_evidence(payload, request, case)
         st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
         left, right = st.columns([1.15, 0.85], gap="large")
@@ -436,10 +539,11 @@ def _render_technical_audit_expander(
 
 
 def _render_error(error: str) -> None:
+    title = _copy("Invalid input", "Entrada inválida")
     st.markdown(
         f"""
         <article class="error-card">
-          <strong>Entrada inválida</strong>
+          <strong>{escape(title)}</strong>
           <p>{escape(error)}</p>
         </article>
         """,
@@ -454,34 +558,61 @@ def _queue_preview(queue_csv: str) -> str:
         rows = []
     waiting = sum(1 for row in rows if (row.get("status") or "waiting").lower() == "waiting")
     priority = sum(1 for row in rows if (row.get("contract_priority_flag") or "").lower() == "true")
+    rows_label = _copy("rows", "linhas")
+    waiting_label = _copy("waiting", "aguardando")
+    priority_label = _copy("priority", "prioridade")
     return f"""
     <div class="input-summary">
-      <div><strong>{len(rows)}</strong><span>linhas</span></div>
-      <div><strong>{waiting}</strong><span>aguardando</span></div>
-      <div><strong>{priority}</strong><span>prioridade</span></div>
+      <div><strong>{len(rows)}</strong><span>{escape(rows_label)}</span></div>
+      <div><strong>{waiting}</strong><span>{escape(waiting_label)}</span></div>
+      <div><strong>{priority}</strong><span>{escape(priority_label)}</span></div>
     </div>
     """
 
 
 def _brand_block() -> str:
+    subtitle = _copy("Yard Copilot · Operations", "Yard Copilot · Operação")
     return """
     <div class="brand">
       <div class="brand-mark"></div>
       <div>
         <h1>PequiFlux</h1>
-        <p>Yard Copilot · Operação</p>
+        <p>{subtitle}</p>
       </div>
     </div>
-    """
+    """.format(
+        subtitle=escape(subtitle)
+    )
+
+
+def _render_language_selector() -> None:
+    options = ["Português", "English"]
+    st.radio(
+        "Idioma / Language",
+        options,
+        index=options.index(st.session_state.get(LANGUAGE_KEY, "Português")),
+        key=LANGUAGE_KEY,
+        horizontal=True,
+    )
+    description = _copy(
+        "English UI copy is enabled. The technical payload, scenario IDs, and audit JSON remain canonical.",
+        "Interface em português ativada. Payload técnico, IDs de cenário e JSON de auditoria permanecem canônicos.",
+    )
+    st.markdown(f'<div class="source-note">{escape(description)}</div>', unsafe_allow_html=True)
 
 
 def _sidebar_runtime_block() -> str:
+    title = _copy("Execution", "Execução")
+    note = _copy(
+        "No operational fallback. If material truth is missing, the flow closes as BLOCKED or REVIEW_REQUIRED.",
+        "Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.",
+    )
     return f"""
     <div class="side-card compact">
-      <div class="side-kicker">Execução</div>
+      <div class="side-kicker">{escape(title)}</div>
       <p>{escape(runtime_label())}</p>
       <p>{escape(_runtime_mode_note())}</p>
-      <p>Sem fallback operacional. Se faltar verdade material, o fluxo fecha em BLOCKED ou REVIEW_REQUIRED.</p>
+      <p>{escape(note)}</p>
     </div>
     """
 
@@ -489,16 +620,27 @@ def _sidebar_runtime_block() -> str:
 def _runtime_mode_note() -> str:
     runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     if runtime == "text":
-        return "Modo teste: sem Gemma/Ollama; use TXT ou Carregar exemplo."
+        return _copy(
+            "Test mode: no Gemma/Ollama; use TXT or Load example.",
+            "Modo teste: sem Gemma/Ollama; use TXT ou Carregar exemplo.",
+        )
     if runtime == "ollama":
-        return "Gemma 4 ativo via Ollama."
-    return f"Runtime customizado: {runtime}."
+        return _copy("Gemma 4 active through Ollama.", "Gemma 4 ativo via Ollama.")
+    return _copy(f"Custom runtime: {runtime}.", f"Runtime customizado: {runtime}.")
 
 
 def _analyze_button_label() -> str:
     if os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama") == "text":
-        return "Analisar em modo teste"
-    return "Analisar com Gemma 4"
+        return _copy("Analyze in test mode", "Analisar em modo teste")
+    return _copy("Analyze with Gemma 4", "Analisar com Gemma 4")
+
+
+def _is_english() -> bool:
+    return is_english()
+
+
+def _copy(english: str, portuguese: str) -> str:
+    return copy_text(english, portuguese)
 
 
 def _empty_defaults() -> dict[str, Any]:

@@ -5,7 +5,7 @@ from typing import Any
 import streamlit as st
 
 from app.domain.models import FrontEndPayload
-from app.ui.components.common import chip, escape
+from app.ui.components.common import chip, copy_text, escape
 
 
 def render_validation_matrix(payload: FrontEndPayload) -> None:
@@ -14,7 +14,7 @@ def render_validation_matrix(payload: FrontEndPayload) -> None:
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>Heatmap de validação</h3><p>Caminhões nas linhas, destinos nas colunas: verde elegível, vermelho bloqueado.</p></div>
+            <div><h3>{escape(copy_text("Validation heatmap", "Heatmap de validação"))}</h3><p>{escape(copy_text("Trucks in rows, destinations in columns: green eligible, red blocked.", "Caminhões nas linhas, destinos nas colunas: verde elegível, vermelho bloqueado."))}</p></div>
             {chip("HC-01..HC-07", "green")}
           </div>
           {heatmap}
@@ -26,7 +26,7 @@ def render_validation_matrix(payload: FrontEndPayload) -> None:
 
 def _validation_heatmap(payload: FrontEndPayload) -> str:
     if payload.audit_record is None or not payload.audit_record.hard_constraints_checked:
-        return '<div class="heatmap-empty">Validação indisponível para este estado.</div>'
+        return f'<div class="heatmap-empty">{escape(copy_text("Validation unavailable for this state.", "Validação indisponível para este estado."))}</div>'
     checks = payload.audit_record.hard_constraints_checked
     selected_pair = None
     if payload.recommended_truck and payload.recommended_destination:
@@ -48,7 +48,7 @@ def _validation_heatmap(payload: FrontEndPayload) -> str:
     return f"""
     <div class="heatmap-wrap">
       <div class="heatmap-grid" style="grid-template-columns: 112px repeat({len(destinations)}, minmax(118px, 1fr));">
-        <div class="heatmap-corner">Fila</div>
+        <div class="heatmap-corner">{escape(copy_text("Queue", "Fila"))}</div>
         {header}
         {rows}
       </div>
@@ -74,13 +74,13 @@ def _heatmap_row(
         is_selected = selected_pair == (truck, destination)
         if is_selected:
             state = "selected"
-            label = "selecionado"
+            label = copy_text("selected", "selecionado")
         elif entry.get("eligible"):
             state = "eligible"
-            label = "elegivel"
+            label = copy_text("eligible", "elegivel")
         else:
             state = "blocked"
-            label = ", ".join(failures) or "bloqueado"
+            label = ", ".join(failures) or copy_text("blocked", "bloqueado")
         cells.append(f'<div class="heat-cell {state}">{escape(label)}</div>')
     return f"""
     <div class="heatmap-truck">{escape(truck)}</div>
