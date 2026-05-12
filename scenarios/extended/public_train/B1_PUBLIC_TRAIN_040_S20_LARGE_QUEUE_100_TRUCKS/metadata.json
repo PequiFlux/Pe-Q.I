@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 2,
+  "document_template_id": "S20_LARGE_QUEUE_100_TRUCKS-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "pt_br_abbreviation"
+  ],
+  "scenario_family": "S20_LARGE_QUEUE_100_TRUCKS",
+  "scenario_id": "B1_PUBLIC_TRAIN_040_S20_LARGE_QUEUE_100_TRUCKS",
+  "sha256": "9c4e9551cb95746d4f2913a0a7bb526c871bf0f7119616c1378f1b6b187a1f0e",
+  "source_case_id": "S20_LARGE_QUEUE_100_TRUCKS",
+  "split": "public_train"
+}

@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 3,
+  "document_template_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "blocked_resource"
+  ],
+  "scenario_family": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+  "scenario_id": "B1_PRIVATE_HOLDOUT_044_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+  "sha256": "68e7a836c2adbbb66c7531ddea340c2cf2356c3fd36a8960d8c747d21a155363",
+  "source_case_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+  "split": "private_holdout"
+}

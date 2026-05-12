@@ -1,0 +1,27 @@
+{
+  "expected_status": "PREVIEW_READY",
+  "acceptable_trucks": ["TRK-001"],
+  "acceptable_destinations": ["DST-COV-01"],
+  "required_constraints": ["HC-01"],
+  "fifo_break_expected": false,
+  "expected_primary_exception": "RAIN_ON_OPEN_DESTINATION",
+  "override_cases": [
+    {
+      "action": "override",
+      "actor_id": "OP-DEMO-01",
+      "requested_truck_id": "TRK-002",
+      "requested_destination_id": "DST-COV-01",
+      "reason": "Supervisor balancing queue after radio confirmation.",
+      "expected_status": "OVERRIDDEN"
+    },
+    {
+      "action": "override",
+      "actor_id": "OP-DEMO-01",
+      "requested_truck_id": "TRK-003",
+      "requested_destination_id": "DST-OPEN-01",
+      "reason": "Invalid attempt: open destination under rain.",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_rejection_constraint": "HC-01"
+    }
+  ]
+}

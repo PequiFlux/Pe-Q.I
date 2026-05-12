@@ -1,0 +1,19 @@
+{
+  "ticket_id": "TCK-S12",
+  "truck_id": "TRK-021",
+  "vehicle_type": "truck",
+  "document_status": "blocked",
+  "document_block_flags": [
+    "missing_signature"
+  ],
+  "load_condition": "dry",
+  "contract_priority_flag": false,
+  "destination_constraints": [
+    "DST-COV-01"
+  ],
+  "parse_confidence": 0.91,
+  "ambiguities": [],
+  "evidence_refs": [
+    "synthetic ticket fixture"
+  ]
+}

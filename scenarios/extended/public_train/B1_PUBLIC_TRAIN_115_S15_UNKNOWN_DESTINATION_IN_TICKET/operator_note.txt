@@ -1,0 +1,1 @@
+Ticket aponta destino que nao existe no estado local de recursos.

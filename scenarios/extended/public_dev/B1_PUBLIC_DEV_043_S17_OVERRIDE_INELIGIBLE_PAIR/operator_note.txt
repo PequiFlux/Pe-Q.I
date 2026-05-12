@@ -1,0 +1,1 @@
+Operador tenta selecionar destino aberto sob chuva; override deve falhar fechado.

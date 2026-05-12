@@ -1,0 +1,4 @@
+truck_id,arrival_ts,vehicle_type,status,contract_priority_flag,declared_destination
+TRK-001,2026-04-04T08:20:00+00:00,truck,waiting,false,DST-COV-01
+TRK-002,2026-04-04T08:24:00+00:00,bitrem,waiting,false,DST-COV-01
+TRK-003,2026-04-04T08:28:00+00:00,truck,waiting,true,DST-COV-01

@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 1,
+  "document_template_id": "S05_CONTRACT_PRIORITY-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "blocked_resource"
+  ],
+  "scenario_family": "S05_CONTRACT_PRIORITY",
+  "scenario_id": "B1_PUBLIC_DEV_005_S05_CONTRACT_PRIORITY",
+  "sha256": "c8913dd3fe2629a9ee35d41f320ab0962e34755cf28fb17f46c0171e308e5d62",
+  "source_case_id": "S05_CONTRACT_PRIORITY",
+  "split": "public_dev"
+}

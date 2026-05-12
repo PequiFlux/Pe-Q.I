@@ -1,0 +1,31 @@
+[
+  {
+    "resource_id": "DST-DRY-01",
+    "status": "available",
+    "capacity_pct": 85,
+    "resource_type": "covered_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
+  },
+  {
+    "resource_id": "DST-WET-01",
+    "status": "available",
+    "capacity_pct": 85,
+    "resource_type": "wet_load_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry",
+      "wet"
+    ]
+  }
+]

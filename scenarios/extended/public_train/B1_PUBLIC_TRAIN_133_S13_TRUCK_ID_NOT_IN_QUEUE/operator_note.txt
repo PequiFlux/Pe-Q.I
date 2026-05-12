@@ -1,0 +1,1 @@
+Documento claro, mas placa nao aparece na fila operacional.

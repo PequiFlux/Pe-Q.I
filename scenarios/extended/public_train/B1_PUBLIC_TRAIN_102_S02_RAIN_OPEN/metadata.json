@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 6,
+  "document_template_id": "S02_RAIN_OPEN-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "jpeg_compression"
+  ],
+  "scenario_family": "S02_RAIN_OPEN",
+  "scenario_id": "B1_PUBLIC_TRAIN_102_S02_RAIN_OPEN",
+  "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+  "source_case_id": "S02_RAIN_OPEN",
+  "split": "public_train"
+}

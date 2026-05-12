@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 6,
+  "document_template_id": "S04_CONVEYOR_DOWN-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "ocr_noise"
+  ],
+  "scenario_family": "S04_CONVEYOR_DOWN",
+  "scenario_id": "B1_PUBLIC_TRAIN_104_S04_CONVEYOR_DOWN",
+  "sha256": "456e03cc356daea2f4fe990ed23efc4374a3328a7a6447eae39cdf10da81c2ea",
+  "source_case_id": "S04_CONVEYOR_DOWN",
+  "split": "public_train"
+}

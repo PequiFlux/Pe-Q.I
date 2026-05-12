@@ -1,0 +1,1 @@
+Supervisor pode escolher um par elegivel nao-top desde que registre motivo.

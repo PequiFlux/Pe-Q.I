@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 1,
+  "document_template_id": "S11_IMAGE_ROTATED_WET_LOAD-template",
+  "label_quality": "reviewed",
+  "modality": "png",
+  "perturbation_recipe": [
+    "unknown_destination",
+    "rotation_90"
+  ],
+  "scenario_family": "S11_IMAGE_ROTATED_WET_LOAD",
+  "scenario_id": "B1_PUBLIC_DEV_011_S11_IMAGE_ROTATED_WET_LOAD",
+  "sha256": "538c3c0303878a86d5d12736122608ad8f8e28877065714812992bf8441b6668",
+  "source_case_id": "S11_IMAGE_ROTATED_WET_LOAD",
+  "split": "public_dev"
+}

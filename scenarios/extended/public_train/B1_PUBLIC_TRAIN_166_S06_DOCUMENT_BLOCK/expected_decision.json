@@ -1,0 +1,8 @@
+{
+  "expected_status": "REVIEW_REQUIRED",
+  "acceptable_trucks": [null],
+  "acceptable_destinations": [null],
+  "required_constraints": [],
+  "fifo_break_expected": false,
+  "expected_primary_exception": "DOCUMENT_BLOCK"
+}
