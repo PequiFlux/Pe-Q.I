@@ -6,7 +6,7 @@ Atualizado em: 2026-05-05
 
 | Ferramenta | Status | Observação |
 |---|---|---|
-| Serena | parcial | CLI encontrada em `/home/marcusvinicius/.local/bin/serena`; `serena project health-check` gerou `.serena/project.yml`, mas falhou ao tentar gravar `/home/marcusvinicius/.serena/serena_config.yml` fora do sandbox |
+| Serena | parcial | CLI encontrada em `/home/marcusvinicius/.local/bin/serena`; qualquer `.serena/` do projeto deve ficar como estado local de tooling, fora do versionamento; a escrita em `/home/marcusvinicius/.serena/serena_config.yml` fora do sandbox continuou bloqueada |
 | Graphify | ok | CLI encontrada em `/home/marcusvinicius/.local/bin/graphify` |
 | code-review-graph | ok | CLI encontrada em `/home/marcusvinicius/.local/bin/code-review-graph`; build executado com 91 arquivos, 497 nodes e 2937 edges |
 | Black | ok | Declarado em `requirements-dev.txt`/`pyproject.toml`; formatador executado em `app`, `bench`, `tests` e `scripts` pelo `scripts/check-quality.sh` |

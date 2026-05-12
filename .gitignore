@@ -23,5 +23,6 @@ test-results/
 .env
 .env.*
 .gstack/
+.serena/
 .codex
 .codex/
