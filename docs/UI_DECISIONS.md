@@ -15,6 +15,10 @@ A primeira tela segue quatro blocos:
 3. Ação do operador: aprovar, bloquear ou sobrescrever com motivo.
 4. Auditoria técnica: JSON, matriz de validação, sequência de tools solicitadas pelo Gemma, hashes, regras disparadas e latência.
 
+### Idioma da interface
+
+A sidebar oferece `Português` e `English`. A seleção troca a cópia operacional principal da tela, incluindo hero, entrada operacional, botões, mensagens de fonte, notas de runtime e cabeçalhos de resultado. Payload técnico, IDs de cenário, nomes de regras, nomes de tools e JSON de auditoria permanecem canônicos para evitar drift entre UI, testes e benchmark.
+
 ### Demo discreta
 
 A UI mantém comandos auxiliares no cabeçalho da entrada operacional: `Carregar exemplo`, `Carregar e analisar exemplo` e `Limpar campos`. O exemplo preenche o pacote com um caso versionado do manifest e permite que avaliadores executem o fluxo como usuários finais. A demo não deve transformar a tela principal em benchmark, modo de banca ou painel comparativo.

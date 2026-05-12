@@ -16,6 +16,7 @@ Esta pasta converte o `technical_blueprint.md` em documentação operacional, mo
 - [`LIMITATIONS.md`](./LIMITATIONS.md): limites explícitos do protótipo e claims não permitidos
 - [`UI_DECISIONS.md`](./UI_DECISIONS.md): decisões de interface para operador, FIFO e auditoria
 - [`technical_blueprint.md`](./technical_blueprint.md): ponte curta para o blueprint canônico da raiz
+- [`../README.en.md`](../README.en.md): versão pública em inglês do README principal
 
 ## Regra de precedência
 

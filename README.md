@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/PequiFlux/Pe-Q.I/actions/workflows/ci.yml/badge.svg)](https://github.com/PequiFlux/Pe-Q.I/actions/workflows/ci.yml)
 
+Idiomas: **Português** | [English](README.en.md)
+
 > Copiloto multimodal, local-first e auditável para decisões de despacho de pátio.
 
 O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino despachar** quando o FIFO puro já não é suficiente. É um **working proof-of-concept técnico** — reproduzível, auditável e benchmarkável — construído para a Gemma 4 Good Hackathon.
@@ -358,6 +360,50 @@ Se precisar forçar um destino específico:
 
 ```bash
 docker compose run --rm benchmark python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir bench/reports/extended/manual-run
+```
+
+### Avaliação limpa sem vazamento de ticket esperado
+
+O B0 textual pode usar `expected_ticket.json` como fixture de contrato para casos multimodais. Splits limpos de avaliação (`public_dev`, `public_test_frozen`, `private_holdout`) não podem conter esse sidecar em PDF/PNG/JPG, porque isso contaminaria a métrica de parsing multimodal.
+
+Use o guard antes de benchmark limpo:
+
+```bash
+python -m bench.clean_eval \
+  --variant full \
+  --runtime gemma4:e4b \
+  --scenario-dir scenarios/extended/public_test_frozen \
+  --output artifacts/latest/clean_public_test \
+  --fail-on-leakage
+```
+
+Para transformar uma execução em artefatos de submissão, use os módulos de estatística e relatório. O `metrics.json` real do benchmark é aceito diretamente; `bench.reporting` normaliza a variante `full`, avalia gates e grava `metrics.json`, `summary.csv`, `error_analysis.csv` e `report.md`.
+
+```bash
+python -m bench.stats \
+  --baseline artifacts/latest/heuristic_public_test/metrics.json \
+  --candidate artifacts/latest/clean_public_test/metrics.json \
+  --output artifacts/latest/stats_report.json
+
+python -m bench.reporting \
+  --metrics artifacts/latest/clean_public_test/metrics.json \
+  --stats artifacts/latest/stats_report.json \
+  --errors artifacts/latest/clean_public_test/error_analysis.csv \
+  --output artifacts/latest
+```
+
+O workflow `.github/workflows/eval.yml` espelha esse contrato: em PR ele roda a avaliação textual barata e publica artefatos; em execução manual ou agendada ele roda o benchmark limpo com `gemma4:e4b`, publica `artifacts/latest` e falha quando `submission_ready` é falso. Para runner externo, configure `GEMMA_BASE_URL` nos secrets do repositório.
+
+Os artefatos podem ser inspecionados na página Streamlit `Benchmark dashboard`, carregada de `app/ui/pages/benchmark_dashboard.py`, e nos notebooks mínimos:
+
+- `notebooks/01_baselines.ipynb`
+- `notebooks/02_multimodal_parsing_eval.ipynb`
+- `notebooks/03_robustness.ipynb`
+
+Atalho de teste:
+
+```bash
+make leakage-guard
 ```
 
 ### Setup do Gemma (necessário para `make demo` e benchmark com runtime Ollama; automático em `make ui`)
