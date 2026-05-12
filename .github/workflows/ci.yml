@@ -33,6 +33,12 @@ jobs:
       - name: Pytest
         run: pytest -q
 
+      - name: Expected ticket leakage guard
+        run: pytest -q tests/scenarios/test_no_expected_ticket_leakage.py
+
+      - name: Extended B1 pack schema
+        run: pytest -q tests/scenarios/test_extended_pack_schema.py
+
       - name: Blueprint audit
         run: python -m app.cli.blueprint_audit
 

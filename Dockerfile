@@ -42,10 +42,12 @@ COPY --chown=pequiflux:pequiflux app app
 COPY --chown=pequiflux:pequiflux bench bench
 COPY --chown=pequiflux:pequiflux data data
 COPY --chown=pequiflux:pequiflux docs docs
+COPY --chown=pequiflux:pequiflux notebooks notebooks
 COPY --chown=pequiflux:pequiflux scenarios scenarios
 COPY --chown=pequiflux:pequiflux scripts scripts
 COPY --chown=pequiflux:pequiflux tests tests
-COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md README.md Dockerfile compose.yaml ./
+COPY --chown=pequiflux:pequiflux .github/workflows .github/workflows
+COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md README.md README.en.md Dockerfile compose.yaml ./
 
 USER pequiflux
 
