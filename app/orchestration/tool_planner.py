@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from time import perf_counter
@@ -7,7 +8,7 @@ from typing import Any
 
 from app.domain.enums import FlowState
 from app.domain.errors import PequiFluxError
-from app.domain.models import AuditRecord, RankedCandidates, ValidationResult
+from app.domain.models import AuditRecord, RankedCandidates, ToolCallIntent, ValidationResult
 from app.gemma.adapter import GemmaAdapter
 from app.gemma.tool_gateway import ToolGateway, ToolLocalIds, available_tools_for_state
 from app.gemma.tool_schemas import TOOL_SCHEMAS
@@ -58,26 +59,34 @@ def execute_planned_tool(
 
     error_tool_name = allowed_tools[0]
     choose_t0 = perf_counter()
-    try:
-        intent = session.gemma_adapter.choose_tool(
-            request_id=session.request_id,
-            current_state=session.state_machine.current_state.value,
-            allowed_tools=allowed_tools,
-            context_summary=context_summary,
-        )
-    except PequiFluxError as exc:
-        session.timers[f"choose_tool_{error_tool_name}"] = int((perf_counter() - choose_t0) * 1000)
-        session.tool_records.append(
-            {
-                "tool_name": error_tool_name,
-                "request_id": session.request_id,
-                "state": session.state_machine.current_state.value,
-                "status": "error",
-                "purpose": "",
-                "error_code": exc.code,
-            }
-        )
-        raise
+    intent = _single_tool_fast_intent(
+        request_id=session.request_id,
+        allowed_tools=allowed_tools,
+        context_summary=context_summary,
+    )
+    if intent is None:
+        try:
+            intent = session.gemma_adapter.choose_tool(
+                request_id=session.request_id,
+                current_state=session.state_machine.current_state.value,
+                allowed_tools=allowed_tools,
+                context_summary=context_summary,
+            )
+        except PequiFluxError as exc:
+            session.timers[f"choose_tool_{error_tool_name}"] = int(
+                (perf_counter() - choose_t0) * 1000
+            )
+            session.tool_records.append(
+                {
+                    "tool_name": error_tool_name,
+                    "request_id": session.request_id,
+                    "state": session.state_machine.current_state.value,
+                    "status": "error",
+                    "purpose": "",
+                    "error_code": exc.code,
+                }
+            )
+            raise
 
     session.timers[f"choose_tool_{intent.tool_name}"] = int((perf_counter() - choose_t0) * 1000)
     session.tool_records.append(
@@ -147,6 +156,23 @@ def execute_planned_tool(
     )
     session.executed_tools.add(intent.tool_name)
     return ToolExecutionStep(tool_name=intent.tool_name, result=result)
+
+
+def _single_tool_fast_intent(
+    *,
+    request_id: str,
+    allowed_tools: list[str],
+    context_summary: str,
+) -> ToolCallIntent | None:
+    if os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "").strip().lower() != "ollama":
+        return None
+    if len(allowed_tools) != 1:
+        return None
+    return ToolCallIntent(
+        tool_name=allowed_tools[0],
+        request_id=request_id,
+        purpose=f"Single allowed tool under whitelist. {context_summary}",
+    )
 
 
 def run_validation_and_ranking_plan(

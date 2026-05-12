@@ -113,6 +113,19 @@ def test_build_payload_row_and_expected_match_for_full_payload() -> None:
     assert row["tool_path"] == "validate_hard_constraints>rank_candidates>generate_audit_payload"
     assert row["tool_error_count"] == 0
     assert row["planner_step_count"] == 3
+    assert set(row) >= {
+        "latency_ms_preprocess",
+        "latency_ms_model",
+        "latency_ms_rules",
+        "latency_ms_audit",
+        "latency_ms_total",
+    }
+    assert row["latency_ms_total"] == (
+        row["latency_ms_preprocess"]
+        + row["latency_ms_model"]
+        + row["latency_ms_rules"]
+        + row["latency_ms_audit"]
+    )
 
 
 def test_audit_complete_is_status_aware_for_preview_ready_payload() -> None:
@@ -176,6 +189,13 @@ def test_audit_complete_is_status_aware_for_blocked_payload() -> None:
     assert payload.audit_record is not None
     assert payload.audit_record.hard_constraints_checked == []
     assert audit_complete(payload) is True
+    assert tool_call_metrics(payload) == {
+        "tool_call_count": 4,
+        "tool_call_success": True,
+        "tool_path": "validate_hard_constraints",
+        "tool_error_count": 0,
+        "planner_step_count": 2,
+    }
 
 
 def test_audit_complete_requires_terminal_context_for_blocked_payload() -> None:

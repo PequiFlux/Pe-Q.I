@@ -19,6 +19,10 @@ def test_variant_metrics_include_declared_submission_metrics() -> None:
             "tool_call_count": 6,
             "planner_step_count": 3,
             "tool_error_count": 0,
+            "latency_ms_preprocess": 1,
+            "latency_ms_model": 2,
+            "latency_ms_rules": 3,
+            "latency_ms_audit": 4,
             "latency_ms_total": 10,
         },
         {
@@ -35,6 +39,10 @@ def test_variant_metrics_include_declared_submission_metrics() -> None:
             "tool_call_count": 1,
             "planner_step_count": 1,
             "tool_error_count": 1,
+            "latency_ms_preprocess": 3,
+            "latency_ms_model": 4,
+            "latency_ms_rules": 5,
+            "latency_ms_audit": 18,
             "latency_ms_total": 30,
         },
     ]
@@ -54,3 +62,30 @@ def test_variant_metrics_include_declared_submission_metrics() -> None:
     assert metrics["tool_error_rate"] == 0.5
     assert metrics["latency_p50"] == 10
     assert metrics["latency_p95"] == 30
+    assert metrics["latency_ms_preprocess_p95"] == 3
+    assert metrics["latency_ms_model_p95"] == 4
+    assert metrics["latency_ms_rules_p95"] == 5
+    assert metrics["latency_ms_audit_p95"] == 18
+
+
+def test_variant_metrics_skip_unavailable_ticket_accuracy_labels() -> None:
+    metrics = compute_variant_metrics(
+        [
+            {
+                "passed": True,
+                "decision_match_at_1": True,
+                "constraint_violation": False,
+                "ticket_field_accuracy": None,
+                "expected_primary_exception": "MANUAL_REVIEW_HINT",
+                "observed_primary_exception": "MANUAL_REVIEW_HINT",
+                "fifo_break": False,
+                "fifo_break_expected": False,
+                "audit_complete": True,
+                "tool_call_success": True,
+                "tool_error_count": 0,
+                "latency_ms_total": 0,
+            }
+        ]
+    )
+
+    assert metrics["ticket_field_accuracy"] == 0.0
