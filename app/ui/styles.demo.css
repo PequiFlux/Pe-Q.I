@@ -52,6 +52,8 @@ div[data-testid="stButton"] button p {
   .readiness-grid,
   .status-grid,
   .story-grid,
+  .demo-proof,
+  .demo-proof-grid,
   .decision-story,
   .decision-story.single {
     grid-template-columns: 1fr;

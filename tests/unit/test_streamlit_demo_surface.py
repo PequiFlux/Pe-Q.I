@@ -61,6 +61,7 @@ def _preview_payload() -> FrontEndPayload:
                 "notes": [],
             },
             "latency_ms": {
+                "parse_ticket_document": 1461,
                 "validate_hard_constraints": 7,
                 "rank_candidates": 5,
                 "generate_audit_payload": 3,
@@ -103,10 +104,34 @@ def _preview_payload() -> FrontEndPayload:
                 "fifo_break": True,
                 "provenance": [],
                 "latencies_ms": {
+                    "parse_ticket_document": 1461,
                     "validate_hard_constraints": 7,
                     "rank_candidates": 5,
                     "generate_audit_payload": 3,
                 },
+                "tool_calls": [
+                    {
+                        "tool_name": "validate_hard_constraints",
+                        "request_id": "REQ-UI-001",
+                        "state": "constraints_ready",
+                        "status": "executed",
+                        "purpose": "Check hard constraints",
+                    },
+                    {
+                        "tool_name": "rank_candidates",
+                        "request_id": "REQ-UI-001",
+                        "state": "ranking_ready",
+                        "status": "executed",
+                        "purpose": "Rank candidate trucks",
+                    },
+                    {
+                        "tool_name": "generate_audit_payload",
+                        "request_id": "REQ-UI-001",
+                        "state": "audit_ready",
+                        "status": "executed",
+                        "purpose": "Build audit payload",
+                    },
+                ],
                 "source_hashes": {"queue_csv_ref": "queue.csv", "ticket_ref": "ticket.txt"},
             },
         }
@@ -125,6 +150,10 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
         "Carregar e analisar exemplo",
         "Limpar campos",
         "Ver auditoria técnica",
+        "Prova Gemma 4",
+        "Gemma 4 executando no fluxo real",
+        "Tools executadas",
+        "Modo teste ativo",
         "Disponível após carregar a fila de caminhões.",
         "Defina destinos disponíveis e restrições do turno.",
     ]:
@@ -183,6 +212,30 @@ def test_primary_result_and_technical_cards_hide_raw_internal_status_labels() ->
     assert ">skipped<" not in tools_html
 
 
+def test_gemma_proof_card_surfaces_real_runtime_evidence(monkeypatch) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
+    monkeypatch.setenv("GEMMA_MODEL", "gemma4:e2b")
+
+    html = streamlit_app._gemma_proof_card(_preview_payload(), "pt")
+
+    assert "Prova Gemma 4 para a banca" in html
+    assert "Gemma 4 executando no fluxo real" in html
+    assert "Ollama · gemma4:e2b" in html
+    assert "1461 ms" in html
+    assert "3 executadas" in html
+    assert "validate_hard_constraints -&gt; rank_candidates -&gt; generate_audit_payload" in html
+    assert "Fail closed" in html
+
+
+def test_gemma_proof_card_warns_when_test_runtime_is_active(monkeypatch) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+
+    html = streamlit_app._gemma_proof_card(_preview_payload(), "pt")
+
+    assert "Modo teste ativo" in html
+    assert "Não use modo teste para a gravação da banca." in html
+
+
 def test_validation_heatmap_uses_accented_portuguese_label() -> None:
     heatmap_html = _validation_heatmap(_preview_payload())
 
@@ -209,6 +262,7 @@ def test_demo_css_hides_streamlit_page_nav_and_styles_sidebar_language() -> None
     assert '[data-testid="stPageLink"]' in base_css
     assert 'section[data-testid="stSidebar"] div[data-testid="stRadio"]' in base_css
     assert "yc-bancada-kicker" in base_css
+    assert "demo-proof" in base_css
     assert "grid-template-columns: 1fr;" in base_css
     assert "max-width: 1040px" in base_css
     assert "max-width: 100%;" in base_css

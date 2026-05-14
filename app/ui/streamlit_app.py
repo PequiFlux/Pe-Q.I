@@ -18,7 +18,7 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.components.common import escape, runtime_label
+from app.ui.components.common import escape, runtime_label, runtime_mode
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
@@ -785,6 +785,7 @@ def _render_outputs(
         unsafe_allow_html=True,
     )
 
+    st.markdown(_gemma_proof_card(payload, lang), unsafe_allow_html=True)
     render_status_bar(payload, lang=lang)
     st.markdown(recommended_decision_card(payload, lang=lang), unsafe_allow_html=True)
     st.markdown(queue_stack_card(payload, request, lang=lang), unsafe_allow_html=True)
@@ -801,6 +802,70 @@ def _render_outputs(
         render_operator_action(payload, lang=lang)
 
     _render_technical_audit_expander(payload, request, case, lang)
+
+
+def _gemma_proof_card(payload: FrontEndPayload, lang: Language) -> str:
+    mode = runtime_mode()
+    is_live = mode == "ollama"
+    title_key = "proof.title.live" if is_live else "proof.title.test"
+    copy_key = "proof.copy.live" if is_live else "proof.copy.test"
+    tone = "live" if is_live else "test"
+    executed_tools = _executed_tool_names(payload)
+    tool_path = " -> ".join(executed_tools) if executed_tools else t("proof.none", lang)
+    parse_latency = payload.latency_ms.get("parse_ticket_document")
+    parse_value = (
+        f"{parse_latency} ms" if parse_latency is not None else t("proof.not_recorded", lang)
+    )
+    tools_value = (
+        t("proof.tools.value", lang, count=len(executed_tools))
+        if executed_tools
+        else t("proof.none", lang)
+    )
+    status_copy = t("proof.fail_closed.copy", lang)
+    if not is_live:
+        status_copy = t("proof.warning.text", lang)
+    return f"""
+    <section class="demo-proof {tone}">
+      <div class="demo-proof-main">
+        <span>{escape(t("proof.kicker", lang))}</span>
+        <strong>{escape(t(title_key, lang))}</strong>
+        <p>{escape(t(copy_key, lang))}</p>
+      </div>
+      <div class="demo-proof-grid">
+        <div class="demo-proof-metric">
+          <span>{escape(t("proof.runtime", lang))}</span>
+          <strong>{escape(runtime_label())}</strong>
+          <p>{escape(_runtime_mode_note(lang))}</p>
+        </div>
+        <div class="demo-proof-metric">
+          <span>{escape(t("proof.parse", lang))}</span>
+          <strong>{escape(parse_value)}</strong>
+          <p>{escape("parse_ticket_document")}</p>
+        </div>
+        <div class="demo-proof-metric">
+          <span>{escape(t("proof.tools", lang))}</span>
+          <strong>{escape(tools_value)}</strong>
+          <p>{escape(tool_path)}</p>
+        </div>
+        <div class="demo-proof-metric">
+          <span>{escape(t("proof.fail_closed", lang))}</span>
+          <strong>{escape(t("proof.fail_closed.value", lang))}</strong>
+          <p>{escape(status_copy)}</p>
+        </div>
+      </div>
+    </section>
+    """
+
+
+def _executed_tool_names(payload: FrontEndPayload) -> list[str]:
+    if payload.audit_record is None:
+        return []
+    executed = [
+        record.tool_name
+        for record in payload.audit_record.tool_calls
+        if record.status == "executed"
+    ]
+    return list(dict.fromkeys(executed))
 
 
 def _render_technical_audit_expander(

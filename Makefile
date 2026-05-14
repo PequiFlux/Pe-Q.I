@@ -1,4 +1,4 @@
-.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
+.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text demo-ready test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
@@ -8,9 +8,10 @@ help:
 	@echo "  make demo       Run the full Ollama/Gemma scenario demo via Docker Compose"
 	@echo "  make demo-gpu   Run the full Ollama/Gemma scenario demo with GPU access"
 	@echo "  make demo-text  Run the reproducible text-runtime scenario demo"
-	@echo "  make ui         Start full Ollama/Gemma Streamlit UI in background on http://localhost:8501"
+	@echo "  make ui         Start full Ollama/Gemma Streamlit UI in background; auto-uses GPU when available"
 	@echo "  make ui-gpu     Start full Ollama/Gemma Streamlit UI with GPU access"
 	@echo "  make ui-text    Start text-runtime Streamlit UI on http://localhost:8501"
+	@echo "  make demo-ready Start the judge demo UI and run the real scenario smoke test"
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
@@ -30,16 +31,30 @@ demo-text:
 
 ui:
 	docker compose stop ui-text
-	docker compose --profile ui up -d ui
-	docker compose ps
+	@if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi >/dev/null 2>&1; then \
+		echo "NVIDIA GPU detected; starting Gemma/Ollama UI with compose.gpu.yaml"; \
+		$(COMPOSE_GPU) --profile ui up -d --build ui; \
+		$(COMPOSE_GPU) ps; \
+	else \
+		echo "No NVIDIA GPU detected; starting Gemma/Ollama UI with CPU Compose"; \
+		docker compose --profile ui up -d --build ui; \
+		docker compose ps; \
+	fi
 
 ui-gpu:
 	docker compose stop ui-text
-	$(COMPOSE_GPU) --profile ui up -d ui
+	$(COMPOSE_GPU) --profile ui up -d --build ui
 	$(COMPOSE_GPU) ps
 
 ui-text:
-	docker compose --profile ui-text up ui-text
+	docker compose --profile ui-text up --build ui-text
+
+demo-ready: ui
+	@if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi >/dev/null 2>&1; then \
+		$(COMPOSE_GPU) run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO); \
+	else \
+		docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO); \
+	fi
 
 test:
 	docker build --target test -t pequiflux-yard-copilot:test .
