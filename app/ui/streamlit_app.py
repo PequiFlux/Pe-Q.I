@@ -589,7 +589,7 @@ def _render_input_actions(example_case: dict[str, Any], lang: Language) -> None:
         """,
         unsafe_allow_html=True,
     )
-    left, middle, right = st.columns([1, 1, 0.5], gap="small")
+    left, middle, right = st.columns([1, 1.35, 0.7], gap="small")
     with left:
         if st.button(t("button.load", lang), width="stretch"):
             load_case_into_state(INPUT_KEYS, example_case)

@@ -10,6 +10,7 @@ from app.ui.components.common import (
     chip,
     confidence_value,
     constraint_failure_summary,
+    display_status,
     document_interpreter_badge,
     document_interpreter_title,
     escape,
@@ -47,7 +48,7 @@ def recommended_decision_card(payload: FrontEndPayload, lang: Language = "pt") -
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile(t("decision.tile.status", lang), status, t("decision.tile.status.detail", lang))}
+        {story_tile(t("decision.tile.status", lang), display_status(status), t("decision.tile.status.detail", lang))}
         {story_tile(t("decision.tile.truck", lang), recommended_truck, t("decision.tile.destination", lang, destination=destination), "action")}
         {story_tile(t("decision.tile.reason", lang), t("decision.tile.reason.value", lang), reason_detail_label(payload.reason_summary), "proof")}
       </div>
@@ -133,7 +134,7 @@ def _queue_stack_state(
         return "promoted", t("queue.called", lang), t("queue.called.detail", lang, before=before)
     if diff_entry and diff_entry.decision == "blocked":
         rules = truck_failure_rules(payload, truck_id)
-        detail = ", ".join(rules[:3]) if rules else diff_entry.reason
+        detail = ", ".join(rules[:3]) if rules else reason_detail_label(diff_entry.reason)
         return "blocked", t("queue.blocked", lang), detail
     if truck_id == first_id and truck_id != recommended_id:
         rules = truck_failure_rules(payload, truck_id)
@@ -141,9 +142,9 @@ def _queue_stack_state(
             return "blocked", t("queue.blocked", lang), ", ".join(rules[:3])
         return "waiting", t("queue.waiting", lang), t("queue.waiting.detail", lang)
     if diff_entry and diff_entry.decision == "unchanged":
-        return "waiting", t("queue.waiting", lang), diff_entry.reason
+        return "waiting", t("queue.waiting", lang), reason_detail_label(diff_entry.reason)
     if diff_entry and diff_entry.decision == "shifted":
-        return "neutral", t("queue.shifted", lang), diff_entry.reason
+        return "neutral", t("queue.shifted", lang), reason_detail_label(diff_entry.reason)
     return "neutral", t("queue.unchanged", lang), t("queue.unchanged.detail", lang)
 
 

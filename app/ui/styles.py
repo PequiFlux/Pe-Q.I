@@ -7,6 +7,7 @@ import streamlit as st
 STYLE_PATHS = [
     Path(__file__).with_name("styles.base.css"),
     Path(__file__).with_name("styles.surface.css"),
+    Path(__file__).with_name("styles.demo.css"),
 ]
 
 

@@ -77,7 +77,7 @@ def _heatmap_row(
             label = "selecionado"
         elif entry.get("eligible"):
             state = "eligible"
-            label = "elegivel"
+            label = "elegível"
         else:
             state = "blocked"
             label = ", ".join(failures) or "bloqueado"
