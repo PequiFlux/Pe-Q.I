@@ -5,16 +5,17 @@ from typing import Any
 import streamlit as st
 
 from app.domain.models import FrontEndPayload
-from app.ui.components.common import chip, copy_text, escape
+from app.ui.components.common import chip, escape
+from app.ui.i18n import Language, t
 
 
-def render_validation_matrix(payload: FrontEndPayload) -> None:
-    heatmap = _validation_heatmap(payload)
+def render_validation_matrix(payload: FrontEndPayload, lang: Language = "pt") -> None:
+    heatmap = _validation_heatmap(payload, lang=lang)
     st.markdown(
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>{escape(copy_text("Validation heatmap", "Heatmap de validação"))}</h3><p>{escape(copy_text("Trucks in rows, destinations in columns: green eligible, red blocked.", "Caminhões nas linhas, destinos nas colunas: verde elegível, vermelho bloqueado."))}</p></div>
+            <div><h3>{escape(t("heatmap.title", lang))}</h3><p>{escape(t("heatmap.copy", lang))}</p></div>
             {chip("HC-01..HC-07", "green")}
           </div>
           {heatmap}
@@ -24,9 +25,9 @@ def render_validation_matrix(payload: FrontEndPayload) -> None:
     )
 
 
-def _validation_heatmap(payload: FrontEndPayload) -> str:
+def _validation_heatmap(payload: FrontEndPayload, lang: Language = "pt") -> str:
     if payload.audit_record is None or not payload.audit_record.hard_constraints_checked:
-        return f'<div class="heatmap-empty">{escape(copy_text("Validation unavailable for this state.", "Validação indisponível para este estado."))}</div>'
+        return f'<div class="heatmap-empty">{escape(t("heatmap.empty", lang))}</div>'
     checks = payload.audit_record.hard_constraints_checked
     selected_pair = None
     if payload.recommended_truck and payload.recommended_destination:
@@ -44,11 +45,13 @@ def _validation_heatmap(payload: FrontEndPayload) -> str:
     header = "".join(
         f'<div class="heatmap-head">{escape(destination)}</div>' for destination in destinations
     )
-    rows = "".join(_heatmap_row(truck, destinations, by_pair, selected_pair) for truck in trucks)
+    rows = "".join(
+        _heatmap_row(truck, destinations, by_pair, selected_pair, lang=lang) for truck in trucks
+    )
     return f"""
     <div class="heatmap-wrap">
       <div class="heatmap-grid" style="grid-template-columns: 112px repeat({len(destinations)}, minmax(118px, 1fr));">
-        <div class="heatmap-corner">{escape(copy_text("Queue", "Fila"))}</div>
+        <div class="heatmap-corner">{escape(t("heatmap.queue", lang))}</div>
         {header}
         {rows}
       </div>
@@ -61,6 +64,7 @@ def _heatmap_row(
     destinations: list[str],
     by_pair: dict[tuple[str, str], dict[str, Any]],
     selected_pair: tuple[str, str] | None,
+    lang: Language = "pt",
 ) -> str:
     cells = []
     for destination in destinations:
@@ -74,13 +78,13 @@ def _heatmap_row(
         is_selected = selected_pair == (truck, destination)
         if is_selected:
             state = "selected"
-            label = copy_text("selected", "selecionado")
+            label = t("heatmap.selected", lang)
         elif entry.get("eligible"):
             state = "eligible"
-            label = copy_text("eligible", "elegível")
+            label = t("heatmap.eligible", lang)
         else:
             state = "blocked"
-            label = ", ".join(failures) or copy_text("blocked", "bloqueado")
+            label = ", ".join(failures) or t("heatmap.blocked", lang)
         cells.append(f'<div class="heat-cell {state}">{escape(label)}</div>')
     return f"""
     <div class="heatmap-truck">{escape(truck)}</div>

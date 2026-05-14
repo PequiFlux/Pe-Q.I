@@ -8,7 +8,7 @@ help:
 	@echo "  make demo       Run the full Ollama/Gemma scenario demo via Docker Compose"
 	@echo "  make demo-gpu   Run the full Ollama/Gemma scenario demo with GPU access"
 	@echo "  make demo-text  Run the reproducible text-runtime scenario demo"
-	@echo "  make ui         Start full Ollama/Gemma Streamlit UI on http://localhost:8501"
+	@echo "  make ui         Start full Ollama/Gemma Streamlit UI in background on http://localhost:8501"
 	@echo "  make ui-gpu     Start full Ollama/Gemma Streamlit UI with GPU access"
 	@echo "  make ui-text    Start text-runtime Streamlit UI on http://localhost:8501"
 	@echo "  make test       Build and run the Docker test target"
@@ -29,10 +29,14 @@ demo-text:
 	docker compose run --rm demo-text python -m app.cli.run_scenario --scenario $(SCENARIO)
 
 ui:
-	docker compose --profile ui up ui
+	docker compose stop ui-text
+	docker compose --profile ui up -d ui
+	docker compose ps
 
 ui-gpu:
-	$(COMPOSE_GPU) --profile ui up ui
+	docker compose stop ui-text
+	$(COMPOSE_GPU) --profile ui up -d ui
+	$(COMPOSE_GPU) ps
 
 ui-text:
 	docker compose --profile ui-text up ui-text

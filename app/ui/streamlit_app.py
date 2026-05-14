@@ -78,7 +78,7 @@ def main() -> None:
     st.set_page_config(
         page_title="PequiFlux Yard Copilot",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
     inject_styles()
 
@@ -122,11 +122,16 @@ def main() -> None:
         request = None
 
     active_case_id = st.session_state.get("active_case", "UI_INTERACTIVE")
+    has_result = payload is not None and request is not None
+    if has_result:
+        case = case_by_id.get(request.scenario_id, {"scenario_id": request.scenario_id})
+        _render_outputs(payload, request, case, lang)
+
     inputs = _render_operator_input(
         selected_case=selected_case,
         lang=lang,
-        expanded=True,
-        use_expander=False,
+        expanded=not has_result,
+        use_expander=has_result,
     )
 
     if inputs["submitted"]:
@@ -140,13 +145,10 @@ def main() -> None:
         payload = run_payload(request)
         st.session_state["last_payload"] = payload
         st.session_state["last_request"] = request
+        st.rerun()
 
-    if payload is None or request is None:
+    if not has_result:
         _render_empty_state(lang)
-        return
-
-    case = case_by_id.get(request.scenario_id, {"scenario_id": request.scenario_id})
-    _render_outputs(payload, request, case, lang)
 
 
 def _render_intro(lang: Language) -> None:
@@ -157,7 +159,7 @@ def _render_intro(lang: Language) -> None:
             <div class="yc-hero-inner">
               <div>
                 <div class="yc-brand">{escape(t("hero.eyebrow", lang))}</div>
-                <h1 class="yc-hero-title">{t("hero.title.html", lang)}</h1>
+                <div class="yc-hero-title">{t("hero.title.html", lang)}</div>
                 <p class="yc-hero-desc">{escape(t("hero.copy", lang))}</p>
               </div>
               <div class="yc-steps">
@@ -584,32 +586,31 @@ def _render_input_actions(example_case: dict[str, Any], lang: Language) -> None:
         """,
         unsafe_allow_html=True,
     )
-    left, middle, right = st.columns([1, 1.35, 0.7], gap="small")
-    with left:
-        if st.button(t("button.load", lang), width="stretch"):
-            load_case_into_state(INPUT_KEYS, example_case)
-            st.session_state["active_case"] = example_case["scenario_id"]
-            st.rerun()
-    with middle:
-        if st.button(t("button.load_analyze", lang), width="stretch"):
-            load_case_into_state(INPUT_KEYS, example_case)
-            st.session_state["active_case"] = example_case["scenario_id"]
-            st.session_state[INPUT_KEYS["analyze_example"]] = True
-            st.rerun()
-    with right:
-        if st.button(t("button.clear", lang), width="stretch"):
-            clear_input_state(INPUT_KEYS)
-            st.rerun()
+    if st.button(t("button.load", lang), width="stretch"):
+        load_case_into_state(INPUT_KEYS, example_case)
+        st.session_state["active_case"] = example_case["scenario_id"]
+        st.rerun()
+    if st.button(t("button.load_analyze", lang), type="primary", width="stretch"):
+        load_case_into_state(INPUT_KEYS, example_case)
+        st.session_state["active_case"] = example_case["scenario_id"]
+        st.session_state[INPUT_KEYS["analyze_example"]] = True
+        st.rerun()
+    if st.button(t("button.clear", lang), width="stretch"):
+        clear_input_state(INPUT_KEYS)
+        st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
 
 def _preparation_panel(selected_case: dict[str, Any], lang: Language) -> str:
+    scenario_id = str(selected_case["scenario_id"])
     description = str(selected_case.get("description") or t("prep.no_description", lang))
+    display_title = _case_display_title(selected_case)
     return f"""
     <div class="yc-bancada">
       <div class="yc-bancada-header">
         <div>
-          <div class="yc-bancada-title">{escape(selected_case["scenario_id"])}</div>
+          <div class="yc-bancada-kicker">{escape(scenario_id)}</div>
+          <div class="yc-bancada-title">{escape(display_title)}</div>
           <div class="yc-bancada-subtitle">{escape(description)}</div>
         </div>
       </div>
@@ -639,6 +640,14 @@ def _preparation_panel(selected_case: dict[str, Any], lang: Language) -> str:
       </div>
     </div>
     """
+
+
+def _case_display_title(case: dict[str, Any]) -> str:
+    scenario_id = str(case["scenario_id"])
+    parts = scenario_id.split("_", 1)
+    if len(parts) == 2 and parts[0].startswith("S"):
+        return f"{parts[0]} · {parts[1].replace('_', ' ').lower()}"
+    return scenario_id
 
 
 def _analysis_console(
@@ -800,16 +809,16 @@ def _render_technical_audit_expander(
     case: dict[str, Any],
     lang: Language,
 ) -> None:
-    with st.expander(t("audit.expander", lang), expanded=ui_autorun_enabled()):
-        render_input_evidence(payload, request, case)
-        st.markdown(copilot_timeline_card(payload, request), unsafe_allow_html=True)
+    with st.expander(t("audit.expander", lang), expanded=False):
+        render_input_evidence(payload, request, case, lang=lang)
+        st.markdown(copilot_timeline_card(payload, request, lang=lang), unsafe_allow_html=True)
         left, right = st.columns([1.15, 0.85], gap="large")
         with left:
-            render_validation_matrix(payload)
+            render_validation_matrix(payload, lang=lang)
         with right:
-            render_gemma_context(payload, request)
-            st.markdown(tool_badges_card(payload), unsafe_allow_html=True)
-        render_audit(payload)
+            render_gemma_context(payload, request, lang=lang)
+            st.markdown(tool_badges_card(payload, lang=lang), unsafe_allow_html=True)
+        render_audit(payload, lang=lang)
         st.json(payload.model_dump(mode="json"))
 
 

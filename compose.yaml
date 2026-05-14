@@ -1,10 +1,12 @@
 services:
   gemma:
+    restart: unless-stopped
     image: "${OLLAMA_IMAGE:-ollama/ollama:latest}"
     volumes:
       - gemma-models:/root/.ollama
     environment:
       OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-24h}"
+      OLLAMA_LOAD_TIMEOUT: "${OLLAMA_LOAD_TIMEOUT:-10m}"
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 10s
@@ -34,7 +36,7 @@ services:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
-      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
     command: ["python", "-m", "app.cli.run_scenario", "--scenario", "${SCENARIO:-S10_FIFO_BREAK_JUSTIFIED}"]
     volumes:
       - app-cache:/app/cache
@@ -60,11 +62,11 @@ services:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
-      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
     command: ["python", "-m", "app.cli.prewarm_gemma"]
     volumes:
       - app-cache:/app/cache
-    profiles: ["gemma-setup"]
+    profiles: ["gemma-setup", "ui"]
 
   benchmark:
     build:
@@ -77,7 +79,7 @@ services:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
-      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
     command: ["python", "-m", "app.cli.run_benchmark", "--manifest", "scenarios/manifest.json"]
     volumes:
       - ./bench/reports:/app/bench/reports
@@ -92,17 +94,20 @@ services:
     profiles: ["ci"]
 
   ui:
+    restart: unless-stopped
     build:
       context: .
       target: ui
     depends_on:
       gemma-init:
         condition: service_completed_successfully
+      gemma-prewarm:
+        condition: service_completed_successfully
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
-      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
+      GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
     ports:
       - "8501:8501"
     healthcheck:

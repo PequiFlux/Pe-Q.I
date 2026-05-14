@@ -38,12 +38,13 @@ def render_input_evidence(
     payload: FrontEndPayload,
     request: DecisionRequest,
     case: dict[str, Any],
+    lang: Language = "pt",
 ) -> None:
     left, right = st.columns([0.92, 1.08], gap="large")
     with left:
-        st.markdown(_input_package_card(request, case), unsafe_allow_html=True)
+        st.markdown(_input_package_card(request, case, lang=lang), unsafe_allow_html=True)
     with right:
-        st.markdown(_ticket_preview_card(request), unsafe_allow_html=True)
+        st.markdown(_ticket_preview_card(request, lang=lang), unsafe_allow_html=True)
 
 
 def render_status_bar(payload: FrontEndPayload, lang: Language = "pt") -> None:
@@ -65,7 +66,9 @@ def render_status_bar(payload: FrontEndPayload, lang: Language = "pt") -> None:
             st.markdown(status_card(label, value, note), unsafe_allow_html=True)
 
 
-def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> None:
+def render_gemma_context(
+    payload: FrontEndPayload, request: DecisionRequest, lang: Language = "pt"
+) -> None:
     fields = "".join(
         f"<span>{escape(field)}</span>" for field in payload.gemma_visible_summary.parsed_fields
     )
@@ -85,16 +88,16 @@ def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> 
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>{escape(document_interpreter_title())}</h3><p>{escape(document_interpreter_detail())}</p></div>
-            {chip("avançado", "purple")}
+            <div><h3>{escape(document_interpreter_title(lang))}</h3><p>{escape(document_interpreter_detail(lang))}</p></div>
+            {chip(t("audit.advanced", lang), "purple")}
           </div>
           <div class="field-cloud">{fields}</div>
           <div class="mini-metrics">
             {mini_metric("Runtime", runtime_label())}
-            {mini_metric("Etapa", "parse_ticket_document")}
-            {mini_metric("Tipo do arquivo", request.ticket_content_type)}
+            {mini_metric(t("audit.step", lang), "parse_ticket_document")}
+            {mini_metric(t("audit.file_type", lang), request.ticket_content_type)}
             {mini_metric("Status", audit_status_label(parse_status))}
-            {mini_metric("Confiança", confidence_value(payload))}
+            {mini_metric(t("audit.confidence", lang), confidence_value(payload))}
           </div>
           <pre class="json-preview">{escape(preview)}</pre>
           <ul class="note-list">{notes}</ul>
@@ -162,12 +165,15 @@ def render_operator_action(payload: FrontEndPayload, lang: Language = "pt") -> N
     st.markdown("</article>", unsafe_allow_html=True)
 
 
-def render_audit(payload: FrontEndPayload) -> None:
+def render_audit(payload: FrontEndPayload, lang: Language = "pt") -> None:
     steps = [
-        ("requisição", payload.request_id),
-        ("cenário", payload.scenario_id),
-        ("variante", payload.variant),
-        ("regras", ", ".join(payload.audit_record.fired_rules if payload.audit_record else [])),
+        (t("audit.request", lang), payload.request_id),
+        (t("audit.scenario", lang), payload.scenario_id),
+        (t("audit.variant", lang), payload.variant),
+        (
+            t("audit.rules", lang),
+            ", ".join(payload.audit_record.fired_rules if payload.audit_record else []),
+        ),
     ]
     items = "".join(
         f'<div class="audit-step"><strong>{escape(label)}</strong><span>{escape(value)}</span></div>'
@@ -177,7 +183,7 @@ def render_audit(payload: FrontEndPayload) -> None:
         f"""
         <article class="card">
           <div class="card-head">
-            <div><h3>Trilha auditável</h3><p>Campos mínimos para reconstruir a decisão.</p></div>
+            <div><h3>{escape(t("audit.trail.title", lang))}</h3><p>{escape(t("audit.trail.copy", lang))}</p></div>
             {chip("XAI", "green")}
           </div>
           <div class="audit-list">{items}</div>
@@ -207,17 +213,31 @@ def _ui_sqlite_store() -> SQLiteStore:
     return SQLiteStore(path=os.getenv("PEQUIFLUX_SQLITE_PATH", "var/db/pequiflux.db"))
 
 
-def _input_package_card(request: DecisionRequest, case: dict[str, Any]) -> str:
+def _input_package_card(
+    request: DecisionRequest, case: dict[str, Any], lang: Language = "pt"
+) -> str:
     resources = request.resource_state
     blocked = sum(1 for resource in resources if resource.status.lower() == "blocked")
     available = sum(1 for resource in resources if resource.status.lower() == "available")
     scenario_title = case.get("title") or request.scenario_id
     package_items = [
-        ("cenário", scenario_title),
-        ("variante", request.variant),
-        ("clima", f"{request.weather_state.precipitation}/{request.weather_state.severity}"),
-        ("recursos", f"{len(resources)} totais · {available} livres · {blocked} bloqueados"),
-        ("fila", Path(request.queue_csv_ref).name),
+        (t("audit.scenario", lang), scenario_title),
+        (t("audit.variant", lang), request.variant),
+        (
+            t("audit.weather", lang),
+            f"{request.weather_state.precipitation}/{request.weather_state.severity}",
+        ),
+        (
+            t("audit.resources", lang),
+            t(
+                "audit.resources.value",
+                lang,
+                total=len(resources),
+                available=available,
+                blocked=blocked,
+            ),
+        ),
+        (t("audit.queue", lang), Path(request.queue_csv_ref).name),
         ("ticket", Path(request.ticket_ref).name),
     ]
     items = "".join(
@@ -227,7 +247,7 @@ def _input_package_card(request: DecisionRequest, case: dict[str, Any]) -> str:
     return f"""
     <article class="card input-package">
       <div class="card-head">
-        <div><h3>Pacote operacional</h3><p>Entradas que alimentam Gemma, regras e auditoria.</p></div>
+        <div><h3>{escape(t("audit.package.title", lang))}</h3><p>{escape(t("audit.package.copy", lang))}</p></div>
         {chip("I/O", "green")}
       </div>
       <div class="package-grid">{items}</div>
@@ -235,13 +255,13 @@ def _input_package_card(request: DecisionRequest, case: dict[str, Any]) -> str:
     """
 
 
-def _ticket_preview_card(request: DecisionRequest) -> str:
+def _ticket_preview_card(request: DecisionRequest, lang: Language = "pt") -> str:
     ticket_path = Path(request.ticket_ref)
-    preview = _ticket_preview_text(ticket_path, request.ticket_content_type)
+    preview = _ticket_preview_text(ticket_path, request.ticket_content_type, lang=lang)
     return f"""
     <article class="card ticket-preview">
       <div class="card-head">
-        <div><h3>Ticket recebido</h3><p>Documento bruto ao lado do resumo estruturado do Gemma.</p></div>
+        <div><h3>{escape(t("audit.ticket.title", lang))}</h3><p>{escape(t("audit.ticket.copy", lang))}</p></div>
         {chip(request.ticket_content_type, "purple")}
       </div>
       <div class="document-tile">
@@ -255,16 +275,16 @@ def _ticket_preview_card(request: DecisionRequest) -> str:
     """
 
 
-def _ticket_preview_text(ticket_path: Path, content_type: str) -> str:
+def _ticket_preview_text(ticket_path: Path, content_type: str, lang: Language = "pt") -> str:
     if content_type == "text/plain":
         try:
             text = ticket_path.read_text(encoding="utf-8").strip()
         except OSError:
-            return "Texto indisponível no cache da execução."
-        return " ".join(text.split())[:360] or "Ticket textual vazio."
+            return t("audit.ticket.cache_missing", lang)
+        return " ".join(text.split())[:360] or t("audit.ticket.empty", lang)
     if content_type == "application/pdf":
-        return "PDF encaminhado ao leitor local; a UI não mostra prompt nem OCR bruto."
-    return "Imagem encaminhada ao leitor local; interpretação multimodal ocorre no container."
+        return t("audit.ticket.pdf", lang)
+    return t("audit.ticket.image", lang)
 
 
 def _document_icon(content_type: str) -> str:
@@ -275,43 +295,53 @@ def _document_icon(content_type: str) -> str:
     return "TXT"
 
 
-def copilot_timeline_card(payload: FrontEndPayload, request: DecisionRequest) -> str:
+def copilot_timeline_card(
+    payload: FrontEndPayload, request: DecisionRequest, lang: Language = "pt"
+) -> str:
     steps = [
         (
-            "1. Documento interpretado",
+            t("timeline.document", lang),
             step_status(payload, "parse_ticket_document"),
-            f"Campos: {', '.join(payload.gemma_visible_summary.parsed_fields[:5])}.",
+            t(
+                "timeline.fields",
+                lang,
+                fields=", ".join(payload.gemma_visible_summary.parsed_fields[:5]),
+            ),
         ),
         (
-            "2. Regras conferidas",
+            t("timeline.rules", lang),
             step_status(payload, "resolve_truth"),
-            "Conflitos materiais e necessidade de revisão foram avaliados.",
+            t("timeline.rules.copy", lang),
         ),
         (
-            "3. Alternativas bloqueadas",
+            t("timeline.constraints", lang),
             (
                 "ok"
                 if payload.audit_record and payload.audit_record.hard_constraints_checked
                 else "review"
             ),
-            constraints_summary(payload),
+            constraints_summary(payload, lang=lang),
         ),
         (
-            "4. Fila recalculada",
+            t("timeline.queue", lang),
             step_status(payload, "rank_candidates"),
-            ranking_summary(payload),
+            ranking_summary(payload, lang=lang),
         ),
         (
-            "5. Operador decide",
+            t("timeline.operator", lang),
             "ready" if payload.operator_actions else "review",
-            f"Ações disponíveis: {operator_actions_label(payload.operator_actions)}.",
+            t(
+                "timeline.actions",
+                lang,
+                actions=operator_actions_label(payload.operator_actions, lang=lang),
+            ),
         ),
     ]
     items = "".join(timeline_item(*step) for step in steps)
     return f"""
     <article class="card copilot-timeline">
       <div class="card-head">
-        <div><h3>Linha do Copilot</h3><p>Leitura guiada do raciocínio operacional, sem chat livre.</p></div>
+        <div><h3>{escape(t("timeline.title", lang))}</h3><p>{escape(t("timeline.copy", lang))}</p></div>
         {chip(display_status(str(payload.decision_status)), "blue")}
       </div>
       <div class="timeline">{items}</div>
@@ -319,21 +349,25 @@ def copilot_timeline_card(payload: FrontEndPayload, request: DecisionRequest) ->
     """
 
 
-def tool_badges_card(payload: FrontEndPayload) -> str:
+def tool_badges_card(payload: FrontEndPayload, lang: Language = "pt") -> str:
     badges = [
         (
-            "Documento interpretado",
+            t("tool.document", lang),
             "parse_ticket_document",
             tool_status(payload, "parse_ticket_document"),
         ),
-        ("Regras conferidas", "resolve_truth", tool_status(payload, "resolve_truth")),
+        (t("tool.rules", lang), "resolve_truth", tool_status(payload, "resolve_truth")),
         (
-            "Alternativas bloqueadas",
+            t("tool.constraints", lang),
             "validate_hard_constraints",
             tool_status(payload, "validate_hard_constraints"),
         ),
-        ("Fila recalculada", "rank_candidates", tool_status(payload, "rank_candidates")),
-        ("Auditoria gerada", "generate_audit_payload", "ok" if payload.audit_record else "blocked"),
+        (t("tool.queue", lang), "rank_candidates", tool_status(payload, "rank_candidates")),
+        (
+            t("tool.audit", lang),
+            "generate_audit_payload",
+            "ok" if payload.audit_record else "blocked",
+        ),
     ]
     items = "".join(
         f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status_label(status))}</span></div>'
@@ -343,8 +377,8 @@ def tool_badges_card(payload: FrontEndPayload) -> str:
     return f"""
     <article class="card tools-card">
       <div class="card-head">
-        <div><h3>Painel avançado</h3><p>Status das etapas internas permitidas pelo blueprint.</p></div>
-        {chip("auditoria", "green")}
+        <div><h3>{escape(t("tool.panel.title", lang))}</h3><p>{escape(t("tool.panel.copy", lang))}</p></div>
+        {chip(t("tool.panel.badge", lang), "green")}
       </div>
       <div class="tool-grid">{items}</div>
       {tool_call_items}

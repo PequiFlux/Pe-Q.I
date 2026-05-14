@@ -49,10 +49,18 @@ def runtime_mode() -> str:
     return os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
 
 
-def document_interpreter_title() -> str:
+def document_interpreter_title(lang: str = "pt") -> str:
     if runtime_mode() == "ollama":
-        return "Documento interpretado pelo Gemma 4"
-    return "Documento interpretado pelo runtime de teste"
+        return (
+            "Document interpreted by Gemma 4"
+            if lang == "en"
+            else "Documento interpretado pelo Gemma 4"
+        )
+    return (
+        "Document interpreted by the test runtime"
+        if lang == "en"
+        else "Documento interpretado pelo runtime de teste"
+    )
 
 
 def document_interpreter_badge() -> str:
@@ -61,10 +69,18 @@ def document_interpreter_badge() -> str:
     return "modo teste"
 
 
-def document_interpreter_detail() -> str:
+def document_interpreter_detail(lang: str = "pt") -> str:
     if runtime_mode() == "ollama":
-        return "Resultado avançado da leitura estruturada, sem chat nem chain-of-thought."
-    return "Leitura determinística de fixture para validação reproduzível, sem Ollama ou Gemma."
+        return (
+            "Structured reading result, without chat or chain-of-thought."
+            if lang == "en"
+            else "Resultado avançado da leitura estruturada, sem chat nem chain-of-thought."
+        )
+    return (
+        "Deterministic fixture reading for reproducible validation, without Ollama or Gemma."
+        if lang == "en"
+        else "Leitura determinística de fixture para validação reproduzível, sem Ollama ou Gemma."
+    )
 
 
 def status_label(status: str) -> str:
@@ -90,11 +106,17 @@ def audit_status_label(status: str) -> str:
     return label.upper() if status in {"ok", "blocked", "skipped"} else label
 
 
-def constraints_summary(payload: FrontEndPayload) -> str:
+def constraints_summary(payload: FrontEndPayload, lang: str = "pt") -> str:
     if payload.audit_record is None:
-        return "Auditoria indisponível porque o fluxo fechou antes da validação."
+        return (
+            "Audit unavailable because the flow closed before validation."
+            if lang == "en"
+            else "Auditoria indisponível porque o fluxo fechou antes da validação."
+        )
     checked = len(payload.audit_record.hard_constraints_checked)
     rejected = len(payload.audit_record.rejected_candidates)
+    if lang == "en":
+        return f"{checked} pairs evaluated; {rejected} rejected by hard constraint."
     return f"{checked} pares avaliados; {rejected} rejeitados por restrição dura."
 
 
@@ -160,14 +182,24 @@ def _exception_label_short(label: str) -> str:
     return labels.get(label, label.lower().replace("_", " "))
 
 
-def ranking_summary(payload: FrontEndPayload) -> str:
+def ranking_summary(payload: FrontEndPayload, lang: str = "pt") -> str:
     if payload.recommended_truck and payload.recommended_destination:
+        if lang == "en":
+            return (
+                f"{payload.recommended_truck.truck_id} -> "
+                f"{payload.recommended_destination.destination_id}; "
+                f"{len(payload.queue_diff)} queue diff items."
+            )
         return (
             f"{payload.recommended_truck.truck_id} -> "
             f"{payload.recommended_destination.destination_id}; "
             f"{len(payload.queue_diff)} itens no diff da fila."
         )
-    return "Sem par recomendado; decisão exige bloqueio ou revisão."
+    return (
+        "No recommended pair; decision requires block or review."
+        if lang == "en"
+        else "Sem par recomendado; decisão exige bloqueio ou revisão."
+    )
 
 
 def operator_actions_label(actions: list[Any], lang: str = "pt") -> str:

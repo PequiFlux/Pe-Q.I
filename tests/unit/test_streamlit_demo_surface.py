@@ -119,16 +119,34 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
     surface = source + translations
 
     for label in [
+        "Resultado da análise",
         "Entrada operacional",
         "Carregar exemplo",
         "Carregar e analisar exemplo",
         "Limpar campos",
         "Ver auditoria técnica",
+        "Disponível após carregar a fila de caminhões.",
+        "Defina destinos disponíveis e restrições do turno.",
     ]:
         assert label in surface
 
     assert "Carregar caso" not in surface
     assert "Carregar e analisar caso" not in surface
+    assert "1. Entrada operacional" not in surface
+    assert "2. Resultado da análise" not in surface
+    assert "3. Ação do operador" not in surface
+    assert "4. Quais restrições" not in surface
+    assert "Disponivel apos" not in surface
+    assert "restricoes do turno" not in surface
+    assert 'initial_sidebar_state="collapsed"' in source
+    assert '<div class="yc-hero-title">' in source
+    assert 'st.button(t("button.load_analyze", lang), type="primary", width="stretch")' in source
+    assert "has_result = payload is not None and request is not None" in source
+    assert "use_expander=has_result" in source
+    assert "expanded=not has_result" in source
+    assert "st.rerun()" in source
+    assert "expanded=False" in source
+    assert "expanded=ui_autorun_enabled()" not in source
 
     monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
     assert streamlit_app._analyze_button_label() == "Analisar em modo teste"
@@ -172,10 +190,39 @@ def test_validation_heatmap_uses_accented_portuguese_label() -> None:
     assert "elegivel" not in heatmap_html
 
 
-def test_demo_css_is_loaded_and_allows_wrapped_buttons() -> None:
+def test_demo_css_is_loaded_and_allows_wrapped_buttons_and_mobile_layout() -> None:
     loader_source = (ROOT / "app/ui/styles.py").read_text(encoding="utf-8")
     demo_css = (ROOT / "app/ui/styles.demo.css").read_text(encoding="utf-8")
 
     assert "styles.demo.css" in loader_source
     assert "white-space: normal" in demo_css
     assert "min-height: 44px" in demo_css
+    assert "@media (max-width: 640px)" in demo_css
+    assert ".yc-action-row," in demo_css
+    assert ".queue-card.promoted" in demo_css
+
+
+def test_demo_css_hides_streamlit_page_nav_and_styles_sidebar_language() -> None:
+    base_css = (ROOT / "app/ui/styles.base.css").read_text(encoding="utf-8")
+
+    assert 'div[data-testid="stSidebarNav"]' in base_css
+    assert '[data-testid="stPageLink"]' in base_css
+    assert 'section[data-testid="stSidebar"] div[data-testid="stRadio"]' in base_css
+    assert "yc-bancada-kicker" in base_css
+    assert "grid-template-columns: 1fr;" in base_css
+    assert "max-width: 1040px" in base_css
+    assert "max-width: 100%;" in base_css
+
+
+def test_preparation_panel_uses_human_case_title_and_keeps_canonical_id() -> None:
+    html = streamlit_app._preparation_panel(
+        {
+            "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
+            "description": "Primary narrative scenario.",
+        },
+        "pt",
+    )
+
+    assert "S10_FIFO_BREAK_JUSTIFIED" in html
+    assert "S10 · fifo break justified" in html
+    assert "yc-bancada-kicker" in html
