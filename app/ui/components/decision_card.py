@@ -10,6 +10,7 @@ from app.ui.components.common import (
     chip,
     confidence_value,
     constraint_failure_summary,
+    display_status,
     escape,
     reason_detail_label,
     story_tile,
@@ -44,7 +45,7 @@ def recommended_decision_card(payload: FrontEndPayload) -> str:
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile("Status", status, "Resultado atual antes da ação humana.")}
+        {story_tile("Status", display_status(status), "Resultado atual antes da ação humana.")}
         {story_tile("Caminhão", recommended_truck, f"Destino: {destination}", "action")}
         {story_tile("Motivo operacional", "verificável", reason_detail_label(payload.reason_summary), "proof")}
       </div>
@@ -123,7 +124,7 @@ def _queue_stack_state(
         return "promoted", "chamado agora", f"antes #{before}; saiu da fila"
     if diff_entry and diff_entry.decision == "blocked":
         rules = truck_failure_rules(payload, truck_id)
-        detail = ", ".join(rules[:3]) if rules else diff_entry.reason
+        detail = ", ".join(rules[:3]) if rules else reason_detail_label(diff_entry.reason)
         return "blocked", "bloqueado por restrição", detail
     if truck_id == first_id and truck_id != recommended_id:
         rules = truck_failure_rules(payload, truck_id)
@@ -131,9 +132,9 @@ def _queue_stack_state(
             return "blocked", "bloqueado por restrição", ", ".join(rules[:3])
         return "waiting", "mantido aguardando", "sem critério suficiente para chamada automática"
     if diff_entry and diff_entry.decision == "unchanged":
-        return "waiting", "mantido aguardando", diff_entry.reason
+        return "waiting", "mantido aguardando", reason_detail_label(diff_entry.reason)
     if diff_entry and diff_entry.decision == "shifted":
-        return "neutral", "avancou na fila", diff_entry.reason
+        return "neutral", "avançou na fila", reason_detail_label(diff_entry.reason)
     return "neutral", "sem mudança", "ordem preservada até nova avaliação"
 
 
