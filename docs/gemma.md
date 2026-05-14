@@ -40,13 +40,13 @@ O Compose completo sobe um serviço local `gemma` com Ollama e injeta o runtime 
 
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`
-- `GEMMA_MODEL=gemma4:latest` por padrão
+- `GEMMA_MODEL=gemma4:e2b` por padrão para reduzir peso de setup; `gemma4:e4b` continua recomendado quando o hardware suportar
 - `OLLAMA_IMAGE=ollama/ollama:latest` por padrão, para runtime com suporte a GPU quando Docker/NVIDIA estiver disponível
 
 O modelo precisa estar cacheado no volume `gemma-models` antes da demo real:
 
 ```bash
-GEMMA_MODEL=gemma4:latest docker compose --profile gemma-setup run --rm gemma-init
+GEMMA_MODEL=gemma4:e2b docker compose --profile gemma-setup run --rm gemma-init
 ```
 
 Se o runtime não responder ou o modelo não existir, o sistema falha fechado e retorna erro/revisão em vez de trocar automaticamente para parser heurístico.

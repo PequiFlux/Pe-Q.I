@@ -73,19 +73,26 @@ Then open `http://localhost:8501`.
 
 The standalone Docker image defaults to `PEQUIFLUX_GEMMA_RUNTIME=text` so the quickstart works without model setup.
 
-The full UI Compose path starts a local Ollama service named `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:latest}`, and configures the app with:
+The full UI Compose path starts a local Ollama service named `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:e2b}`, and configures the app with:
 
 - `PEQUIFLUX_GEMMA_RUNTIME=ollama`
 - `GEMMA_BASE_URL=http://gemma:11434`
-- `GEMMA_MODEL=${GEMMA_MODEL:-gemma4:latest}`
+- `GEMMA_MODEL=${GEMMA_MODEL:-gemma4:e2b}`
 - `OLLAMA_IMAGE=${OLLAMA_IMAGE:-ollama/ollama:latest}`
 
-The `gemma` service declares `gpus: all`; use `demo-text`/`ui-text` on machines without a compatible Docker GPU setup. To use another Ollama image, set `OLLAMA_IMAGE` explicitly.
+The default `compose.yaml` keeps the `gemma` service CPU-compatible, so the full path can run even without Docker GPU support. For NVIDIA acceleration, apply the override file:
+
+```bash
+docker compose -f compose.yaml -f compose.gpu.yaml run --rm demo
+docker compose -f compose.yaml -f compose.gpu.yaml --profile ui up ui
+```
+
+To use another Ollama image, set `OLLAMA_IMAGE` explicitly.
 
 `make ui` uses that full path, so loading the UI also starts Ollama/Gemma and pulls the configured Gemma 4 tag when it is not already cached. To prewarm the model separately:
 
 ```bash
-GEMMA_MODEL=gemma4:latest docker compose --profile gemma-setup run --rm gemma-init
+GEMMA_MODEL=gemma4:e2b docker compose --profile gemma-setup run --rm gemma-init
 ```
 
 Use the exact model tag available in your Ollama registry/cache. Tests intentionally set `PEQUIFLUX_GEMMA_RUNTIME=text` so CI remains deterministic and does not require model weights.

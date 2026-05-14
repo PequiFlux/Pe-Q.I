@@ -1,26 +1,36 @@
-.PHONY: help demo demo-text ui ui-text test bench audit format-check benchmark-smoke benchmark-validate-text quality prewarm
+.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text test bench bench-gpu audit format-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
+COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
 
 help:
 	@echo "Targets:"
 	@echo "  make demo       Run the full Ollama/Gemma scenario demo via Docker Compose"
+	@echo "  make demo-gpu   Run the full Ollama/Gemma scenario demo with GPU access"
 	@echo "  make demo-text  Run the reproducible text-runtime scenario demo"
 	@echo "  make ui         Start full Ollama/Gemma Streamlit UI on http://localhost:8501"
+	@echo "  make ui-gpu     Start full Ollama/Gemma Streamlit UI with GPU access"
 	@echo "  make ui-text    Start text-runtime Streamlit UI on http://localhost:8501"
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
+	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
 	@echo "  make audit      Run blueprint audit inside Docker"
 	@echo "  make quality    Run Black, pytest, audit and validated text benchmark gates as CI"
 
 demo:
 	docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
 
+demo-gpu:
+	$(COMPOSE_GPU) run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
+
 demo-text:
 	docker compose run --rm demo-text python -m app.cli.run_scenario --scenario $(SCENARIO)
 
 ui:
 	docker compose --profile ui up ui
+
+ui-gpu:
+	$(COMPOSE_GPU) --profile ui up ui
 
 ui-text:
 	docker compose --profile ui-text up ui-text
@@ -31,6 +41,9 @@ test:
 
 bench:
 	docker compose run --rm benchmark
+
+bench-gpu:
+	$(COMPOSE_GPU) run --rm benchmark
 
 audit:
 	docker build --target test -t pequiflux-yard-copilot:test .
@@ -53,3 +66,7 @@ quality: format-check test audit benchmark-validate-text
 prewarm:
 	docker compose --profile gemma-setup run --rm gemma-init
 	docker compose --profile gemma-setup run --rm gemma-prewarm
+
+prewarm-gpu:
+	$(COMPOSE_GPU) --profile gemma-setup run --rm gemma-init
+	$(COMPOSE_GPU) --profile gemma-setup run --rm gemma-prewarm

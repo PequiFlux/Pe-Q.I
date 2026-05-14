@@ -10,20 +10,20 @@ A interface principal deve parecer produto operacional, não painel de banca. O 
 
 A primeira tela segue quatro blocos:
 
-1. Nova decisão: botões `Carregar exemplo`, `Carregar e analisar exemplo` e `Limpar campos`, fila CSV por upload, ticket/documento PDF/PNG/JPG/TXT por upload, nota do operador, clima em formulário simples ou JSON, e recursos em formulário simples ou JSON.
+1. Nova decisão: seletor de cenário versionado no sidebar, botões `Carregar caso`, `Carregar e analisar caso` e `Limpar campos`, fila CSV por upload, ticket/documento PDF/PNG/JPG/TXT por upload, nota do operador, clima em formulário simples ou JSON, e recursos em formulário simples ou JSON.
 2. Resultado: status, caminhão recomendado, destino recomendado, motivo operacional, documento interpretado, restrições críticas e mensagem ao motorista.
 3. Ação do operador: aprovar, bloquear ou sobrescrever com motivo.
 4. Auditoria técnica: JSON, matriz de validação, sequência de tools solicitadas pelo Gemma, hashes, regras disparadas e latência.
 
 ### Demo discreta
 
-A UI mantém comandos auxiliares no cabeçalho da entrada operacional: `Carregar exemplo`, `Carregar e analisar exemplo` e `Limpar campos`. O exemplo preenche o pacote com um caso versionado do manifest e permite que avaliadores executem o fluxo como usuários finais. A demo não deve transformar a tela principal em benchmark, modo de banca ou painel comparativo.
+A UI mantém um seletor de cenários versionados no sidebar e comandos auxiliares no cabeçalho da entrada operacional: `Carregar caso`, `Carregar e analisar caso` e `Limpar campos`. O caso selecionado preenche o pacote com um fixture do manifest e permite que avaliadores executem o fluxo como usuários finais sem editar JSON manualmente. A demo não deve transformar a tela principal em benchmark, modo de banca ou painel comparativo.
 
-Ao carregar exemplo, a UI regenera as keys dos uploaders de fila e ticket para impedir que um arquivo carregado anteriormente continue prevalecendo sobre o fixture preenchido.
+Ao carregar um caso, a UI regenera as keys dos uploaders de fila e ticket para impedir que um arquivo carregado anteriormente continue prevalecendo sobre o fixture preenchido.
 
 ### Runtime explícito
 
-O sidebar precisa distinguir execução de teste e execução real. Com `PEQUIFLUX_GEMMA_RUNTIME=text`, a UI informa que é modo teste sem Gemma/Ollama e orienta o uso de TXT ou exemplo. Com `ollama`, informa que Gemma 4 está ativo via Ollama.
+O sidebar precisa distinguir execução de teste e execução real. Com `PEQUIFLUX_GEMMA_RUNTIME=text`, a UI informa que é modo teste sem Gemma/Ollama e orienta o uso de TXT ou de um caso versionado. Com `ollama`, informa que Gemma 4 está ativo via Ollama.
 
 O botão de análise também acompanha o runtime: em `ollama`, mostra `Analisar com Gemma 4`; em `text`, mostra `Analisar em modo teste` para não sugerir uso real de Gemma/Ollama.
 
@@ -45,7 +45,7 @@ A matriz de validação, sequência de tools solicitadas pelo Gemma, payload JSO
 
 ### Linguagem operacional
 
-Rótulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam na auditoria técnica. A primeira leitura usa: `Documento interpretado pelo Gemma 4`, `Restrições críticas`, `Fila`, `Mensagem ao motorista` e `Ação do operador`. O cartão principal mostra ticket, caminhão lido, tipo de carga, destino extraído, confiança e campos usados na decisão.
+Rótulos como `parse_ticket_document`, `rank_candidates` e `FrontEndPayload` ficam na auditoria técnica. A primeira leitura usa `Documento interpretado`, `Restrições críticas`, `Fila`, `Mensagem ao motorista` e `Ação do operador`. Quando o runtime é `ollama`, a superfície pode explicitar `Gemma 4`; quando o runtime é `text`, a UI precisa assumir o modo teste de forma explícita, sem fingir parsing real. O cartão principal mostra ticket, caminhão lido, tipo de carga, destino extraído, confiança e campos usados na decisão.
 
 ### Prova técnica colapsada
 

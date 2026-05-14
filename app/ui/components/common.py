@@ -26,10 +26,32 @@ def tool_status(payload: FrontEndPayload, latency_key: str) -> str:
 
 
 def runtime_label() -> str:
-    runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
+    runtime = runtime_mode()
     if runtime == "ollama":
-        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:latest')}"
+        return f"Ollama · {os.getenv('GEMMA_MODEL', 'gemma4:e2b')}"
     return runtime
+
+
+def runtime_mode() -> str:
+    return os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama").strip().lower()
+
+
+def document_interpreter_title() -> str:
+    if runtime_mode() == "ollama":
+        return "Documento interpretado pelo Gemma 4"
+    return "Documento interpretado pelo runtime de teste"
+
+
+def document_interpreter_badge() -> str:
+    if runtime_mode() == "ollama":
+        return "Gemma 4"
+    return "modo teste"
+
+
+def document_interpreter_detail() -> str:
+    if runtime_mode() == "ollama":
+        return "Resultado avançado da leitura estruturada, sem chat nem chain-of-thought."
+    return "Leitura determinística de fixture para validação reproduzível, sem Ollama ou Gemma."
 
 
 def audit_status_label(status: str) -> str:
@@ -118,16 +140,24 @@ def ranking_summary(payload: FrontEndPayload) -> str:
     return "Sem par recomendado; decisão exige bloqueio ou revisão."
 
 
-def operator_actions_label(actions: list[Any]) -> str:
-    return ", ".join(operator_action_label(str(action)) for action in actions)
+def operator_actions_label(actions: list[Any], lang: str = "pt") -> str:
+    return ", ".join(operator_action_label(str(action), lang=lang) for action in actions)
 
 
-def operator_action_label(action: str) -> str:
-    labels = {
-        "approve": "aprovar",
-        "block": "bloquear",
-        "override": "sobrescrever",
-    }
+def operator_action_label(action: str, lang: str = "pt") -> str:
+    labels = (
+        {
+            "approve": "approve",
+            "block": "block",
+            "override": "override",
+        }
+        if lang == "en"
+        else {
+            "approve": "aprovar",
+            "block": "bloquear",
+            "override": "sobrescrever",
+        }
+    )
     return labels.get(action, action)
 
 

@@ -14,41 +14,45 @@ for arg in "$@"; do
 done
 
 echo "==> pytest"
-if command -v pytest >/dev/null 2>&1; then
-  pytest
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker build --target test -t pequiflux-yard-copilot:test .
   docker run --rm pequiflux-yard-copilot:test
+elif command -v pytest >/dev/null 2>&1; then
+  echo "Docker indisponível; usando pytest local apenas como contingência."
+  pytest
 else
   echo "pytest e docker não encontrados. Não foi possível executar testes." >&2
   exit 1
 fi
 
 echo "==> black"
-if command -v black >/dev/null 2>&1; then
-  black --check app bench tests scripts
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker run --rm pequiflux-yard-copilot:test python -m black --check app bench tests scripts
+elif command -v black >/dev/null 2>&1; then
+  echo "Docker indisponível; usando black local apenas como contingência."
+  black --check app bench tests scripts
 else
   echo "black e docker não encontrados. Não foi possível executar format check." >&2
   exit 1
 fi
 
 echo "==> blueprint audit"
-if command -v python >/dev/null 2>&1; then
-  python -m app.cli.blueprint_audit
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker run --rm pequiflux-yard-copilot:test python -m app.cli.blueprint_audit
+elif command -v python >/dev/null 2>&1; then
+  echo "Docker indisponível; usando auditoria local apenas como contingência."
+  python -m app.cli.blueprint_audit
 else
   echo "python e docker não encontrados. Não foi possível executar blueprint audit." >&2
   exit 1
 fi
 
 echo "==> text-runtime benchmark validation"
-if command -v python >/dev/null 2>&1; then
-  PEQUIFLUX_GEMMA_RUNTIME=text python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
+elif command -v python >/dev/null 2>&1; then
+  echo "Docker indisponível; usando benchmark local apenas como contingência."
+  PEQUIFLUX_GEMMA_RUNTIME=text python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 else
   echo "python e docker não encontrados. Não foi possível executar benchmark validado." >&2
   exit 1

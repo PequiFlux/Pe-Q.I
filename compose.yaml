@@ -1,7 +1,6 @@
 services:
   gemma:
     image: "${OLLAMA_IMAGE:-ollama/ollama:latest}"
-    gpus: all
     volumes:
       - gemma-models:/root/.ollama
     environment:
@@ -19,7 +18,7 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://gemma:11434
-      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
     entrypoint: ["sh", "-lc"]
     command: ["ollama pull \"$${GEMMA_MODEL}\""]
     profiles: ["gemma-setup", "ui"]
@@ -28,14 +27,13 @@ services:
     build:
       context: .
       target: runtime
-    image: pequiflux-yard-copilot:local
     depends_on:
       gemma:
         condition: service_healthy
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
-      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
     command: ["python", "-m", "app.cli.run_scenario", "--scenario", "${SCENARIO:-S10_FIFO_BREAK_JUSTIFIED}"]
     volumes:
@@ -45,7 +43,6 @@ services:
     build:
       context: .
       target: runtime
-    image: pequiflux-yard-copilot:local
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: text
     command: ["python", "-m", "app.cli.run_scenario", "--scenario", "${SCENARIO:-S10_FIFO_BREAK_JUSTIFIED}"]
@@ -56,14 +53,13 @@ services:
     build:
       context: .
       target: runtime
-    image: pequiflux-yard-copilot:local
     depends_on:
       gemma:
         condition: service_healthy
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
-      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
     command: ["python", "-m", "app.cli.prewarm_gemma"]
     volumes:
@@ -74,14 +70,13 @@ services:
     build:
       context: .
       target: runtime
-    image: pequiflux-yard-copilot:local
     depends_on:
       gemma:
         condition: service_healthy
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
-      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
     command: ["python", "-m", "app.cli.run_benchmark", "--manifest", "scenarios/manifest.json"]
     volumes:
@@ -92,7 +87,6 @@ services:
     build:
       context: .
       target: test
-    image: pequiflux-yard-copilot:test
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: text
     profiles: ["ci"]
@@ -101,14 +95,13 @@ services:
     build:
       context: .
       target: ui
-    image: pequiflux-yard-copilot:ui
     depends_on:
       gemma-init:
         condition: service_completed_successfully
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
       GEMMA_BASE_URL: http://gemma:11434
-      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:latest}"
+      GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-45}"
     ports:
       - "8501:8501"
@@ -125,7 +118,6 @@ services:
     build:
       context: .
       target: ui
-    image: pequiflux-yard-copilot:ui
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: text
     ports:
