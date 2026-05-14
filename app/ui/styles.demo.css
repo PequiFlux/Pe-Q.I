@@ -1,0 +1,16 @@
+div[data-testid="stButton"] button {
+  min-height: 44px;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+}
+
+div[data-testid="stButton"] button p {
+  white-space: normal;
+}
+
+@media (max-width: 860px) {
+  div[data-testid="column"] {
+    min-width: 100%;
+  }
+}
