@@ -6,7 +6,7 @@ Mapa dos critérios esperados da submissão para evidências versionadas no repo
 |---|---|---|
 | Uso claro de Gemma | `app/gemma/`, `docs/gemma.md`, `docs/adr/ADR-0002-gemma-as-interpretation-layer.md` | Gemma interpreta documento; regras determinísticas decidem |
 | Problema real e delimitado | `README.md`, `docs/product.md`, `docs/LIMITATIONS.md` | Escopo: despacho de pátio sob exceção operacional |
-| Demo avaliável | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `docs/DEMO_SCRIPT.md` | `make ui-text` sem GPU em modo teste; `make ui` para Gemma/Ollama completo |
+| Demo avaliável | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `docs/DEMO_SCRIPT.md` | `make demo-ready` para pré-voo completo; `make ui-text` sem GPU em modo teste; `make ui` para Gemma/Ollama completo |
 | Benchmark comparativo | `app/cli/run_benchmark.py`, `bench/metrics.py`, `bench/reports/sample/`, `bench/reports/extended/` | `make bench` gera `metrics.json`, `summary.csv`, `per_scenario.json` em `extended`; o sample público fica congelado e não é saída viva |
 | Reprodutibilidade | `Dockerfile`, `compose.yaml`, `Makefile`, `config/env.example` | `make demo-text`, `make ui-text`, `make test`, `make audit` |
 | Auditoria e explicabilidade | `app/audit/`, `app/services/decision_builder.py`, schemas em `scenarios/schemas/` | Payload final inclui `AuditRecord`, regras disparadas e hashes |

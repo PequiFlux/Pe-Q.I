@@ -11,14 +11,14 @@ Fala:
 
 ## 0:20-0:45 — Carregar exemplo
 
-Antes da gravação, suba a stack real com `make ui-gpu` nesta máquina. No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos, e `Limpar campos` volta ao estado vazio.
+Antes da gravação, rode `make demo-ready` nesta máquina. Ele sobe a stack real com GPU quando disponível, preaquece o Gemma e executa o cenário principal. No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos; `Limpar campos` volta ao estado vazio antes da análise, e `Nova análise` volta ao início depois do resultado.
 
 Fala:
 > Para a demo, eu carrego um pacote sintético versionado. Em operação, esses campos viriam do upload da fila CSV, do ticket PDF, imagem ou TXT, da nota do operador, e do clima/recursos em formulário simples ou JSON.
 
 ## 0:45-1:10 — Analisar
 
-Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Para a demo dos juízes, use `make ui-gpu` ou `make ui`; o botão aparece como `Analisar com Gemma 4`. O caminho `make ui-text` é apenas para teste reproduzível sem modelo.
+Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Para a demo dos juízes, use `make demo-ready` ou `make ui`; o botão aparece como `Analisar com Gemma 4`. O caminho `make ui-text` é apenas para teste reproduzível sem modelo.
 
 Fala:
 > A execução interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisão auditável. Se faltar verdade material, o sistema fecha em bloqueio ou revisão, sem fallback operacional.
