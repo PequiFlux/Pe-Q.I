@@ -92,7 +92,7 @@ def _preview_payload() -> FrontEndPayload:
                         "destination_id": "DST-COV-01",
                         "eligible": True,
                         "failed_constraints": [],
-                    }
+                    },
                 ],
                 "fired_rules": ["PR-04_WAIT_SLA_PRESSURE"],
                 "rejected_candidates": [],
