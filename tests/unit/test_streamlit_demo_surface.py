@@ -149,6 +149,7 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
         "Carregar exemplo",
         "Carregar e analisar exemplo",
         "Limpar campos",
+        "Nova análise",
         "Ver auditoria técnica",
         "Prova Gemma 4",
         "Gemma 4 executando no fluxo real",
@@ -171,6 +172,8 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
     assert '<div class="yc-hero-title">' in source
     assert 'st.button(t("button.load_analyze", lang), type="primary", width="stretch")' in source
     assert "has_result = payload is not None and request is not None" in source
+    assert "_render_result_navigation(lang)" in source
+    assert "clear_input_state(INPUT_KEYS)" in source
     assert "use_expander=has_result" in source
     assert "expanded=not has_result" in source
     assert "st.rerun()" in source
@@ -280,3 +283,20 @@ def test_preparation_panel_uses_human_case_title_and_keeps_canonical_id() -> Non
     assert "S10_FIFO_BREAK_JUSTIFIED" in html
     assert "S10 · fifo break justified" in html
     assert "yc-bancada-kicker" in html
+
+
+def test_case_selector_accepts_canonical_id_and_display_label() -> None:
+    cases = [
+        {
+            "scenario_id": "S10_FIFO_BREAK_JUSTIFIED",
+            "description": "Primary narrative scenario.",
+        }
+    ]
+    label = streamlit_app.scenario_label(cases[0])
+
+    assert streamlit_app._resolve_case_id("S10_FIFO_BREAK_JUSTIFIED", cases) == (
+        "S10_FIFO_BREAK_JUSTIFIED"
+    )
+    assert streamlit_app._resolve_case_id(label, cases) == "S10_FIFO_BREAK_JUSTIFIED"
+    assert streamlit_app._format_case_option(cases, label) == label
+    assert streamlit_app._format_case_option(cases, "UNKNOWN") == "UNKNOWN"

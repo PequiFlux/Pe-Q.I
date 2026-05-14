@@ -85,10 +85,12 @@ def main() -> None:
     manifest = load_manifest()
     case_by_id = {case["scenario_id"]: case for case in manifest["cases"]}
     st.session_state.setdefault(INPUT_KEYS["selected_case"], EXAMPLE_SCENARIO_ID)
-    selected_case_id = st.session_state[INPUT_KEYS["selected_case"]]
+    selected_case_id = _resolve_case_id(
+        st.session_state[INPUT_KEYS["selected_case"]], manifest["cases"]
+    )
     if selected_case_id not in case_by_id:
         selected_case_id = EXAMPLE_SCENARIO_ID
-        st.session_state[INPUT_KEYS["selected_case"]] = selected_case_id
+    st.session_state[INPUT_KEYS["selected_case"]] = selected_case_id
     selected_case = case_by_id[selected_case_id]
 
     lang = _current_language()
@@ -785,6 +787,7 @@ def _render_outputs(
         unsafe_allow_html=True,
     )
 
+    _render_result_navigation(lang)
     st.markdown(_gemma_proof_card(payload, lang), unsafe_allow_html=True)
     render_status_bar(payload, lang=lang)
     st.markdown(recommended_decision_card(payload, lang=lang), unsafe_allow_html=True)
@@ -802,6 +805,14 @@ def _render_outputs(
         render_operator_action(payload, lang=lang)
 
     _render_technical_audit_expander(payload, request, case, lang)
+
+
+def _render_result_navigation(lang: Language) -> None:
+    _, action_col = st.columns([0.72, 0.28])
+    with action_col:
+        if st.button(t("button.new_analysis", lang), width="stretch"):
+            clear_input_state(INPUT_KEYS)
+            st.rerun()
 
 
 def _gemma_proof_card(payload: FrontEndPayload, lang: Language) -> str:
@@ -948,6 +959,23 @@ def _sidebar_runtime_block(lang: Language) -> str:
     """
 
 
+def _resolve_case_id(value: object, cases: list[dict[str, Any]]) -> str:
+    candidate = str(value)
+    for case in cases:
+        scenario_id = str(case["scenario_id"])
+        if candidate == scenario_id or candidate == scenario_label(case):
+            return scenario_id
+    return candidate
+
+
+def _format_case_option(cases: list[dict[str, Any]], value: object) -> str:
+    scenario_id = _resolve_case_id(value, cases)
+    for case in cases:
+        if case["scenario_id"] == scenario_id:
+            return scenario_label(case)
+    return str(value)
+
+
 def _render_sidebar_case_picker(cases: list[dict[str, Any]], lang: Language) -> None:
     st.markdown(
         f"""
@@ -962,9 +990,7 @@ def _render_sidebar_case_picker(cases: list[dict[str, Any]], lang: Language) -> 
         t("sidebar.scenario.label", lang),
         options=[case["scenario_id"] for case in cases],
         key=INPUT_KEYS["selected_case"],
-        format_func=lambda scenario_id: scenario_label(
-            next(case for case in cases if case["scenario_id"] == scenario_id)
-        ),
+        format_func=lambda scenario_id: _format_case_option(cases, scenario_id),
     )
 
 
