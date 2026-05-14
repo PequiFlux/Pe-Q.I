@@ -24,6 +24,7 @@ from app.ui.components.common import (
     ranking_summary,
     runtime_label,
     status_card,
+    status_label,
     step_status,
     timeline_item,
     tool_status,
@@ -102,7 +103,7 @@ def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> 
 
 def render_operator_action(payload: FrontEndPayload) -> None:
     st.markdown(
-        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>3. Ação do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restrição dura.</p></div></div>',
+        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>3. Ação do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica sobrescrita sem burlar restrição dura.</p></div></div>',
         unsafe_allow_html=True,
     )
     action = st.radio(
@@ -129,7 +130,7 @@ def render_operator_action(payload: FrontEndPayload) -> None:
         if destination_options:
             requested_destination = st.selectbox("Destino solicitado", destination_options)
         else:
-            st.warning("Nenhum destino validado disponível para override.")
+            st.warning("Nenhum destino validado disponível para sobrescrita.")
     if st.button("Registrar ação", type="primary"):
         try:
             finalized, updated_audit = finalize_operator_decision(
@@ -154,10 +155,10 @@ def render_operator_action(payload: FrontEndPayload) -> None:
 
 def render_audit(payload: FrontEndPayload) -> None:
     steps = [
-        ("request", payload.request_id),
+        ("requisição", payload.request_id),
         ("cenário", payload.scenario_id),
-        ("variant", payload.variant),
-        ("rules", ", ".join(payload.audit_record.fired_rules if payload.audit_record else [])),
+        ("variante", payload.variant),
+        ("regras", ", ".join(payload.audit_record.fired_rules if payload.audit_record else [])),
     ]
     items = "".join(
         f'<div class="audit-step"><strong>{escape(label)}</strong><span>{escape(value)}</span></div>'
@@ -302,7 +303,7 @@ def copilot_timeline_card(payload: FrontEndPayload, request: DecisionRequest) ->
     <article class="card copilot-timeline">
       <div class="card-head">
         <div><h3>Linha do Copilot</h3><p>Leitura guiada do raciocínio operacional, sem chat livre.</p></div>
-        {chip(str(payload.decision_status), "blue")}
+        {chip(display_status(str(payload.decision_status)), "blue")}
       </div>
       <div class="timeline">{items}</div>
     </article>
@@ -326,7 +327,7 @@ def tool_badges_card(payload: FrontEndPayload) -> str:
         ("Auditoria gerada", "generate_audit_payload", "ok" if payload.audit_record else "blocked"),
     ]
     items = "".join(
-        f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status)}</span></div>'
+        f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status_label(status))}</span></div>'
         for name, technical, status in badges
     )
     tool_call_items = _gemma_tool_call_items(payload)
@@ -368,8 +369,8 @@ def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
         return ""
     return f"""
       <div class="tool-call-summary">
-        <h4>Gemma Tool Planner</h4>
-        <p>FlowState → tool → status executado sob whitelist.</p>
+        <h4>Planejador de ferramentas Gemma</h4>
+        <p>Estado → ferramenta → status executado sob whitelist.</p>
         <ol class="tool-call-list">{items}</ol>
       </div>
     """
