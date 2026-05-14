@@ -161,7 +161,7 @@ def _render_empty_state() -> None:
     st.markdown(
         f"""
         <article class="empty-state">
-          <strong>Preencha os campos ou carregue um caso versionado.</strong>
+          <strong>Preencha os campos ou carregue um exemplo versionado.</strong>
           <p>Depois, use {escape(_analyze_button_label())} para gerar status, caminhão, destino, motivo operacional, documento interpretado, restrições críticas, mensagem ao motorista e ação humana.</p>
         </article>
         """,
@@ -344,19 +344,19 @@ def _render_resource_input() -> str:
 def _render_input_actions(example_case: dict[str, Any]) -> None:
     st.markdown(
         """
-        <div class="panel-title">Caso versionado</div>
+        <div class="panel-title">Exemplo versionado</div>
         """,
         unsafe_allow_html=True,
     )
     st.markdown(scenario_note(example_case), unsafe_allow_html=True)
-    left, middle, right = st.columns([0.18, 0.22, 0.18], gap="small")
+    left, middle, right = st.columns([1, 1.35, 1], gap="small")
     with left:
-        if st.button("Carregar caso", width="stretch"):
+        if st.button("Carregar exemplo", width="stretch"):
             load_case_into_state(INPUT_KEYS, example_case)
             st.session_state["active_case"] = example_case["scenario_id"]
             st.rerun()
     with middle:
-        if st.button("Carregar e analisar caso", width="stretch"):
+        if st.button("Carregar e analisar exemplo", width="stretch"):
             load_case_into_state(INPUT_KEYS, example_case)
             st.session_state["active_case"] = example_case["scenario_id"]
             st.session_state[INPUT_KEYS["analyze_example"]] = True
@@ -458,13 +458,13 @@ def _render_sidebar_case_picker(cases: list[dict[str, Any]]) -> None:
         """
         <div class="side-card compact">
           <div class="side-kicker">Fixtures</div>
-          <p>Escolha o cenário versionado antes de carregar ou analisar o caso.</p>
+          <p>Escolha o exemplo versionado antes de carregar ou analisar.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
     st.selectbox(
-        "Cenário versionado",
+        "Exemplo versionado",
         options=[case["scenario_id"] for case in cases],
         key=INPUT_KEYS["selected_case"],
         format_func=lambda scenario_id: scenario_label(
@@ -476,7 +476,7 @@ def _render_sidebar_case_picker(cases: list[dict[str, Any]]) -> None:
 def _runtime_mode_note() -> str:
     runtime = os.getenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     if runtime == "text":
-        return "Modo teste: sem Gemma/Ollama; use TXT ou carregue um caso versionado."
+        return "Modo teste: sem Gemma/Ollama; use TXT ou carregue um exemplo versionado."
     if runtime == "ollama":
         return "Gemma 4 ativo via Ollama."
     return f"Runtime customizado: {runtime}."
