@@ -77,7 +77,7 @@ def _heatmap_row(
             label = copy_text("selected", "selecionado")
         elif entry.get("eligible"):
             state = "eligible"
-            label = copy_text("eligible", "elegivel")
+            label = copy_text("eligible", "elegível")
         else:
             state = "blocked"
             label = ", ".join(failures) or copy_text("blocked", "bloqueado")
