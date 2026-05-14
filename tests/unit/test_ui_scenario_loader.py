@@ -51,6 +51,21 @@ def test_validate_ui_inputs_rejects_non_text_upload_in_text_runtime(monkeypatch)
     assert "Modo teste aceita upload apenas TXT" in error
 
 
+def test_validate_ui_inputs_rejects_multimodal_fixture_without_sidecar(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+    fixture_ticket = tmp_path / "ticket.png"
+    fixture_ticket.write_bytes(b"fake-image")
+
+    error = scenario_loader.validate_ui_inputs(
+        _inputs(ticket_text="", fixture_ticket_path=str(fixture_ticket))
+    )
+
+    assert error is not None
+    assert "expected_ticket.json" in error
+
+
 def test_build_request_from_inputs_accepts_txt_upload_in_text_runtime(
     monkeypatch, tmp_path: Path
 ) -> None:

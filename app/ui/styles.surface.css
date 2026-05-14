@@ -129,6 +129,8 @@ tr.selected { background: linear-gradient(90deg, rgba(34, 201, 139, 0.12), rgba(
   .hero { grid-template-columns: 1fr; }
   .decision-story { grid-template-columns: 1fr; }
   .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .prep-grid,
+  .readiness-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 860px) {
@@ -137,16 +139,19 @@ tr.selected { background: linear-gradient(90deg, rgba(34, 201, 139, 0.12), rgba(
   .story-grid,
   .decision-pair,
   .input-summary,
+  .prep-grid,
   .package-grid,
   .tool-grid,
+  .readiness-grid,
   .mini-metrics { grid-template-columns: 1fr; }
   .run-strip,
   .section-title,
   .card-head { flex-direction: column; }
+  .prep-list div { grid-template-columns: 1fr; }
   .timeline-item { grid-template-columns: 18px minmax(0, 1fr); }
   .queue-card { grid-template-columns: 48px minmax(0, 1fr); }
   .queue-state,
   .queue-after { grid-column: 2; justify-self: start; }
   .timeline-item .chip { grid-column: 2; width: fit-content; }
-  .hero h1 { font-size: 28px; }
+  .hero h1 { font-size: 30px; }
 }

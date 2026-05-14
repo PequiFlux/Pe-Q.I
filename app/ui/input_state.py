@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,7 @@ from typing import Any
 import streamlit as st
 
 from app.ui.components.common import escape
+from app.ui.i18n import Language, t
 from app.ui.scenario_loader import load_case_defaults
 
 
@@ -31,23 +33,23 @@ def ticket_text_value(input_keys: dict[str, str], uploaded_ticket: Any) -> str:
         return ""
 
 
-def queue_source_note(uploaded_queue: Any, queue_csv: str) -> str:
+def queue_source_note(uploaded_queue: Any, queue_csv: str, lang: Language = "pt") -> str:
     if uploaded_queue is not None:
-        source = f"Arquivo carregado: {uploaded_queue.name}"
+        source = t("queue.source.uploaded", lang, name=uploaded_queue.name)
     elif queue_csv:
-        source = "Caso versionado carregado como CSV de fixture."
+        source = t("queue.source.fixture", lang)
     else:
-        source = "Nenhuma fila carregada."
+        source = t("queue.source.empty", lang)
     return f'<div class="source-note">{escape(source)}</div>'
 
 
-def ticket_source_note(uploaded_ticket: Any, ticket_text: str) -> str:
+def ticket_source_note(uploaded_ticket: Any, ticket_text: str, lang: Language = "pt") -> str:
     if uploaded_ticket is not None:
-        source = f"Arquivo carregado: {uploaded_ticket.name}"
+        source = t("ticket.source.uploaded", lang, name=uploaded_ticket.name)
     elif ticket_text:
-        source = "Caso versionado carregado como ticket TXT de fixture."
+        source = t("ticket.source.fixture_text", lang)
     else:
-        source = "Nenhum ticket carregado."
+        source = t("ticket.source.empty", lang)
     return f'<div class="source-note">{escape(source)}</div>'
 
 
@@ -55,21 +57,22 @@ def ticket_source_note_with_fixture(
     uploaded_ticket: Any,
     ticket_text: str,
     fixture_ticket_path: str,
+    lang: Language = "pt",
 ) -> str:
     if uploaded_ticket is not None or ticket_text:
-        return ticket_source_note(uploaded_ticket, ticket_text)
+        return ticket_source_note(uploaded_ticket, ticket_text, lang)
     if fixture_ticket_path:
         suffix = Path(fixture_ticket_path).suffix.lower().lstrip(".").upper() or "FILE"
-        source = f"Caso versionado carregado como fixture {suffix}."
+        source = t("ticket.source.fixture_file", lang, suffix=suffix)
         return f'<div class="source-note">{escape(source)}</div>'
-    return ticket_source_note(uploaded_ticket, ticket_text)
+    return ticket_source_note(uploaded_ticket, ticket_text, lang)
 
 
 def split_ids(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def queue_preview_html(queue_csv: str) -> str:
+def queue_preview_html(queue_csv: str, lang: Language = "pt") -> str:
     try:
         rows = list(csv.DictReader(queue_csv.splitlines()))
     except csv.Error:
@@ -78,9 +81,9 @@ def queue_preview_html(queue_csv: str) -> str:
     priority = sum(1 for row in rows if (row.get("contract_priority_flag") or "").lower() == "true")
     return f"""
     <div class="input-summary">
-      <div><strong>{len(rows)}</strong><span>linhas</span></div>
-      <div><strong>{waiting}</strong><span>aguardando</span></div>
-      <div><strong>{priority}</strong><span>prioridade</span></div>
+      <div><strong>{len(rows)}</strong><span>{escape(t("queue.metric.rows", lang))}</span></div>
+      <div><strong>{waiting}</strong><span>{escape(t("queue.metric.waiting", lang))}</span></div>
+      <div><strong>{priority}</strong><span>{escape(t("queue.metric.priority", lang))}</span></div>
     </div>
     """
 
@@ -94,8 +97,8 @@ def empty_defaults() -> dict[str, Any]:
         "operator_note": "",
         "weather_json": '{\n  "precipitation": "none",\n  "severity": "none"\n}',
         "resource_json": "[]",
-        "weather_mode": "JSON",
-        "resource_mode": "JSON",
+        "weather_mode": "formulário",
+        "resource_mode": "formulário",
         "weather_precipitation": "none",
         "weather_severity": "none",
         "resource_available": "",
@@ -115,6 +118,7 @@ def ensure_input_state(input_keys: dict[str, str]) -> None:
 
 
 def clear_input_state(input_keys: dict[str, str]) -> None:
+    selected_case = st.session_state.get(input_keys["selected_case"])
     for key in list(st.session_state.keys()):
         if key in input_keys.values() or is_upload_widget_key(input_keys, key):
             st.session_state.pop(key, None)
@@ -123,6 +127,8 @@ def clear_input_state(input_keys: dict[str, str]) -> None:
     defaults = empty_defaults()
     for field, value in defaults.items():
         st.session_state.setdefault(input_keys[field], value)
+    if selected_case is not None:
+        st.session_state[input_keys["selected_case"]] = selected_case
 
 
 def state_defaults(input_keys: dict[str, str]) -> dict[str, str]:
@@ -154,9 +160,52 @@ def load_case_into_state(input_keys: dict[str, str], case: dict[str, Any]) -> No
         "resource_json",
     ):
         st.session_state[input_keys[field]] = defaults[field]
-    st.session_state[input_keys["weather_mode"]] = "JSON"
-    st.session_state[input_keys["resource_mode"]] = "JSON"
+    _sync_weather_form_state(input_keys, defaults["weather_json"])
+    _sync_resource_form_state(input_keys, defaults["resource_json"])
+    st.session_state[input_keys["weather_mode"]] = "formulário"
+    st.session_state[input_keys["resource_mode"]] = "formulário"
     reset_result_state()
+
+
+def _sync_weather_form_state(input_keys: dict[str, str], weather_json: str) -> None:
+    try:
+        weather = json.loads(weather_json)
+    except json.JSONDecodeError:
+        return
+    precipitation = str(weather.get("precipitation") or "none")
+    severity = str(weather.get("severity") or "none")
+    if precipitation in {"none", "rain"}:
+        st.session_state[input_keys["weather_precipitation"]] = precipitation
+    if severity in {"none", "low", "medium", "high"}:
+        st.session_state[input_keys["weather_severity"]] = severity
+
+
+def _sync_resource_form_state(input_keys: dict[str, str], resource_json: str) -> None:
+    try:
+        resources = json.loads(resource_json)
+    except json.JSONDecodeError:
+        return
+    if not isinstance(resources, list):
+        return
+    available: list[str] = []
+    blocked: list[str] = []
+    wet: list[str] = []
+    for resource in resources:
+        if not isinstance(resource, dict):
+            continue
+        resource_id = str(resource.get("resource_id") or "").strip()
+        if not resource_id:
+            continue
+        if resource.get("status") == "blocked":
+            blocked.append(resource_id)
+        else:
+            available.append(resource_id)
+        supported = resource.get("supported_load_conditions") or []
+        if isinstance(supported, list) and "wet" in supported:
+            wet.append(resource_id)
+    st.session_state[input_keys["resource_available"]] = ", ".join(dict.fromkeys(available))
+    st.session_state[input_keys["resource_blocked"]] = ", ".join(dict.fromkeys(blocked))
+    st.session_state[input_keys["resource_wet"]] = ", ".join(dict.fromkeys(wet))
 
 
 def upload_key(input_keys: dict[str, str], field: str) -> str:

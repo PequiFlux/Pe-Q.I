@@ -30,6 +30,7 @@ from app.ui.components.common import (
     timeline_item,
     tool_status,
 )
+from app.ui.i18n import Language, t
 
 
 def render_input_evidence(
@@ -44,7 +45,7 @@ def render_input_evidence(
         st.markdown(_ticket_preview_card(request), unsafe_allow_html=True)
 
 
-def render_status_bar(payload: FrontEndPayload) -> None:
+def render_status_bar(payload: FrontEndPayload, lang: Language = "pt") -> None:
     truck = payload.recommended_truck.truck_id if payload.recommended_truck else "-"
     destination = (
         payload.recommended_destination.destination_id if payload.recommended_destination else "-"
@@ -52,11 +53,11 @@ def render_status_bar(payload: FrontEndPayload) -> None:
     rejected = len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
     latency = sum(payload.latency_ms.values())
     cards = [
-        ("Status", display_status(str(payload.decision_status)), "estado final da prévia"),
-        ("Caminhão", truck, "próxima chamada"),
-        ("Destino", destination, "recurso recomendado"),
-        ("Rejeições", str(rejected), "pares inelegíveis"),
-        ("Latência", f"{latency} ms", "pipeline local"),
+        ("Status", display_status(str(payload.decision_status)), t("status.note.status", lang)),
+        (t("status.truck", lang), truck, t("status.note.truck", lang)),
+        (t("status.destination", lang), destination, t("status.note.destination", lang)),
+        (t("status.rejections", lang), str(rejected), t("status.note.rejections", lang)),
+        (t("status.latency", lang), f"{latency} ms", t("status.note.latency", lang)),
     ]
     for column, (label, value, note) in zip(st.columns(5), cards):
         with column:
@@ -102,23 +103,27 @@ def render_gemma_context(payload: FrontEndPayload, request: DecisionRequest) -> 
     )
 
 
-def render_operator_action(payload: FrontEndPayload) -> None:
+def render_operator_action(payload: FrontEndPayload, lang: Language = "pt") -> None:
     st.markdown(
-        '<article class="card streamlit-card narrative-card"><div class="card-head"><div><h3>3. Ação do operador</h3><p>O sistema recomenda; o operador aprova, bloqueia ou justifica override sem burlar restrição dura.</p></div></div>',
+        (
+            '<article class="card streamlit-card narrative-card"><div class="card-head"><div>'
+            f'<h3>{escape(t("operator.action.title", lang))}</h3>'
+            f'<p>{escape(t("operator.action.copy", lang))}</p></div></div>'
+        ),
         unsafe_allow_html=True,
     )
     action = st.radio(
-        "Ação",
+        t("operator.action.label", lang),
         options=[str(item) for item in payload.operator_actions],
-        format_func=operator_action_label,
+        format_func=lambda value: operator_action_label(value, lang=lang),
         horizontal=True,
     )
-    reason = st.text_input("Motivo obrigatório", value="OP-DEMO-01 revisou a decisão.")
+    reason = st.text_input(t("operator.reason", lang), value=t("operator.reason.default", lang))
     requested_truck = None
     requested_destination = None
     if action.endswith("override"):
         requested_truck = st.selectbox(
-            "Caminhão solicitado", [item.truck_id for item in payload.queue_diff]
+            t("operator.requested_truck", lang), [item.truck_id for item in payload.queue_diff]
         )
         destination_options = sorted(
             {
@@ -129,10 +134,12 @@ def render_operator_action(payload: FrontEndPayload) -> None:
             }
         )
         if destination_options:
-            requested_destination = st.selectbox("Destino solicitado", destination_options)
+            requested_destination = st.selectbox(
+                t("operator.requested_destination", lang), destination_options
+            )
         else:
-            st.warning("Nenhum destino validado disponível para override.")
-    if st.button("Registrar ação", type="primary"):
+            st.warning(t("operator.no_destination", lang))
+    if st.button(t("operator.register_action", lang), type="primary"):
         try:
             finalized, updated_audit = finalize_operator_decision(
                 payload=payload,
@@ -146,7 +153,7 @@ def render_operator_action(payload: FrontEndPayload) -> None:
         except PequiFluxError as exc:
             st.error(exc.message)
         else:
-            st.success("Ação humana finalizada e persistida.")
+            st.success(t("operator.success", lang))
             st.session_state["operator_finalization"] = finalized.model_dump(mode="json")
             st.session_state["operator_audit_update"] = updated_audit.operator_action
     if "operator_finalization" in st.session_state:
@@ -179,15 +186,15 @@ def render_audit(payload: FrontEndPayload) -> None:
     )
 
 
-def render_driver_message(payload: FrontEndPayload) -> None:
+def render_driver_message(payload: FrontEndPayload, lang: Language = "pt") -> None:
     st.markdown(
         f"""
         <article class="card phone-card">
           <div class="phone">
-            <div class="phone-head"><strong>PequiFlux</strong><span>Mensagem ao motorista</span></div>
-            <div class="bubble">Seu check-in foi processado.</div>
+            <div class="phone-head"><strong>PequiFlux</strong><span>{escape(t("driver.title", lang))}</span></div>
+            <div class="bubble">{escape(t("driver.processed", lang))}</div>
             <div class="bubble me">{escape(payload.driver_message.message)}</div>
-            <div class="phone-input">Mensagem</div>
+            <div class="phone-input">{escape(t("driver.input", lang))}</div>
           </div>
         </article>
         """,

@@ -548,7 +548,7 @@ Exemplo sem secrets: [`config/env.example`](config/env.example). O repositório 
 | `OLLAMA_IMAGE` | `ollama/ollama:latest` | Imagem Docker do Ollama usada pelo serviço `gemma` |
 | `OLLAMA_KEEP_ALIVE` | `24h` | Keep-alive do modelo no Ollama |
 | `PEQUIFLUX_IN_CONTAINER` | `0` | Setado para `1` pelo Dockerfile |
-| `PEQUIFLUX_SQLITE_PATH` | `var/db/pequiflux_ui.db` | Caminho do banco SQLite |
+| `PEQUIFLUX_SQLITE_PATH` | `var/db/pequiflux.db` | Caminho do banco SQLite |
 
 `make demo-text` e `make ui-text` não sobem o serviço `gemma` e não exigem GPU. Para o modo completo, o `compose.yaml` funciona em CPU por padrão. Se quiser aceleração NVIDIA, rode os mesmos comandos com o override `compose.gpu.yaml`, por exemplo `docker compose -f compose.yaml -f compose.gpu.yaml --profile ui up ui`.
 

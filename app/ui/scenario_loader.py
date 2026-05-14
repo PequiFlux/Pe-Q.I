@@ -135,6 +135,22 @@ def validate_ui_inputs(inputs: dict[str, Any]) -> str | None:
     if not resource_json:
         return "Recursos obrigatórios."
     if uploaded is None:
+        if ticket_text or not fixture_ticket_path:
+            return None
+        fixture_ticket = Path(fixture_ticket_path).expanduser()
+        suffix = fixture_ticket.suffix.lower()
+        content_type = _content_type_for_suffix(suffix)
+        if content_type is None:
+            return f"Tipo de ticket não suportado: {suffix or '(sem extensão)'}"
+        if not fixture_ticket.exists():
+            return f"Fixture do ticket não encontrado: {fixture_ticket}"
+        if runtime_mode() == "text" and content_type != "text/plain":
+            expected_ticket = fixture_ticket.with_name("expected_ticket.json")
+            if not expected_ticket.exists():
+                return (
+                    "Fixture multimodal em modo teste exige expected_ticket.json ao lado do "
+                    "arquivo do ticket."
+                )
         return None
 
     suffix = Path(str(uploaded.name)).suffix.lower()

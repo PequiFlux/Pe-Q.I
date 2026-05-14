@@ -140,16 +140,24 @@ def ranking_summary(payload: FrontEndPayload) -> str:
     return "Sem par recomendado; decisão exige bloqueio ou revisão."
 
 
-def operator_actions_label(actions: list[Any]) -> str:
-    return ", ".join(operator_action_label(str(action)) for action in actions)
+def operator_actions_label(actions: list[Any], lang: str = "pt") -> str:
+    return ", ".join(operator_action_label(str(action), lang=lang) for action in actions)
 
 
-def operator_action_label(action: str) -> str:
-    labels = {
-        "approve": "aprovar",
-        "block": "bloquear",
-        "override": "sobrescrever",
-    }
+def operator_action_label(action: str, lang: str = "pt") -> str:
+    labels = (
+        {
+            "approve": "approve",
+            "block": "block",
+            "override": "override",
+        }
+        if lang == "en"
+        else {
+            "approve": "aprovar",
+            "block": "bloquear",
+            "override": "sobrescrever",
+        }
+    )
     return labels.get(action, action)
 
 

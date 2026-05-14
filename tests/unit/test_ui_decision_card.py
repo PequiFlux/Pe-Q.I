@@ -55,6 +55,13 @@ def test_recommended_decision_card_title_matches_preview_ready() -> None:
     assert "TRK-005 deve ir para DST-COV-01" in html
 
 
+def test_recommended_decision_card_can_render_english() -> None:
+    html = recommended_decision_card(_payload("PREVIEW_READY"), lang="en")
+
+    assert "TRK-005 should go to DST-COV-01" in html
+    assert "deve ir para" not in html
+
+
 def test_recommended_decision_card_title_matches_review_required() -> None:
     html = recommended_decision_card(_payload("REVIEW_REQUIRED"))
 
