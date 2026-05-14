@@ -86,6 +86,12 @@ def _preview_payload() -> FrontEndPayload:
                         "destination_id": "DST-COV-01",
                         "eligible": True,
                         "failed_constraints": [],
+                    },
+                    {
+                        "truck_id": "TRK-011",
+                        "destination_id": "DST-COV-01",
+                        "eligible": True,
+                        "failed_constraints": [],
                     }
                 ],
                 "fired_rules": ["PR-04_WAIT_SLA_PRESSURE"],
@@ -126,7 +132,7 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
 
     monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
     assert streamlit_app._analyze_button_label() == "Analisar em modo teste"
-    assert "exemplo versionado" in streamlit_app._runtime_mode_note()
+    assert "exemplo versionado" in streamlit_app._runtime_mode_note("pt")
 
     monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     assert streamlit_app._analyze_button_label() == "Analisar com Gemma 4"

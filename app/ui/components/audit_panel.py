@@ -378,8 +378,8 @@ def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
         return ""
     return f"""
       <div class="tool-call-summary">
-        <h4>Planejador de ferramentas Gemma</h4>
-        <p>Estado → ferramenta → status executado sob whitelist.</p>
+        <h4>Gemma Tool Planner</h4>
+        <p>FlowState → tool → status executado sob whitelist.</p>
         <ol class="tool-call-list">{items}</ol>
       </div>
     """

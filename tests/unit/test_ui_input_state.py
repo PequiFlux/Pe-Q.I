@@ -47,8 +47,8 @@ def test_source_notes_describe_fixture_vs_upload() -> None:
         "scenarios/cases/S03_WET_LOAD/ticket.png",
     )
 
-    assert "Caso versionado" in fixture_queue
-    assert "Caso versionado" in fixture_ticket
+    assert "Exemplo versionado" in fixture_queue
+    assert "Exemplo versionado" in fixture_ticket
     assert "fixture PNG" in multimodal_ticket
 
 
@@ -62,7 +62,7 @@ def test_source_notes_can_render_english() -> None:
         lang="en",
     )
 
-    assert "Versioned case" in fixture_queue
+    assert "Versioned example" in fixture_queue
     assert "fixture TXT ticket" in fixture_ticket
     assert "PNG fixture" in multimodal_ticket
 
