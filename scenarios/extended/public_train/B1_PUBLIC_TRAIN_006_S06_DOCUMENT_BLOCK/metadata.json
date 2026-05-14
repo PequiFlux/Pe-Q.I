@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 1,
+  "document_template_id": "S06_DOCUMENT_BLOCK-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "weather_load_conflict"
+  ],
+  "scenario_family": "S06_DOCUMENT_BLOCK",
+  "scenario_id": "B1_PUBLIC_TRAIN_006_S06_DOCUMENT_BLOCK",
+  "sha256": "9da77e43986fb5ee186ba7b775862117be659f156821120618506b028fb9d448",
+  "source_case_id": "S06_DOCUMENT_BLOCK",
+  "split": "public_train"
+}

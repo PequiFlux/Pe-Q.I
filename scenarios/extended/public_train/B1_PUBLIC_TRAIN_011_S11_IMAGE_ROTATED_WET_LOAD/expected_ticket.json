@@ -1,0 +1,17 @@
+{
+  "ticket_id": "TCK-S11",
+  "truck_id": "TRK-011",
+  "vehicle_type": "truck",
+  "document_status": "clear",
+  "document_block_flags": [],
+  "load_condition": "wet",
+  "contract_priority_flag": false,
+  "destination_constraints": [
+    "DST-WET-01"
+  ],
+  "parse_confidence": 0.9,
+  "ambiguities": [],
+  "evidence_refs": [
+    "synthetic ticket fixture"
+  ]
+}

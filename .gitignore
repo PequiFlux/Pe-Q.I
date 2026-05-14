@@ -14,11 +14,15 @@ bench/reports/*
 !bench/reports/sample/summary.csv
 logs/
 var/
+cache/
+artifacts/debug*/
+artifacts/latest/text_contract/
 tmp/
 test-results/
 
 .env
 .env.*
 .gstack/
+.serena/
 .codex
 .codex/

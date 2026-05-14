@@ -1,0 +1,11 @@
+ticket_id: TCK-S08-001
+truck_id: TRK-001
+vehicle_type: truck
+document_status: clear
+document_block_flags: []
+load_condition: dry
+contract_priority_flag: false
+destination_constraints: []
+parse_confidence: 0.95
+evidence_refs:
+- "document_status: clear"

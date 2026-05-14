@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 1,
+  "document_template_id": "S08_REDUCED_CAPACITY-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "rotation_minus_90"
+  ],
+  "scenario_family": "S08_REDUCED_CAPACITY",
+  "scenario_id": "B1_PUBLIC_TRAIN_008_S08_REDUCED_CAPACITY",
+  "sha256": "56a06816983ade959e4e68d179680f5d96b5d84d8e4e4c64f4d5be89549d62da",
+  "source_case_id": "S08_REDUCED_CAPACITY",
+  "split": "public_train"
+}

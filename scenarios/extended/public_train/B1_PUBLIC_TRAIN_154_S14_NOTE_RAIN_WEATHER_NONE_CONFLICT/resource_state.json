@@ -1,0 +1,16 @@
+[
+  {
+    "resource_id": "DST-OPEN-01",
+    "status": "available",
+    "capacity_pct": 85,
+    "resource_type": "open_hopper",
+    "exposure": "open",
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
+  }
+]

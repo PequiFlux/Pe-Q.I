@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 2,
+  "document_template_id": "S06_DOCUMENT_BLOCK-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "ocr_noise"
+  ],
+  "scenario_family": "S06_DOCUMENT_BLOCK",
+  "scenario_id": "B1_PRIVATE_HOLDOUT_026_S06_DOCUMENT_BLOCK",
+  "sha256": "9da77e43986fb5ee186ba7b775862117be659f156821120618506b028fb9d448",
+  "source_case_id": "S06_DOCUMENT_BLOCK",
+  "split": "private_holdout"
+}

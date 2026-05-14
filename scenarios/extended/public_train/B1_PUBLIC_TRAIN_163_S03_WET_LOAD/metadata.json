@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 9,
+  "document_template_id": "S03_WET_LOAD-template",
+  "label_quality": "auto",
+  "modality": "png",
+  "perturbation_recipe": [
+    "ocr_noise",
+    "ticket_note_conflict"
+  ],
+  "scenario_family": "S03_WET_LOAD",
+  "scenario_id": "B1_PUBLIC_TRAIN_163_S03_WET_LOAD",
+  "sha256": "78406092b922920fa3fc8c7cdeff2d2936cd76fd4282e90c61c4f82eb735cf27",
+  "source_case_id": "S03_WET_LOAD",
+  "split": "public_train"
+}

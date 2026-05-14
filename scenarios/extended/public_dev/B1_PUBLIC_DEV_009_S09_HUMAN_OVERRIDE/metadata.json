@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 1,
+  "document_template_id": "S09_HUMAN_OVERRIDE-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "light_skew"
+  ],
+  "scenario_family": "S09_HUMAN_OVERRIDE",
+  "scenario_id": "B1_PUBLIC_DEV_009_S09_HUMAN_OVERRIDE",
+  "sha256": "89920f793d9a02c03ce49d4b8c6d88e11254fc569e72e20789b08727b7eabd9a",
+  "source_case_id": "S09_HUMAN_OVERRIDE",
+  "split": "public_dev"
+}

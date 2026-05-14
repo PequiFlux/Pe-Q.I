@@ -61,6 +61,10 @@ class GemmaAdapter:
                     "sha256": bundle.sha256,
                     "extracted_text": bundle.extracted_text,
                     "rendered_pages": list(bundle.rendered_pages),
+                    "document_views": [
+                        view.model_dump(mode="json") for view in bundle.document_views
+                    ],
+                    "ocr_hints": [hint.model_dump(mode="json") for hint in bundle.ocr_hints],
                 },
             )
         except PequiFluxError:

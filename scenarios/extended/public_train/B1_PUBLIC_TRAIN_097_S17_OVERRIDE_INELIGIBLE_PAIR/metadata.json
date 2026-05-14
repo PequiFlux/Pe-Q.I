@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 5,
+  "document_template_id": "S17_OVERRIDE_INELIGIBLE_PAIR-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "weather_load_conflict"
+  ],
+  "scenario_family": "S17_OVERRIDE_INELIGIBLE_PAIR",
+  "scenario_id": "B1_PUBLIC_TRAIN_097_S17_OVERRIDE_INELIGIBLE_PAIR",
+  "sha256": "ebe55a2206a20d777bfa1763294538c915190e34e4f357cb7b766a837c943b2d",
+  "source_case_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+  "split": "public_train"
+}

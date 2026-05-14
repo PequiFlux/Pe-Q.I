@@ -44,6 +44,7 @@ def build_audit_record(
         fifo_break=bool(
             preview.recommended_truck and preview.recommended_truck.queue_position_before != 1
         ),
+        truth_resolution=interpreted_context.truth_resolution,
         provenance=[item.model_dump(mode="json") for item in interpreted_context.provenance],
         operator_action=operator_action,
         tool_calls=tool_calls or [],

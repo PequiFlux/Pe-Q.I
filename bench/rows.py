@@ -31,6 +31,7 @@ FULL_PREVIEW_READY_TOOL_PATH = (
     "generate_audit_payload",
 )
 FULL_TERMINAL_TOOL_PATH = ("generate_audit_payload",)
+EXPECTED_BLOCKED_TOOL_ERRORS = {"EMPTY_VALIDATION_MATRIX", "NO_ELIGIBLE_CANDIDATE"}
 
 
 def build_raw_fifo_row(
@@ -68,6 +69,7 @@ def build_raw_fifo_row(
         "fifo_break_justified": False,
         "rejected_count": 0,
         **_empty_tool_call_metrics(),
+        **_empty_latency_metrics(),
         "latency_ms_total": 0,
     }
 
@@ -78,12 +80,15 @@ def build_payload_row(
     variant: str,
     payload: FrontEndPayload,
     expected: dict[str, Any],
-    ticket_field_accuracy: float,
+    ticket_field_accuracy: float | None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    metadata = metadata or {}
     fifo_break = bool(
         payload.recommended_truck and payload.recommended_truck.queue_position_before != 1
     )
     observed_primary_exception = str(payload.benchmark_observed.get("primary_exception", "UNKNOWN"))
+    latency = phase_latency_metrics(payload.latency_ms)
     return {
         "scenario_id": scenario_id,
         "variant": variant,
@@ -97,6 +102,11 @@ def build_payload_row(
         "exception_match": observed_primary_exception == expected["expected_primary_exception"],
         "audit_complete": audit_complete(payload),
         "decision_status": payload.decision_status,
+        "scenario_family": metadata.get("scenario_family", ""),
+        "modality": metadata.get("modality", ""),
+        "perturbation_recipe": metadata.get("perturbation_recipe", []),
+        "expected_decision": _expected_decision_label(expected),
+        "manual_review_flag": payload.decision_status == "REVIEW_REQUIRED",
         "recommended_truck": (
             payload.recommended_truck.truck_id if payload.recommended_truck else None
         ),
@@ -112,8 +122,74 @@ def build_payload_row(
             len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
         ),
         **tool_call_metrics(payload),
-        "latency_ms_total": sum(payload.latency_ms.values()),
+        **latency,
     }
+
+
+def phase_latency_metrics(latencies_ms: dict[str, int]) -> dict[str, int]:
+    preprocess = _sum_latency(latencies_ms, {"normalize_queue_snapshot"})
+    model = _sum_latency(
+        latencies_ms,
+        {
+            "parse_ticket_document",
+            "parse_structured_ticket_document",
+        },
+        prefixes=("choose_tool_",),
+    )
+    audit = _sum_latency(
+        latencies_ms,
+        {"generate_audit_payload"},
+        prefixes=("tool_generate_audit_payload",),
+    )
+    rules = _sum_latency(
+        latencies_ms,
+        {
+            "resolve_truth",
+            "validate_hard_constraints",
+            "rank_candidates",
+            "validation_and_ranking_plan",
+        },
+        prefixes=("tool_validate_hard_constraints", "tool_rank_candidates"),
+    )
+    return {
+        "latency_ms_preprocess": preprocess,
+        "latency_ms_model": model,
+        "latency_ms_rules": rules,
+        "latency_ms_audit": audit,
+        "latency_ms_total": preprocess + model + rules + audit,
+    }
+
+
+def _sum_latency(
+    latencies_ms: dict[str, int],
+    exact_keys: set[str],
+    *,
+    prefixes: tuple[str, ...] = (),
+) -> int:
+    return int(
+        sum(
+            value
+            for key, value in latencies_ms.items()
+            if key in exact_keys or any(key.startswith(prefix) for prefix in prefixes)
+        )
+    )
+
+
+def _empty_latency_metrics() -> dict[str, int]:
+    return {
+        "latency_ms_preprocess": 0,
+        "latency_ms_model": 0,
+        "latency_ms_rules": 0,
+        "latency_ms_audit": 0,
+    }
+
+
+def _expected_decision_label(expected: dict[str, Any]) -> str:
+    trucks = expected.get("acceptable_trucks") or []
+    destinations = expected.get("acceptable_destinations") or []
+    if trucks and destinations:
+        return f"{trucks[0]}->{destinations[0]}"
+    return str(expected.get("expected_status", ""))
 
 
 def tool_call_metrics(payload: FrontEndPayload) -> dict[str, Any]:
@@ -121,7 +197,7 @@ def tool_call_metrics(payload: FrontEndPayload) -> dict[str, Any]:
     executed_tools = _unique_in_order(
         record.tool_name for record in records if record.status == "executed"
     )
-    tool_error_count = sum(1 for record in records if record.status == "error")
+    tool_error_count = _unexpected_tool_error_count(payload, records)
     planner_step_count = sum(1 for record in records if record.status == "requested")
     required_tools = _required_tool_path(payload)
     return {
@@ -151,9 +227,32 @@ def _required_tool_path(payload: FrontEndPayload) -> tuple[str, ...]:
     status = str(payload.decision_status)
     if status == "PREVIEW_READY":
         return FULL_PREVIEW_READY_TOOL_PATH
+    if status == "BLOCKED" and _has_expected_blocked_tool_error(payload):
+        return ("validate_hard_constraints",)
     if status in TERMINAL_AUDIT_STATUSES:
         return FULL_TERMINAL_TOOL_PATH
     return ()
+
+
+def _unexpected_tool_error_count(payload: FrontEndPayload, records: list[Any]) -> int:
+    return sum(
+        1
+        for record in records
+        if record.status == "error" and not _is_expected_blocked_tool_error(payload, record)
+    )
+
+
+def _has_expected_blocked_tool_error(payload: FrontEndPayload) -> bool:
+    records = list(payload.audit_record.tool_calls if payload.audit_record else [])
+    return any(_is_expected_blocked_tool_error(payload, record) for record in records)
+
+
+def _is_expected_blocked_tool_error(payload: FrontEndPayload, record: Any) -> bool:
+    return (
+        str(payload.decision_status) == "BLOCKED"
+        and record.status == "error"
+        and record.error_code in EXPECTED_BLOCKED_TOOL_ERRORS
+    )
 
 
 def _unique_in_order(values: Iterable[str]) -> list[str]:

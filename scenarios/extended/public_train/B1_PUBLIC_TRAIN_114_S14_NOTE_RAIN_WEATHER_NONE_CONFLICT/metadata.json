@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 6,
+  "document_template_id": "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "blur"
+  ],
+  "scenario_family": "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+  "scenario_id": "B1_PUBLIC_TRAIN_114_S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+  "sha256": "2fda0020b8444e4996dc9703b3458afabd4e88c46dac911f6e993a502bc9f69f",
+  "source_case_id": "S14_NOTE_RAIN_WEATHER_NONE_CONFLICT",
+  "split": "public_train"
+}

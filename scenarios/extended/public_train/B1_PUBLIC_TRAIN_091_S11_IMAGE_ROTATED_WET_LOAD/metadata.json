@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 5,
+  "document_template_id": "S11_IMAGE_ROTATED_WET_LOAD-template",
+  "label_quality": "auto",
+  "modality": "png",
+  "perturbation_recipe": [
+    "weather_load_conflict",
+    "light_skew"
+  ],
+  "scenario_family": "S11_IMAGE_ROTATED_WET_LOAD",
+  "scenario_id": "B1_PUBLIC_TRAIN_091_S11_IMAGE_ROTATED_WET_LOAD",
+  "sha256": "c1085e8c8a8defd542ae7cbdc602a276e37a2851d6b87763034e9c3aa6228439",
+  "source_case_id": "S11_IMAGE_ROTATED_WET_LOAD",
+  "split": "public_train"
+}

@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 8,
+  "document_template_id": "S12_PDF_SCANNED_DOCUMENT_BLOCK-template",
+  "label_quality": "auto",
+  "modality": "pdf_scanned",
+  "perturbation_recipe": [
+    "missing_field",
+    "blocked_resource"
+  ],
+  "scenario_family": "S12_PDF_SCANNED_DOCUMENT_BLOCK",
+  "scenario_id": "B1_PUBLIC_TRAIN_152_S12_PDF_SCANNED_DOCUMENT_BLOCK",
+  "sha256": "e986697893b774e61e8ec3dc0ca58d877641f15a5ac33b85607978d5de6738d5",
+  "source_case_id": "S12_PDF_SCANNED_DOCUMENT_BLOCK",
+  "split": "public_train"
+}

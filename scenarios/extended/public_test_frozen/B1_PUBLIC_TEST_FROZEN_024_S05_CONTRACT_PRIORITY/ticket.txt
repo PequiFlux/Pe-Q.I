@@ -1,0 +1,11 @@
+ticket_id: TCK-S05-003
+truck_id: TRK-003
+vehicle_type: truck
+document_status: clear
+document_block_flags: []
+load_condition: dry
+contract_priority_flag: true
+destination_constraints: []
+parse_confidence: 0.95
+evidence_refs:
+- "contract_priority_flag: true"

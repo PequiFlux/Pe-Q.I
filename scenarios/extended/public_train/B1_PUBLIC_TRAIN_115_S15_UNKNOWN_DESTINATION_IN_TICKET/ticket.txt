@@ -1,0 +1,12 @@
+ticket_id: TCK-S15
+truck_id: TRK-051
+vehicle_type: truck
+document_status: clear
+document_block_flags: []
+load_condition: dry
+contract_priority_flag: false
+destination_constraints: [DST-GHOST-99]
+parse_confidence: 0.94
+ambiguities: []
+evidence_refs:
+- synthetic ticket fixture

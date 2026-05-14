@@ -1,4 +1,4 @@
-.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text test bench bench-gpu audit format-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
+.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
@@ -15,6 +15,8 @@ help:
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
 	@echo "  make audit      Run blueprint audit inside Docker"
+	@echo "  make leakage-guard  Run expected_ticket clean-eval leakage guard tests"
+	@echo "  make extended-pack-check  Validate B1 extended split manifests"
 	@echo "  make quality    Run Black, pytest, audit and validated text benchmark gates as CI"
 
 demo:
@@ -53,6 +55,14 @@ format-check:
 	docker build --target test -t pequiflux-yard-copilot:test .
 	docker run --rm pequiflux-yard-copilot:test python -m black --check app bench tests scripts
 
+leakage-guard:
+	docker build --target test -t pequiflux-yard-copilot:test .
+	docker run --rm pequiflux-yard-copilot:test pytest -q tests/scenarios/test_no_expected_ticket_leakage.py
+
+extended-pack-check:
+	docker build --target test -t pequiflux-yard-copilot:test .
+	docker run --rm pequiflux-yard-copilot:test pytest -q tests/scenarios/test_extended_pack_schema.py
+
 benchmark-smoke:
 	docker build --target test -t pequiflux-yard-copilot:test .
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark --no-validate
@@ -61,7 +71,7 @@ benchmark-validate-text:
 	docker build --target test -t pequiflux-yard-copilot:test .
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 
-quality: format-check test audit benchmark-validate-text
+quality: format-check test leakage-guard extended-pack-check audit benchmark-validate-text
 
 prewarm:
 	docker compose --profile gemma-setup run --rm gemma-init

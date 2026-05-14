@@ -44,9 +44,14 @@ Procurar:
 - Manter apenas `technical_blueprint.md` da raiz como blueprint longo; `docs/technical_blueprint.md` deve permanecer uma ponte curta para evitar drift.
 - Não colocar regra de domínio em `app/ui` ou `app/cli`; chamar orquestração/domínio existente.
 - Não criar novo parser de ticket sem verificar `app/services/parser.py`, `app/services/structured_ticket_parser.py` e `app/adapters/document_adapter.py`.
+- Preprocessamento multimodal deve passar por `app/document/preprocess.py`; OCR hints devem passar por `app/document/ocr_hints.py`; não adicionar lógica paralela de view/OCR dentro de adapter, UI ou benchmark.
+- Evidência por campo de ticket deve reutilizar `app/gemma/field_extractor.py`; não espalhar thresholds de campo crítico em prompt, UI ou benchmark.
+- Calibração de confiança e decisão de revisão humana por baixa confiança, conflito de fonte ou discordância OCR/modelo deve passar por `app/gemma/calibration.py`; não duplicar thresholds em parser, prompt, UI, benchmark ou notebooks.
 - Fixtures textuais de ticket devem reutilizar `app/services/structured_ticket_parser.py`; `TextTicketRuntime` não deve extrair dados de frases do prompt.
 - Casos multimodais do benchmark devem reutilizar o sidecar `expected_ticket.json`; não criar formato paralelo de fixture esperado por cenário.
+- `expected_ticket.json` é permitido no B0/CI textual como fixture de contrato, mas é proibido em splits limpos de avaliação (`public_dev`, `public_test_frozen`, `private_holdout`) para documentos multimodais; usar `bench.clean_eval --fail-on-leakage` e `tests/scenarios/test_no_expected_ticket_leakage.py`.
 - `scenarios/cases/` e `scenarios/manifest.json` estão congelados em 20 casos de vitrine; expansões futuras devem ir para `scenarios/extended/stress/` ou `scenarios/extended/failure/`, não para o sample principal.
+- O B1 em `scenarios/extended/public_train`, `public_dev`, `public_test_frozen` e `private_holdout` deve ser regenerado por `scripts/build_extended_pack.py`; não editar manualmente centenas de fixtures duplicadas sem atualizar o gerador e `tests/scenarios/test_extended_pack_schema.py`. Splits de avaliação usam composição controlada para cobrir todas as famílias uma vez e manter `manual_review_rate` esperado dentro do gate.
 - Não parsear `arrival_ts` fora de `app/adapters/csv_adapter.py`; timestamps de fila precisam ter timezone explícito e serem normalizados para UTC.
 - Leitura canônica de `queue.csv` deve passar por `app/adapters/csv_adapter.load_queue_rows`; não manter leitor paralelo de fila para UI ou FIFO bruto.
 - Não criar novo formato de cenário sem atualizar `scenarios/manifest.json`, schemas e testes de cenário.
@@ -54,10 +59,13 @@ Procurar:
 - Classificação de exceções deve acumular sinais em `secondary_exceptions` e `affected_resources`; não voltar a early return por primeira condição em `app/services/exception_classifier.py`.
 - Quando `MANUAL_REVIEW_HINT` aparecer em achados de classificação, mesmo como secundária, `needs_human_review` deve ser `true`; não depender apenas da exceção primária.
 - Combinações críticas de hierarquia devem ficar como testes unitários em `tests/unit/test_exception_classifier.py`, `tests/unit/test_constraints.py` e `tests/unit/test_truth_resolver.py`; não expandir o sample público congelado só para cobrir variantes de regra.
-- A tela principal da UI deve ser operacional: seletor de cenário versionado e comandos `Carregar caso`/`Carregar e analisar caso`/`Limpar campos` no cabeçalho da entrada operacional, fila CSV por upload, ticket/documento por upload, nota, clima/recursos simples ou JSON, resultado, ação humana e auditoria técnica colapsada. Benchmark strip, modo de banca e comparação entre variantes não devem voltar para a superfície principal.
+- A tela principal da UI deve ser operacional: seletor de cenário versionado e comandos `Carregar caso`/`Carregar e analisar caso`/`Limpar` no cabeçalho da entrada operacional, fila CSV por upload, ticket/documento por upload, nota, clima/recursos simples ou JSON, resultado, ação humana e auditoria técnica colapsada. Benchmark strip, modo de banca e comparação entre variantes não devem voltar para a superfície principal.
+- Cópia de idioma da UI principal deve reutilizar `app/ui/i18n.py`; `app/ui/components/common.py::copy_text` e `is_english` ficam apenas como compatibilidade para páginas legadas como o dashboard de benchmark. Payload técnico, IDs de cenário, nomes de regras e JSON de auditoria não devem ser traduzidos nem duplicados.
 - O formulário simples de recursos deve modelar compatibilidade com carga úmida via `Destinos compatíveis com carga úmida`; não forçar operadores finais a editar JSON para adicionar `supported_load_conditions: ["dry", "wet"]`.
 - Prova de Gemma na UI deve usar `gemma_extraction_card` para o resumo operacional, `render_gemma_context` para Runtime/Etapa/Tipo do arquivo/Status e `tool_badges_card` para a sequência `AuditRecord.tool_calls` na auditoria avançada; não criar cartão paralelo de benchmark ou runtime.
 - Screenshot do README deve usar `assets/screenshots/pequiflux-ui.png`; manter `docs/writeup_assets/pequiflux-ui.png` sincronizado quando usado em material de submissão.
+- `README.en.md` é tradução pública do `README.md`; manter links de idioma e evidências principais sincronizados, sem criar um segundo blueprint longo.
+- Avaliação em CI deve ficar em `.github/workflows/ci.yml` para qualidade geral e `.github/workflows/eval.yml` para contrato/benchmark limpo; não criar novo workflow paralelo de benchmark sem reutilizar `bench.clean_eval`, `bench.stats`, `bench.reporting` e upload de `artifacts/latest`.
 - Visualizações de fila e heatmap na UI devem usar `queue_diff` e `AuditRecord`; não recriar validação de hard constraints no front-end.
 - `queue_diff` deve representar a fila após a chamada: caminhão chamado usa `called` e `position_after=None`; demais itens usam `unchanged`, `shifted` ou `blocked`. Não reintroduzir `recommended/skipped` como estado de fila.
 - Toda contribuição de score em `app/domain/ranking.py` deve adicionar `PolicyRule` correspondente em `fired_rules`; não deixar bônus/penalidade só em `reason_details`.
@@ -66,11 +74,17 @@ Procurar:
 - Nomes públicos de variante do benchmark devem passar por `bench.variants.report_variant_name`; não espalhar tradução `fifo` -> `fifo_safe` em CLI, UI ou docs de execução.
 - Montagem de linhas, match esperado, violação de constraint e acurácia de ticket do benchmark devem reutilizar `bench.rows`; não recolocar essa lógica em `app/cli/run_benchmark.py`.
 - Completude de auditoria do benchmark deve ser status-aware em `bench.rows.audit_complete`; `PREVIEW_READY` exige matriz de validação, e `BLOCKED`/`REVIEW_REQUIRED` exigem razão terminal, contexto observado, proveniência e todos os hashes de entrada gerados pelo orquestrador.
+- Resolução de conflito de verdade deve ser preservada em `AuditRecord.truth_resolution`; não tentar reconstruir material conflicts por string em UI, notebooks ou benchmark.
 - `audit_completeness` mede completude de payloads comparáveis do benchmark; falhas catastróficas antes da ingestão completa podem falhar fechado sem latências, proveniência ou hashes completos e não devem forçar relaxamento dessa métrica.
 - Validação de violação do FIFO bruto deve tratar par caminhão-destino ausente da matriz como inválido em `bench.rows.pair_rejected`; não interpretar destino desconhecido como “sem violação”.
 - Validação de cenário/benchmark deve reutilizar `bench.validation.validate_payload`; não importar helpers privados de `app/cli`.
 - Relatórios CSV de benchmark devem reutilizar `bench.reporting.render_summary_csv`; não montar CSV manualmente com `",".join(...)`.
-- Métricas de tool calling no benchmark devem ser derivadas em `bench.rows.tool_call_metrics` a partir de `AuditRecord.tool_calls`; não recalcular caminho de tools em CLI, UI ou `bench.reporting`.
+- Métricas de tool calling no benchmark devem ser derivadas em `bench.rows.tool_call_metrics` a partir de `AuditRecord.tool_calls`; não recalcular caminho de tools em CLI, UI ou `bench.reporting`. Erros terminais fail-closed esperados em `BLOCKED`, como `NO_ELIGIBLE_CANDIDATE`, continuam auditáveis, mas não contam como erro inesperado de tool.
+- Latência por fase deve ser derivada em `bench.rows.phase_latency_metrics` a partir de `AuditRecord.latencies_ms`; não somar timers manualmente em CLI, UI, notebooks ou relatórios.
+- Gates de submissão devem passar por `bench.gates.evaluate_submission_gates`; não espalhar thresholds de `goal.md` em README, UI, notebooks ou scripts ad hoc.
+- Comparações estatísticas pareadas devem passar por `bench.stats`; não reimplementar McNemar/bootstrap em notebooks antes de chamar o módulo canônico.
+- Artefatos finais (`metrics.json`, `summary.csv`, `error_analysis.csv`, `report.md`) devem ser materializados por `bench.reporting.write_benchmark_report`/CLI; não montar JSON/CSV/Markdown paralelos em scripts soltos.
+- Dashboard e notebooks devem ler `artifacts/latest` e chamar `bench.reporting`/`bench.stats`; não recalcular gates, McNemar, bootstrap ou acurácia em células soltas ou páginas Streamlit.
 - Atalhos de execução devem apontar para Docker/Compose, scripts existentes ou CLIs existentes; não criar novo runner paralelo para demo, teste ou benchmark.
 - Caminhos reprodutíveis mínimos devem usar `demo-text`/`ui-text`; não fazer quickstart depender implicitamente do serviço `gemma`.
 - Checks públicos devem reutilizar `pytest`, `black`, `app.cli.blueprint_audit` e `app.cli.run_benchmark`; não criar runner paralelo de CI para métricas ou auditoria.
@@ -86,5 +100,5 @@ Procurar:
 - Comparação FIFO bruta da UI deve importar `raw_fifo_call` e `raw_queue_rows` de `app.services.raw_fifo`; não recriar wrappers ou leitura de CSV em `app/ui/components/common.py`.
 - A UI deve obter `DecisionOrchestrator` via `app/ui/ui_runner.py` e `st.cache_resource`; não chamar `build_gemma_adapter()` diretamente em componente ou composição de tela.
 - Novas mudanças no fluxo de decisão devem encaixar nas etapas `load_inputs`, `interpret_context`, `validate_and_rank`, `build_payload` ou `persist_and_log`; não voltar a concentrar o pipeline inteiro em `run_decision()`.
-- Mecânica do Gemma Tool Planner deve ficar em `app/orchestration/tool_planner.py`: sessão, `execute_planned_tool`, plano de validação/ranking e plano de auditoria. `DecisionOrchestrator` só deve montar callbacks determinísticos e coordenar payload/persistência.
+- Mecânica do Gemma Tool Planner deve ficar em `app/orchestration/tool_planner.py`: sessão, `execute_planned_tool`, fast-path de tool única sob whitelist, plano de validação/ranking e plano de auditoria. `DecisionOrchestrator` só deve montar callbacks determinísticos e coordenar payload/persistência.
 - Estados de orquestração só podem mudar por `WorkflowStateMachine.transition_to` ou `WorkflowStateMachine.force_terminal`; não atribuir `current_state` diretamente fora da máquina de estados.

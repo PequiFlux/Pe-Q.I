@@ -203,9 +203,7 @@ def _render_operator_input(
     use_expander: bool = True,
 ) -> dict[str, Any]:
     wrapper = (
-        st.expander(t("input.title", lang), expanded=expanded)
-        if use_expander
-        else nullcontext()
+        st.expander(t("input.title", lang), expanded=expanded) if use_expander else nullcontext()
     )
     with wrapper:
         st.markdown(
@@ -324,9 +322,7 @@ def _render_operator_input(
                 _execution_strip(
                     queue_csv=queue_csv,
                     ticket_text=ticket_text,
-                    fixture_ticket_path=st.session_state.get(
-                        INPUT_KEYS["fixture_ticket_path"], ""
-                    ),
+                    fixture_ticket_path=st.session_state.get(INPUT_KEYS["fixture_ticket_path"], ""),
                     operator_note=operator_note,
                     weather_json=weather_json,
                     resource_json=resource_json,
@@ -335,8 +331,7 @@ def _render_operator_input(
                 unsafe_allow_html=True,
             )
             submitted = (
-                st.button(_analyze_button_label(lang), type="primary", width="stretch")
-                or submitted
+                st.button(_analyze_button_label(lang), type="primary", width="stretch") or submitted
             )
 
     return {
@@ -674,16 +669,20 @@ def _analysis_console(
         (
             t("ready.weather", lang),
             bool(weather_json.strip()),
-            t("ready.weather.ok", lang)
-            if weather_json.strip()
-            else t("ready.weather.pending", lang),
+            (
+                t("ready.weather.ok", lang)
+                if weather_json.strip()
+                else t("ready.weather.pending", lang)
+            ),
         ),
         (
             t("ready.resources", lang),
             bool(resource_json.strip()),
-            t("ready.resources.ok", lang)
-            if resource_json.strip()
-            else t("ready.resources.pending", lang),
+            (
+                t("ready.resources.ok", lang)
+                if resource_json.strip()
+                else t("ready.resources.pending", lang)
+            ),
         ),
     ]
     ready_count = sum(1 for _, ready, _ in checks if ready)
@@ -828,10 +827,11 @@ def _render_error(error: str, lang: Language = "pt") -> None:
 
 def _current_language() -> Language:
     value = st.session_state.get(LANGUAGE_KEY, "pt")
-    return "en" if value == "en" else "pt"
+    return "en" if value in {"en", "English"} else "pt"
 
 
 def _render_language_picker() -> Language:
+    st.session_state[LANGUAGE_KEY] = _current_language()
     st.markdown(
         f"""
         <div class="side-card compact">

@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 3,
+  "document_template_id": "S17_OVERRIDE_INELIGIBLE_PAIR-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "unknown_destination"
+  ],
+  "scenario_family": "S17_OVERRIDE_INELIGIBLE_PAIR",
+  "scenario_id": "B1_PRIVATE_HOLDOUT_056_S17_OVERRIDE_INELIGIBLE_PAIR",
+  "sha256": "ebe55a2206a20d777bfa1763294538c915190e34e4f357cb7b766a837c943b2d",
+  "source_case_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+  "split": "private_holdout"
+}

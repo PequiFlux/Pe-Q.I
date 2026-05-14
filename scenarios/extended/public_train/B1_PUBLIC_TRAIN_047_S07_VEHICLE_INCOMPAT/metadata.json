@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 3,
+  "document_template_id": "S07_VEHICLE_INCOMPAT-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "rotation_minus_90"
+  ],
+  "scenario_family": "S07_VEHICLE_INCOMPAT",
+  "scenario_id": "B1_PUBLIC_TRAIN_047_S07_VEHICLE_INCOMPAT",
+  "sha256": "2b1dd3ae34135c743486acf742d4d56b1d52fe9412f8ad210a0237ee04e00d39",
+  "source_case_id": "S07_VEHICLE_INCOMPAT",
+  "split": "public_train"
+}

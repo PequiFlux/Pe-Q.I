@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 2,
+  "document_template_id": "S03_WET_LOAD-template",
+  "label_quality": "reviewed",
+  "modality": "png",
+  "perturbation_recipe": [
+    "ticket_note_conflict",
+    "weather_load_conflict"
+  ],
+  "scenario_family": "S03_WET_LOAD",
+  "scenario_id": "B1_PRIVATE_HOLDOUT_023_S03_WET_LOAD",
+  "sha256": "1be74739ca909b1eb230a957d244d66485e4af5cd108e0f2fcb118a11b0f344d",
+  "source_case_id": "S03_WET_LOAD",
+  "split": "private_holdout"
+}

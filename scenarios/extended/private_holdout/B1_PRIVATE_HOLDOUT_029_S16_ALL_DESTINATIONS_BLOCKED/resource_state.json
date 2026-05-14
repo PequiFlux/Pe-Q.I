@@ -1,0 +1,30 @@
+[
+  {
+    "resource_id": "DST-BLOCK-01",
+    "status": "blocked",
+    "capacity_pct": 0,
+    "resource_type": "covered_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
+  },
+  {
+    "resource_id": "DST-BLOCK-02",
+    "status": "down",
+    "capacity_pct": 0,
+    "resource_type": "covered_hopper",
+    "exposure": "covered",
+    "allowed_vehicle_types": [
+      "truck",
+      "bitrem"
+    ],
+    "supported_load_conditions": [
+      "dry"
+    ]
+  }
+]

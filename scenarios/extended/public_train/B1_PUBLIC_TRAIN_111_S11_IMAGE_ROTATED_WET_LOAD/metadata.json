@@ -1,0 +1,16 @@
+{
+  "created_by": "generator",
+  "cycle": 6,
+  "document_template_id": "S11_IMAGE_ROTATED_WET_LOAD-template",
+  "label_quality": "auto",
+  "modality": "png",
+  "perturbation_recipe": [
+    "ocr_noise",
+    "ticket_note_conflict"
+  ],
+  "scenario_family": "S11_IMAGE_ROTATED_WET_LOAD",
+  "scenario_id": "B1_PUBLIC_TRAIN_111_S11_IMAGE_ROTATED_WET_LOAD",
+  "sha256": "df22ce47d5aebd4d27cdaeb3d7e1f3cf8b3a39e9df29cde1bdd80a0b7a08852f",
+  "source_case_id": "S11_IMAGE_ROTATED_WET_LOAD",
+  "split": "public_train"
+}

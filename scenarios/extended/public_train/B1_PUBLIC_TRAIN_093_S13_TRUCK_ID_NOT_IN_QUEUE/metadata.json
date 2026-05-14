@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 5,
+  "document_template_id": "S13_TRUCK_ID_NOT_IN_QUEUE-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "missing_field"
+  ],
+  "scenario_family": "S13_TRUCK_ID_NOT_IN_QUEUE",
+  "scenario_id": "B1_PUBLIC_TRAIN_093_S13_TRUCK_ID_NOT_IN_QUEUE",
+  "sha256": "4b70cab21d00f3be121a8b8a45e0a5c77feedff3b3046bddf1abeb9001e2bb70",
+  "source_case_id": "S13_TRUCK_ID_NOT_IN_QUEUE",
+  "split": "public_train"
+}

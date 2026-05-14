@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 9,
+  "document_template_id": "S15_UNKNOWN_DESTINATION_IN_TICKET-template",
+  "label_quality": "auto",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "weather_load_conflict"
+  ],
+  "scenario_family": "S15_UNKNOWN_DESTINATION_IN_TICKET",
+  "scenario_id": "B1_PUBLIC_TRAIN_175_S15_UNKNOWN_DESTINATION_IN_TICKET",
+  "sha256": "09731ad01a441fbdbb50b6d5cc97ff6ba5c58ea443a53ffa9c62519f6a612008",
+  "source_case_id": "S15_UNKNOWN_DESTINATION_IN_TICKET",
+  "split": "public_train"
+}

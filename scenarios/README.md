@@ -12,6 +12,17 @@ make bench
 O manifest completo fica em [`manifest.json`](./manifest.json). A estrutura e os criterios de integridade ficam em [`../docs/scenario-pack.md`](../docs/scenario-pack.md).
 O manifest principal deve permanecer alinhado aos 20 casos da vitrine; manifests estendidos, se necessários, devem ficar sob `extended/`.
 
+## B1 extended pack
+
+O pack B1 emergencial vive em:
+
+- [`extended/public_train/manifest.json`](./extended/public_train/manifest.json)
+- [`extended/public_dev/manifest.json`](./extended/public_dev/manifest.json)
+- [`extended/public_test_frozen/manifest.json`](./extended/public_test_frozen/manifest.json)
+- [`extended/private_holdout/manifest.json`](./extended/private_holdout/manifest.json)
+
+Ele é gerado por `python scripts/build_extended_pack.py` e validado por `make extended-pack-check`. Splits de avaliação não devem conter `expected_ticket.json` para documentos multimodais; esse guard fica em `make leakage-guard`.
+
 ## Leitura humana dos cenarios
 
 | Cenario | Narrativa para avaliacao |

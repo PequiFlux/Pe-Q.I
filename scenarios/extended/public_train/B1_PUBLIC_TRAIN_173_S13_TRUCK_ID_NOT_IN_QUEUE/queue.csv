@@ -1,0 +1,3 @@
+truck_id,arrival_ts,status,vehicle_type,contract_priority_flag
+TRK-031,2026-04-04T10:20:00+00:00,waiting,truck,false
+TRK-032,2026-04-04T10:30:00+00:00,waiting,truck,false

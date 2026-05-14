@@ -5,6 +5,19 @@ import os
 from typing import Any
 
 from app.domain.models import FrontEndPayload
+from app.ui.i18n import LANGUAGE_KEY
+
+
+def is_english() -> bool:
+    try:
+        import streamlit as st
+    except ModuleNotFoundError:
+        return False
+    return st.session_state.get(LANGUAGE_KEY, "pt") in {"en", "English"}
+
+
+def copy_text(english: str, portuguese: str) -> str:
+    return english if is_english() else portuguese
 
 
 def step_status(payload: FrontEndPayload, latency_key: str) -> str:

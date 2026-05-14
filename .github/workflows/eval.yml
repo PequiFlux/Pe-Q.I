@@ -1,0 +1,130 @@
+name: Evaluation
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - "bench/**"
+      - "scenarios/**"
+      - "tests/**"
+      - "requirements*.txt"
+      - "pyproject.toml"
+      - ".github/workflows/eval.yml"
+  workflow_dispatch:
+    inputs:
+      scenario_dir:
+        description: "Clean evaluation scenario directory"
+        required: false
+        default: "scenarios/extended/public_test_frozen"
+      runtime:
+        description: "Gemma runtime label"
+        required: false
+        default: "gemma4:e4b"
+  schedule:
+    - cron: "17 6 * * 1"
+
+jobs:
+  contract:
+    name: text contract
+    runs-on: ubuntu-latest
+    env:
+      PEQUIFLUX_GEMMA_RUNTIME: text
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements*.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-all.txt
+
+      - name: Run clean text contract
+        run: |
+          python -m bench.clean_eval \
+            --variant full \
+            --runtime text \
+            --scenario-dir scenarios \
+            --manifest scenarios/manifest.json \
+            --output artifacts/eval/text_contract \
+            --fail-on-leakage
+
+      - name: Upload text contract artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: text-contract-eval
+          path: artifacts/eval/text_contract
+
+  gemma:
+    name: clean Gemma eval
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    env:
+      PYTHONUNBUFFERED: "1"
+      SCENARIO_DIR: ${{ inputs.scenario_dir || 'scenarios/extended/public_test_frozen' }}
+      RUNTIME: ${{ inputs.runtime || 'gemma4:e4b' }}
+      GEMMA_BASE_URL: ${{ secrets.GEMMA_BASE_URL }}
+      GEMMA_TIMEOUT_SECONDS: "45"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements*.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-all.txt
+
+      - name: Run clean Gemma benchmark
+        run: |
+          python -m bench.clean_eval \
+            --variant full \
+            --runtime "$RUNTIME" \
+            --scenario-dir "$SCENARIO_DIR" \
+            --output artifacts/latest/clean_public_test \
+            --fail-on-leakage
+
+      - name: Build submission artifacts
+        run: |
+          python -m bench.stats \
+            --baseline artifacts/latest/clean_public_test/metrics.json \
+            --candidate artifacts/latest/clean_public_test/metrics.json \
+            --output artifacts/latest/stats_report.json
+          python -m bench.reporting \
+            --metrics artifacts/latest/clean_public_test/metrics.json \
+            --stats artifacts/latest/stats_report.json \
+            --errors artifacts/latest/clean_public_test/error_analysis.csv \
+            --output artifacts/latest
+
+      - name: Check submission gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          metrics = json.loads(Path("artifacts/latest/metrics.json").read_text(encoding="utf-8"))
+          if not metrics.get("submission_ready"):
+              failed = metrics.get("failed_gates", [])
+              raise SystemExit(f"submission_ready is false; failed_gates={failed}")
+          PY
+
+      - name: Upload Gemma eval artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: clean-gemma-eval
+          path: artifacts/latest

@@ -207,3 +207,29 @@ Em `bench/reports/extended/<run_id>/`:
 - `scenarios/extended/failure/` para entradas inválidas, documentos malformados, dependências ausentes e casos fail-closed.
 
 Manifests estendidos, quando necessários, devem viver em `scenarios/extended/` e escrever relatórios em `bench/reports/extended/`, `bench/reports/extended-sample/` ou diretório temporário local.
+
+## B1
+
+O pack B1 limpo fica em:
+
+- `scenarios/extended/public_train/manifest.json` com 180 cenários.
+- `scenarios/extended/public_dev/manifest.json` com 60 cenários.
+- `scenarios/extended/public_test_frozen/manifest.json` com 60 cenários.
+- `scenarios/extended/private_holdout/manifest.json` com 60 cenários.
+
+Nos splits de avaliação, o gerador cobre as 20 famílias uma vez e preenche o restante com famílias despacháveis. Isso preserva cobertura de exceções sem tornar `manual_review_rate <= 0.15` matematicamente impossível.
+
+Ele é gerado de forma determinística por:
+
+```bash
+python scripts/build_extended_pack.py
+```
+
+Cada caso contém `queue.csv`, `ticket.*`, `operator_note.txt`, `weather_state.json`, `resource_state.json`, `expected_decision.json` e `metadata.json`. O `metadata.json` registra `scenario_family`, `document_template_id`, `modality`, `perturbation_recipe`, `created_by`, `label_quality` e `sha256`.
+
+`expected_ticket.json` é permitido em `public_train` como rótulo/contrato, mas não deve existir para documentos multimodais em `public_dev`, `public_test_frozen` ou `private_holdout`. O gate canônico é:
+
+```bash
+make extended-pack-check
+make leakage-guard
+```

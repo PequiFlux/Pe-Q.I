@@ -162,8 +162,7 @@ def gemma_extraction_card(
         (t("extract.load", lang), parsed.get("load_condition") or "unknown"),
         (
             t("extract.destination", lang),
-            ", ".join(parsed.get("destination_constraints") or [])
-            or t("extract.unknown", lang),
+            ", ".join(parsed.get("destination_constraints") or []) or t("extract.unknown", lang),
         ),
         (t("extract.confidence", lang), confidence_value(payload)),
         (t("extract.fields", lang), parsed_fields),
