@@ -32,10 +32,27 @@ def runtime_label() -> str:
     return runtime
 
 
+def status_label(status: str) -> str:
+    labels = {
+        "ok": "OK",
+        "ready": "pronto",
+        "pending": "pendente",
+        "review": "revisão",
+        "blocked": "bloqueado",
+        "skipped": "ignorado",
+        "PREVIEW_READY": "prévia pronta",
+        "REVIEW_REQUIRED": "revisão obrigatória",
+        "BLOCKED": "bloqueado",
+        "APPROVED": "aprovado",
+        "REJECTED": "bloqueado pelo operador",
+        "OVERRIDDEN": "sobrescrito",
+    }
+    return labels.get(status, status.replace("_", " ").lower())
+
+
 def audit_status_label(status: str) -> str:
-    if status == "ok":
-        return "OK"
-    return status.upper()
+    label = status_label(status)
+    return label.upper() if status in {"ok", "blocked", "skipped"} else label
 
 
 def constraints_summary(payload: FrontEndPayload) -> str:
@@ -138,6 +155,24 @@ def reason_detail_label(text: str) -> str:
         "FIFO break justified by Long wait time increased ranking priority.": (
             "Quebra de FIFO justificada por tempo de espera e critério verificável."
         ),
+        "FIFO break justified by deterministic ranking among eligible pairs.": (
+            "Quebra de FIFO justificada por ranking determinístico entre pares elegíveis."
+        ),
+        "Deterministic ranking selected the top eligible pair.": (
+            "Ranking determinístico selecionou o melhor par elegível."
+        ),
+        "No eligible pair after deterministic validation.": (
+            "Nenhum par elegível após validação determinística."
+        ),
+        "Manual review is required before any dispatch decision.": (
+            "Revisão humana é obrigatória antes de qualquer despacho."
+        ),
+        "blocked_by_hard_constraint": "bloqueado por restrição dura",
+        "fifo_break_kept_waiting_ahead_of_called_truck": (
+            "mantido aguardando por quebra de FIFO justificada"
+        ),
+        "shifted_after_called_truck_left_queue": "avançou após saída do caminhão chamado",
+        "no_dispatch_kept_queue_position": "posição preservada sem despacho automático",
     }
     if text in translations:
         return translations[text]
@@ -162,7 +197,7 @@ def timeline_item(label: str, status: str, detail: str) -> str:
         <strong>{escape(label)}</strong>
         <p>{escape(detail)}</p>
       </div>
-      {chip(status, _status_color(status))}
+      {chip(status_label(status), _status_color(status))}
     </div>
     """
 
@@ -191,7 +226,7 @@ def _status_color(status: str) -> str:
 
 
 def display_status(status: str) -> str:
-    return status.replace("_", " ")
+    return status_label(status)
 
 
 def status_card(label: str, value: str, note: str) -> str:
