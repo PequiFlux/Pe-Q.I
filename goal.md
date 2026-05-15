@@ -168,7 +168,7 @@ Tamanho mínimo aceitável:
 |---|---:|---|
 | `public_train` | `180` cenários | prompts, LoRA, thresholds |
 | `public_dev` | `60` cenários | seleção de modelo e configuração |
-| `public_test_frozen` | `60` cenários | score público reprodutível |
+| `public_test_frozen` | `100` cenários | score público reprodutível |
 | `private_holdout` | `60` cenários | validação final interna |
 
 Se o prazo apertar, mínimo defensável:
@@ -544,7 +544,7 @@ Contrato de `metrics.json`:
   "commit": "string",
   "timestamp_utc": "string",
   "runtime": "gemma4:e4b",
-  "scenario_count": 60,
+  "scenario_count": 100,
   "metrics": {
     "constraint_violation_rate": 0.0,
     "audit_completeness": 1.0,

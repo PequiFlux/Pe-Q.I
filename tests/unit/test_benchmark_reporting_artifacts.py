@@ -69,7 +69,9 @@ def test_write_benchmark_report_creates_required_artifacts(tmp_path: Path) -> No
     assert outputs["summary"] == tmp_path / "summary.csv"
     assert outputs["error_analysis"] == tmp_path / "error_analysis.csv"
     assert outputs["report"] == tmp_path / "report.md"
-    assert "B1_clean_public_test_frozen" in (tmp_path / "report.md").read_text(encoding="utf-8")
+    report_text = (tmp_path / "report.md").read_text(encoding="utf-8")
+    assert "B1_clean_public_test_frozen" in report_text
+    assert "- Error-analysis table rows: `1`" in report_text
 
     error_rows = list(csv.DictReader((tmp_path / "error_analysis.csv").open()))
     assert error_rows[0]["primary_failure_type"] == ""

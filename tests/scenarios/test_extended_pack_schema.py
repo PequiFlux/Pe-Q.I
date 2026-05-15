@@ -10,7 +10,7 @@ from bench.clean_eval import expected_ticket_leakage_violations
 SPLIT_MINIMUMS = {
     "public_train": 180,
     "public_dev": 60,
-    "public_test_frozen": 60,
+    "public_test_frozen": 100,
     "private_holdout": 60,
 }
 REQUIRED_METADATA_FIELDS = {

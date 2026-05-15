@@ -160,21 +160,23 @@ def test_s10_full_tool_planner_offers_legal_tools_by_state():
     ]
 
 
-def test_ollama_single_tool_states_use_whitelist_fast_path(monkeypatch):
+def test_ollama_single_tool_states_still_call_gemma_runtime(monkeypatch):
     monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "ollama")
     runtime = CapturingToolPlannerRuntime()
 
     payload = _run_scenario("S10_FIFO_BREAK_JUSTIFIED", variant="full", runtime=runtime)
 
     assert payload.decision_status == "PREVIEW_READY"
-    assert runtime.tool_requests == []
+    assert [(item["current_state"], item["allowed_tools"]) for item in runtime.tool_requests] == [
+        ("INTERPRETED", ["validate_hard_constraints"]),
+        ("VALIDATED", ["rank_candidates"]),
+        ("RANKED", ["generate_audit_payload"]),
+    ]
     assert payload.audit_record is not None
     assert {
         record.purpose for record in payload.audit_record.tool_calls if record.status == "executed"
     } == {
-        "Single allowed tool under whitelist. Ticket interpreted and truth resolved; hard constraints must be checked before ranking.",
-        "Single allowed tool under whitelist. Hard constraints were validated; ranking may only order eligible pairs.",
-        "Single allowed tool under whitelist. Ranking is complete; audit payload must be generated from formal decision artifacts.",
+        "Deterministic CI tool intent.",
     }
 
 

@@ -8,6 +8,8 @@ Idiomas: **Português** | [English](README.en.md)
 
 O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino despachar** quando o FIFO puro já não é suficiente. É um **working proof-of-concept técnico** — reproduzível, auditável e benchmarkável — construído para a Gemma 4 Good Hackathon.
 
+Este repositório **não** deve ser apresentado como sistema pronto para produção, validado em campo ou integração operacional implantada. Os dados e cenários são sintéticos, e a proposta aqui é demonstrar um recorte técnico sério, auditável e reproduzível.
+
 **Princípio central:** Gemma interpreta; regras determinísticas decidem; o operador humano aprova, bloqueia ou faz override; tudo fica auditável.
 
 ## Contexto da hackathon
@@ -24,6 +26,8 @@ O uso de Gemma 4 é deliberadamente limitado e auditável:
 - nunca decide hard constraints, nunca altera fila/recurso/clima e nunca executa comandos livres.
 
 O resultado esperado para a banca é simples: abrir a UI, carregar um exemplo, analisar com Gemma 4 ou modo teste reproduzível, ver caminhão/destino recomendados, entender o motivo operacional e conferir a trilha técnica em auditoria.
+
+O claim correto da demo é deliberadamente estreito: trata-se de uma prova técnica local-first com benchmark sintético, não de validação industrial ou prontidão produtiva.
 
 ![PequiFlux Yard Copilot UI com decisão auditável, Gemma 4 via Ollama e recomendação TRK-005 para DST-COV-01](assets/screenshots/pequiflux-ui.png)
 

@@ -36,3 +36,21 @@ def test_writeup_screenshot_matches_canonical_readme_asset() -> None:
     writeup = ROOT / "docs/writeup_assets/pequiflux-ui.png"
 
     assert _sha256(canonical) == _sha256(writeup)
+
+
+def test_judge_demo_video_capture_path_is_documented() -> None:
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    demo_script = (ROOT / "docs/DEMO_SCRIPT.md").read_text(encoding="utf-8")
+    submission = (ROOT / "docs/HACKATHON_SUBMISSION.md").read_text(encoding="utf-8")
+    capture_script = (ROOT / "scripts/capture_judge_demo_video.mjs").read_text(
+        encoding="utf-8"
+    )
+
+    assert "judge-demo-video" in makefile
+    assert "PEQUIFLUX_JUDGE_VIDEO_PATH" in makefile
+    assert "host.docker.internal:8501" in makefile
+    assert "make judge-demo-video" in demo_script
+    assert "artifacts/judge-demo/pequiflux-gemma-proof.webm" in demo_script
+    assert "make judge-demo-video" in submission
+    assert "Prova Gemma 4 para a banca" in capture_script
+    assert "Modo teste ativo" in capture_script

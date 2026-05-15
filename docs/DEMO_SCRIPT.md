@@ -2,6 +2,8 @@
 
 Roteiro para video de 3 minutos da Gemma 4 Good Hackathon.
 
+Para gerar a prova visual curta sem gravação manual, rode `make judge-demo-video`. Esse alvo executa `make judge-demo`, abre a UI real via Playwright em Docker e salva `artifacts/judge-demo/pequiflux-gemma-proof.webm`. A captura falha se a tela ainda estiver em `modo teste`.
+
 ## 0:00-0:20 — Tese
 
 Mostrar a tela inicial de nova decisão.
@@ -11,14 +13,14 @@ Fala:
 
 ## 0:20-0:45 — Carregar exemplo
 
-Antes da gravação, rode `make demo-ready` nesta máquina. Ele sobe a stack real com GPU quando disponível, preaquece o Gemma e executa o cenário principal. No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos; `Limpar campos` volta ao estado vazio antes da análise, e `Nova análise` volta ao início depois do resultado.
+Antes da gravação, rode `make judge-demo` nesta máquina. Ele zera serviços antigos, sobe a stack real com GPU quando disponível, puxa/preaquece o Gemma, executa o cenário principal e imprime URL, runtime, modelo, healthcheck e status. Para gerar o vídeo curto automaticamente, use `make judge-demo-video`. No bloco `Entrada operacional`, clique em `Carregar e analisar exemplo`. O botão `Carregar exemplo` apenas preenche os campos; `Limpar campos` volta ao estado vazio antes da análise, e `Nova análise` volta ao início depois do resultado.
 
 Fala:
 > Para a demo, eu carrego um pacote sintético versionado. Em operação, esses campos viriam do upload da fila CSV, do ticket PDF, imagem ou TXT, da nota do operador, e do clima/recursos em formulário simples ou JSON.
 
 ## 0:45-1:10 — Analisar
 
-Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Para a demo dos juízes, use `make demo-ready` ou `make ui`; o botão aparece como `Analisar com Gemma 4`. O caminho `make ui-text` é apenas para teste reproduzível sem modelo.
+Se tiver usado apenas `Carregar exemplo`, clique no botão de análise. Para a demo dos juízes, use `make judge-demo`; `make ui` continua útil para subir só a interface, e o botão aparece como `Analisar com Gemma 4`. O caminho `make ui-text` é apenas para teste reproduzível sem modelo.
 
 Fala:
 > A execução interpreta o documento, reconcilia a nota do operador com clima e recursos, aplica hard constraints e prepara uma decisão auditável. Se faltar verdade material, o sistema fecha em bloqueio ou revisão, sem fallback operacional.

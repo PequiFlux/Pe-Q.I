@@ -214,7 +214,7 @@ O pack B1 limpo fica em:
 
 - `scenarios/extended/public_train/manifest.json` com 180 cenários.
 - `scenarios/extended/public_dev/manifest.json` com 60 cenários.
-- `scenarios/extended/public_test_frozen/manifest.json` com 60 cenários.
+- `scenarios/extended/public_test_frozen/manifest.json` com 100 cenários.
 - `scenarios/extended/private_holdout/manifest.json` com 60 cenários.
 
 Nos splits de avaliação, o gerador cobre as 20 famílias uma vez e preenche o restante com famílias despacháveis. Isso preserva cobertura de exceções sem tornar `manual_review_rate <= 0.15` matematicamente impossível.

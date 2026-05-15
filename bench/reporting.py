@@ -306,7 +306,7 @@ def _render_report_markdown(
         f"- Scenario count: `{benchmark.get('scenario_count', 0)}`",
         f"- Submission ready: `{str(gates.get('submission_ready', False)).lower()}`",
         f"- Failed gates: `{len(failed_gates)}`",
-        f"- Error rows: `{len(error_rows)}`",
+        f"- Error-analysis table rows: `{len(error_rows)}`",
         "",
         "## Metrics",
     ]

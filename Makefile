@@ -1,7 +1,11 @@
-.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text demo-ready test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
+.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text demo-ready judge-demo judge-demo-video test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
+JUDGE_URL ?= http://localhost:8501
+JUDGE_CAPTURE_URL ?= http://host.docker.internal:8501/
+JUDGE_VIDEO_PATH ?= artifacts/judge-demo/pequiflux-gemma-proof.webm
+PLAYWRIGHT_CAPTURE_IMAGE ?= mcr.microsoft.com/playwright:v1.54.1-noble
 
 help:
 	@echo "Targets:"
@@ -11,7 +15,9 @@ help:
 	@echo "  make ui         Start full Ollama/Gemma Streamlit UI in background; auto-uses GPU when available"
 	@echo "  make ui-gpu     Start full Ollama/Gemma Streamlit UI with GPU access"
 	@echo "  make ui-text    Start text-runtime Streamlit UI on http://localhost:8501"
-	@echo "  make demo-ready Start the judge demo UI and run the real scenario smoke test"
+	@echo "  make judge-demo Run the canonical judge ritual: reset, pull/prewarm, start UI, run S10, print status"
+	@echo "  make judge-demo-video Run judge-demo and save a short proof video with runtime Ollama"
+	@echo "  make demo-ready Alias for make judge-demo"
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
@@ -49,12 +55,59 @@ ui-gpu:
 ui-text:
 	docker compose --profile ui-text up --build ui-text
 
-demo-ready: ui
-	@if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi >/dev/null 2>&1; then \
-		$(COMPOSE_GPU) run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO); \
+judge-demo:
+	@set -e; \
+	docker compose down --remove-orphans >/dev/null 2>&1 || true; \
+	$(COMPOSE_GPU) down --remove-orphans >/dev/null 2>&1 || true; \
+	docker compose stop ui-text >/dev/null 2>&1 || true; \
+	if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi >/dev/null 2>&1; then \
+		compose_cmd='$(COMPOSE_GPU)'; \
+		stack_label='gpu'; \
+		echo "NVIDIA GPU detected; running judge demo with compose.gpu.yaml"; \
 	else \
-		docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO); \
-	fi
+		compose_cmd='docker compose'; \
+		stack_label='cpu'; \
+		echo "No NVIDIA GPU detected; running judge demo with CPU Compose"; \
+	fi; \
+	echo "Pulling and prewarming model $${GEMMA_MODEL:-gemma4:e2b}"; \
+	eval "$$compose_cmd --profile gemma-setup run --rm gemma-init"; \
+	eval "$$compose_cmd --profile gemma-setup run --rm gemma-prewarm"; \
+	echo "Starting UI stack"; \
+	eval "$$compose_cmd --profile ui up -d --build ui"; \
+	echo "Running live scenario $(SCENARIO)"; \
+	eval "$$compose_cmd run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)"; \
+	ui_health='unreachable'; \
+	for attempt in $$(seq 1 30); do \
+		if curl -fsS $(JUDGE_URL)/_stcore/health >/tmp/pequiflux-ui-health.txt 2>/dev/null; then \
+			ui_health="$$(cat /tmp/pequiflux-ui-health.txt)"; \
+			break; \
+		fi; \
+		sleep 2; \
+	done; \
+	model_status="$$(eval "$$compose_cmd exec -T gemma ollama list" 2>/dev/null | grep -E "^$${GEMMA_MODEL:-gemma4:e2b}[[:space:]]" || true)"; \
+	echo ""; \
+	echo "Judge demo ready"; \
+	echo "URL: $(JUDGE_URL)"; \
+	echo "Runtime: ollama"; \
+	echo "Model: $${GEMMA_MODEL:-gemma4:e2b}"; \
+	echo "Scenario: $(SCENARIO)"; \
+	echo "UI healthcheck: $$ui_health"; \
+	echo "Stack: $$stack_label"; \
+	if [ -n "$$model_status" ]; then \
+		echo "Model status: cached"; \
+	else \
+		echo "Model status: not confirmed by ollama list"; \
+	fi; \
+	echo "Services:"; \
+	eval "$$compose_cmd ps"
+
+demo-ready: judge-demo
+
+judge-demo-video:
+	@$(MAKE) judge-demo
+	@mkdir -p $(dir $(JUDGE_VIDEO_PATH))
+	docker run --rm --add-host=host.docker.internal:host-gateway -e PEQUIFLUX_UI_URL=$(JUDGE_CAPTURE_URL) -e PEQUIFLUX_JUDGE_VIDEO_PATH=/work/$(JUDGE_VIDEO_PATH) -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright -e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v "$(CURDIR):/work" -w /work $(PLAYWRIGHT_CAPTURE_IMAGE) bash -lc "mkdir -p /tmp/pequiflux-playwright && cd /tmp/pequiflux-playwright && npm init -y >/dev/null 2>&1 && npm install --silent playwright@1.54.1 >/dev/null 2>&1 && PLAYWRIGHT_MODULE=/tmp/pequiflux-playwright/node_modules/playwright/index.js node /work/scripts/capture_judge_demo_video.mjs"
+	@echo "Judge demo video: $(JUDGE_VIDEO_PATH)"
 
 test:
 	docker build --target test -t pequiflux-yard-copilot:test .

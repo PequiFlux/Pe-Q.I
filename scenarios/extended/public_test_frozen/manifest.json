@@ -4128,12 +4128,2792 @@
         }
       },
       "scenario_id": "B1_PUBLIC_TEST_FROZEN_060_S01_BASELINE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S02_RAIN_OPEN: Rain blocks open destination; next compatible covered pair should be selected.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S02_RAIN_OPEN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "light_skew"
+        ],
+        "scenario_family": "S02_RAIN_OPEN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN",
+        "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+        "source_case_id": "S02_RAIN_OPEN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Comecou chuva. Moega aberta nao deve receber carga agora.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/queue.csv",
+        "received_at": "2026-04-04T10:05:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:05:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S04_CONVEYOR_DOWN: Local resource state blocks a down destination.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S04_CONVEYOR_DOWN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blur"
+        ],
+        "scenario_family": "S04_CONVEYOR_DOWN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN",
+        "sha256": "456e03cc356daea2f4fe990ed23efc4374a3328a7a6447eae39cdf10da81c2ea",
+        "source_case_id": "S04_CONVEYOR_DOWN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Correia da moega coberta em manutencao. Usar alternativa liberada.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/queue.csv",
+        "received_at": "2026-04-04T10:15:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-ALT-01",
+            "resource_type": "alternate_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:15:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_062_S04_CONVEYOR_DOWN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S05_CONTRACT_PRIORITY: Published contract priority can justify a FIFO break when constraints are clear.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S05_CONTRACT_PRIORITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "jpeg_compression"
+        ],
+        "scenario_family": "S05_CONTRACT_PRIORITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY",
+        "sha256": "c8913dd3fe2629a9ee35d41f320ab0962e34755cf28fb17f46c0171e308e5d62",
+        "source_case_id": "S05_CONTRACT_PRIORITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Contrato prioritario publicado para TRK-003.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/queue.csv",
+        "received_at": "2026-04-04T10:20:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:20:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_063_S05_CONTRACT_PRIORITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S07_VEHICLE_INCOMPAT: Vehicle type compatibility is binary and can force a FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S07_VEHICLE_INCOMPAT-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "low_resolution"
+        ],
+        "scenario_family": "S07_VEHICLE_INCOMPAT",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT",
+        "sha256": "2b1dd3ae34135c743486acf742d4d56b1d52fe9412f8ad210a0237ee04e00d39",
+        "source_case_id": "S07_VEHICLE_INCOMPAT",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Moega estreita liberada apenas para truck.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/queue.csv",
+        "received_at": "2026-04-04T10:30:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-NARROW-01",
+            "resource_type": "narrow_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:30:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_064_S07_VEHICLE_INCOMPAT"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S08_REDUCED_CAPACITY: Reduced capacity above the hard minimum remains eligible.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S08_REDUCED_CAPACITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ocr_noise"
+        ],
+        "scenario_family": "S08_REDUCED_CAPACITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY",
+        "sha256": "56a06816983ade959e4e68d179680f5d96b5d84d8e4e4c64f4d5be89549d62da",
+        "source_case_id": "S08_REDUCED_CAPACITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Destino com capacidade reduzida, mas acima do minimo operacional.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/queue.csv",
+        "received_at": "2026-04-04T10:35:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 30,
+            "exposure": "covered",
+            "resource_id": "DST-LOWCAP-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:35:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_065_S08_REDUCED_CAPACITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S09_HUMAN_OVERRIDE: Governance scenario for approved and rejected override attempts.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S09_HUMAN_OVERRIDE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "pt_br_abbreviation"
+        ],
+        "scenario_family": "S09_HUMAN_OVERRIDE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE",
+        "sha256": "89920f793d9a02c03ce49d4b8c6d88e11254fc569e72e20789b08727b7eabd9a",
+        "source_case_id": "S09_HUMAN_OVERRIDE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor quer testar override para um par elegivel e registrar motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/queue.csv",
+        "received_at": "2026-04-04T10:40:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:40:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_066_S09_HUMAN_OVERRIDE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S10_FIFO_BREAK_JUSTIFIED: Primary narrative scenario combining rain and compatibility to justify FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S10_FIFO_BREAK_JUSTIFIED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "missing_field"
+        ],
+        "scenario_family": "S10_FIFO_BREAK_JUSTIFIED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED",
+        "sha256": "8bfb7f4fdb4aed2c7b8c3fb4256d9fb6c12cf3ca9c04488378eb7d2011dd5f8c",
+        "source_case_id": "S10_FIFO_BREAK_JUSTIFIED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Chuva bloqueou destino aberto; coberta aceita apenas truck neste momento.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "received_at": "2026-04-04T10:45:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "high",
+          "timestamp": "2026-04-04T10:45:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_067_S10_FIFO_BREAK_JUSTIFIED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S16_ALL_DESTINATIONS_BLOCKED: Every destination is blocked or below capacity; system must fail closed with BLOCKED.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S16_ALL_DESTINATIONS_BLOCKED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ticket_note_conflict"
+        ],
+        "scenario_family": "S16_ALL_DESTINATIONS_BLOCKED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED",
+        "sha256": "4609dd8a6e6aa539789589b4e989f24393b67503aa40e9100ddf68158f27043d",
+        "source_case_id": "S16_ALL_DESTINATIONS_BLOCKED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Todos os destinos tecnicos estao indisponiveis.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-01",
+            "resource_type": "covered_hopper",
+            "status": "blocked",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-02",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_068_S16_ALL_DESTINATIONS_BLOCKED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S17_OVERRIDE_INELIGIBLE_PAIR: Operator override cannot select an ineligible pair blocked by hard constraints.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S17_OVERRIDE_INELIGIBLE_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "unknown_destination"
+        ],
+        "scenario_family": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "sha256": "ebe55a2206a20d777bfa1763294538c915190e34e4f357cb7b766a837c943b2d",
+        "source_case_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operador tenta selecionar destino aberto sob chuva; override deve falhar fechado.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_069_S17_OVERRIDE_INELIGIBLE_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR: Operator override may choose an eligible non-top pair with an explicit reason.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blocked_resource"
+        ],
+        "scenario_family": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "sha256": "68e7a836c2adbbb66c7531ddea340c2cf2356c3fd36a8960d8c747d21a155363",
+        "source_case_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor pode escolher um par elegivel nao-top desde que registre motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-02",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_070_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S19_TIE_BREAK_EQUAL_SCORE: Equal score for two destinations must resolve through deterministic lexicographic destination tie-break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S19_TIE_BREAK_EQUAL_SCORE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "weather_load_conflict"
+        ],
+        "scenario_family": "S19_TIE_BREAK_EQUAL_SCORE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE",
+        "sha256": "7c674e3307cec26bb929345f91e33213d447ad4b049bce0248a7dec9b7730db1",
+        "source_case_id": "S19_TIE_BREAK_EQUAL_SCORE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Dois destinos equivalentes; aplicar desempate deterministico.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-A-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-B-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_071_S19_TIE_BREAK_EQUAL_SCORE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S20_LARGE_QUEUE_100_TRUCKS: Stress fixture with 100 waiting trucks and deterministic FIFO-preserving recommendation.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S20_LARGE_QUEUE_100_TRUCKS-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_90"
+        ],
+        "scenario_family": "S20_LARGE_QUEUE_100_TRUCKS",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS",
+        "sha256": "9c4e9551cb95746d4f2913a0a7bb526c871bf0f7119616c1378f1b6b187a1f0e",
+        "source_case_id": "S20_LARGE_QUEUE_100_TRUCKS",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Fila grande sintetica para testar estabilidade do ranking e da validacao.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_072_S20_LARGE_QUEUE_100_TRUCKS"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S01_BASELINE: Nominal yard state; FIFO should be preserved.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S01_BASELINE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_minus_90"
+        ],
+        "scenario_family": "S01_BASELINE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE",
+        "sha256": "fbac97bf866387c780ea5e84ecd185b67db9324512051911d990cdba606733e4",
+        "source_case_id": "S01_BASELINE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operacao nominal. Sem excecoes reportadas.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/queue.csv",
+        "received_at": "2026-04-04T10:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_073_S01_BASELINE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S02_RAIN_OPEN: Rain blocks open destination; next compatible covered pair should be selected.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S02_RAIN_OPEN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "light_skew"
+        ],
+        "scenario_family": "S02_RAIN_OPEN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN",
+        "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+        "source_case_id": "S02_RAIN_OPEN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Comecou chuva. Moega aberta nao deve receber carga agora.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/queue.csv",
+        "received_at": "2026-04-04T10:05:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:05:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_074_S02_RAIN_OPEN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S04_CONVEYOR_DOWN: Local resource state blocks a down destination.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S04_CONVEYOR_DOWN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blur"
+        ],
+        "scenario_family": "S04_CONVEYOR_DOWN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN",
+        "sha256": "456e03cc356daea2f4fe990ed23efc4374a3328a7a6447eae39cdf10da81c2ea",
+        "source_case_id": "S04_CONVEYOR_DOWN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Correia da moega coberta em manutencao. Usar alternativa liberada.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/queue.csv",
+        "received_at": "2026-04-04T10:15:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-ALT-01",
+            "resource_type": "alternate_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:15:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_075_S04_CONVEYOR_DOWN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S05_CONTRACT_PRIORITY: Published contract priority can justify a FIFO break when constraints are clear.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S05_CONTRACT_PRIORITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "jpeg_compression"
+        ],
+        "scenario_family": "S05_CONTRACT_PRIORITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY",
+        "sha256": "c8913dd3fe2629a9ee35d41f320ab0962e34755cf28fb17f46c0171e308e5d62",
+        "source_case_id": "S05_CONTRACT_PRIORITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Contrato prioritario publicado para TRK-003.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/queue.csv",
+        "received_at": "2026-04-04T10:20:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:20:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_076_S05_CONTRACT_PRIORITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S07_VEHICLE_INCOMPAT: Vehicle type compatibility is binary and can force a FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S07_VEHICLE_INCOMPAT-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "low_resolution"
+        ],
+        "scenario_family": "S07_VEHICLE_INCOMPAT",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT",
+        "sha256": "2b1dd3ae34135c743486acf742d4d56b1d52fe9412f8ad210a0237ee04e00d39",
+        "source_case_id": "S07_VEHICLE_INCOMPAT",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Moega estreita liberada apenas para truck.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/queue.csv",
+        "received_at": "2026-04-04T10:30:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-NARROW-01",
+            "resource_type": "narrow_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:30:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_077_S07_VEHICLE_INCOMPAT"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S08_REDUCED_CAPACITY: Reduced capacity above the hard minimum remains eligible.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S08_REDUCED_CAPACITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ocr_noise"
+        ],
+        "scenario_family": "S08_REDUCED_CAPACITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY",
+        "sha256": "56a06816983ade959e4e68d179680f5d96b5d84d8e4e4c64f4d5be89549d62da",
+        "source_case_id": "S08_REDUCED_CAPACITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Destino com capacidade reduzida, mas acima do minimo operacional.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/queue.csv",
+        "received_at": "2026-04-04T10:35:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 30,
+            "exposure": "covered",
+            "resource_id": "DST-LOWCAP-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:35:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_078_S08_REDUCED_CAPACITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S09_HUMAN_OVERRIDE: Governance scenario for approved and rejected override attempts.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S09_HUMAN_OVERRIDE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "pt_br_abbreviation"
+        ],
+        "scenario_family": "S09_HUMAN_OVERRIDE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE",
+        "sha256": "89920f793d9a02c03ce49d4b8c6d88e11254fc569e72e20789b08727b7eabd9a",
+        "source_case_id": "S09_HUMAN_OVERRIDE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor quer testar override para um par elegivel e registrar motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/queue.csv",
+        "received_at": "2026-04-04T10:40:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:40:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_079_S09_HUMAN_OVERRIDE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S10_FIFO_BREAK_JUSTIFIED: Primary narrative scenario combining rain and compatibility to justify FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 4,
+        "document_template_id": "S10_FIFO_BREAK_JUSTIFIED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "missing_field"
+        ],
+        "scenario_family": "S10_FIFO_BREAK_JUSTIFIED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED",
+        "sha256": "8bfb7f4fdb4aed2c7b8c3fb4256d9fb6c12cf3ca9c04488378eb7d2011dd5f8c",
+        "source_case_id": "S10_FIFO_BREAK_JUSTIFIED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Chuva bloqueou destino aberto; coberta aceita apenas truck neste momento.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "received_at": "2026-04-04T10:45:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "high",
+          "timestamp": "2026-04-04T10:45:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_080_S10_FIFO_BREAK_JUSTIFIED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S16_ALL_DESTINATIONS_BLOCKED: Every destination is blocked or below capacity; system must fail closed with BLOCKED.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S16_ALL_DESTINATIONS_BLOCKED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ticket_note_conflict"
+        ],
+        "scenario_family": "S16_ALL_DESTINATIONS_BLOCKED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED",
+        "sha256": "4609dd8a6e6aa539789589b4e989f24393b67503aa40e9100ddf68158f27043d",
+        "source_case_id": "S16_ALL_DESTINATIONS_BLOCKED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Todos os destinos tecnicos estao indisponiveis.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-01",
+            "resource_type": "covered_hopper",
+            "status": "blocked",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-02",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_081_S16_ALL_DESTINATIONS_BLOCKED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S17_OVERRIDE_INELIGIBLE_PAIR: Operator override cannot select an ineligible pair blocked by hard constraints.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S17_OVERRIDE_INELIGIBLE_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "unknown_destination"
+        ],
+        "scenario_family": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "sha256": "ebe55a2206a20d777bfa1763294538c915190e34e4f357cb7b766a837c943b2d",
+        "source_case_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operador tenta selecionar destino aberto sob chuva; override deve falhar fechado.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_082_S17_OVERRIDE_INELIGIBLE_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR: Operator override may choose an eligible non-top pair with an explicit reason.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blocked_resource"
+        ],
+        "scenario_family": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "sha256": "68e7a836c2adbbb66c7531ddea340c2cf2356c3fd36a8960d8c747d21a155363",
+        "source_case_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor pode escolher um par elegivel nao-top desde que registre motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-02",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_083_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S19_TIE_BREAK_EQUAL_SCORE: Equal score for two destinations must resolve through deterministic lexicographic destination tie-break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S19_TIE_BREAK_EQUAL_SCORE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "weather_load_conflict"
+        ],
+        "scenario_family": "S19_TIE_BREAK_EQUAL_SCORE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE",
+        "sha256": "7c674e3307cec26bb929345f91e33213d447ad4b049bce0248a7dec9b7730db1",
+        "source_case_id": "S19_TIE_BREAK_EQUAL_SCORE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Dois destinos equivalentes; aplicar desempate deterministico.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-A-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-B-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_084_S19_TIE_BREAK_EQUAL_SCORE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S20_LARGE_QUEUE_100_TRUCKS: Stress fixture with 100 waiting trucks and deterministic FIFO-preserving recommendation.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S20_LARGE_QUEUE_100_TRUCKS-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_90"
+        ],
+        "scenario_family": "S20_LARGE_QUEUE_100_TRUCKS",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS",
+        "sha256": "9c4e9551cb95746d4f2913a0a7bb526c871bf0f7119616c1378f1b6b187a1f0e",
+        "source_case_id": "S20_LARGE_QUEUE_100_TRUCKS",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Fila grande sintetica para testar estabilidade do ranking e da validacao.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_085_S20_LARGE_QUEUE_100_TRUCKS"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S01_BASELINE: Nominal yard state; FIFO should be preserved.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S01_BASELINE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_minus_90"
+        ],
+        "scenario_family": "S01_BASELINE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE",
+        "sha256": "fbac97bf866387c780ea5e84ecd185b67db9324512051911d990cdba606733e4",
+        "source_case_id": "S01_BASELINE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operacao nominal. Sem excecoes reportadas.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/queue.csv",
+        "received_at": "2026-04-04T10:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_086_S01_BASELINE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S02_RAIN_OPEN: Rain blocks open destination; next compatible covered pair should be selected.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S02_RAIN_OPEN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "light_skew"
+        ],
+        "scenario_family": "S02_RAIN_OPEN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN",
+        "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+        "source_case_id": "S02_RAIN_OPEN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Comecou chuva. Moega aberta nao deve receber carga agora.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/queue.csv",
+        "received_at": "2026-04-04T10:05:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:05:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_087_S02_RAIN_OPEN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S04_CONVEYOR_DOWN: Local resource state blocks a down destination.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S04_CONVEYOR_DOWN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blur"
+        ],
+        "scenario_family": "S04_CONVEYOR_DOWN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN",
+        "sha256": "456e03cc356daea2f4fe990ed23efc4374a3328a7a6447eae39cdf10da81c2ea",
+        "source_case_id": "S04_CONVEYOR_DOWN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Correia da moega coberta em manutencao. Usar alternativa liberada.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/queue.csv",
+        "received_at": "2026-04-04T10:15:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-ALT-01",
+            "resource_type": "alternate_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:15:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_088_S04_CONVEYOR_DOWN"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S05_CONTRACT_PRIORITY: Published contract priority can justify a FIFO break when constraints are clear.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S05_CONTRACT_PRIORITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "jpeg_compression"
+        ],
+        "scenario_family": "S05_CONTRACT_PRIORITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY",
+        "sha256": "c8913dd3fe2629a9ee35d41f320ab0962e34755cf28fb17f46c0171e308e5d62",
+        "source_case_id": "S05_CONTRACT_PRIORITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Contrato prioritario publicado para TRK-003.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/queue.csv",
+        "received_at": "2026-04-04T10:20:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:20:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_089_S05_CONTRACT_PRIORITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S07_VEHICLE_INCOMPAT: Vehicle type compatibility is binary and can force a FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S07_VEHICLE_INCOMPAT-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "low_resolution"
+        ],
+        "scenario_family": "S07_VEHICLE_INCOMPAT",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT",
+        "sha256": "2b1dd3ae34135c743486acf742d4d56b1d52fe9412f8ad210a0237ee04e00d39",
+        "source_case_id": "S07_VEHICLE_INCOMPAT",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Moega estreita liberada apenas para truck.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/queue.csv",
+        "received_at": "2026-04-04T10:30:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-NARROW-01",
+            "resource_type": "narrow_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:30:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_090_S07_VEHICLE_INCOMPAT"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S08_REDUCED_CAPACITY: Reduced capacity above the hard minimum remains eligible.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S08_REDUCED_CAPACITY-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ocr_noise"
+        ],
+        "scenario_family": "S08_REDUCED_CAPACITY",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY",
+        "sha256": "56a06816983ade959e4e68d179680f5d96b5d84d8e4e4c64f4d5be89549d62da",
+        "source_case_id": "S08_REDUCED_CAPACITY",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Destino com capacidade reduzida, mas acima do minimo operacional.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/queue.csv",
+        "received_at": "2026-04-04T10:35:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 30,
+            "exposure": "covered",
+            "resource_id": "DST-LOWCAP-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:35:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_091_S08_REDUCED_CAPACITY"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S09_HUMAN_OVERRIDE: Governance scenario for approved and rejected override attempts.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S09_HUMAN_OVERRIDE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "pt_br_abbreviation"
+        ],
+        "scenario_family": "S09_HUMAN_OVERRIDE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE",
+        "sha256": "89920f793d9a02c03ce49d4b8c6d88e11254fc569e72e20789b08727b7eabd9a",
+        "source_case_id": "S09_HUMAN_OVERRIDE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor quer testar override para um par elegivel e registrar motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/queue.csv",
+        "received_at": "2026-04-04T10:40:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:40:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_092_S09_HUMAN_OVERRIDE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S10_FIFO_BREAK_JUSTIFIED: Primary narrative scenario combining rain and compatibility to justify FIFO break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S10_FIFO_BREAK_JUSTIFIED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "missing_field"
+        ],
+        "scenario_family": "S10_FIFO_BREAK_JUSTIFIED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED",
+        "sha256": "8bfb7f4fdb4aed2c7b8c3fb4256d9fb6c12cf3ca9c04488378eb7d2011dd5f8c",
+        "source_case_id": "S10_FIFO_BREAK_JUSTIFIED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Chuva bloqueou destino aberto; coberta aceita apenas truck neste momento.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/queue.csv",
+        "received_at": "2026-04-04T10:45:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "high",
+          "timestamp": "2026-04-04T10:45:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_093_S10_FIFO_BREAK_JUSTIFIED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S16_ALL_DESTINATIONS_BLOCKED: Every destination is blocked or below capacity; system must fail closed with BLOCKED.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S16_ALL_DESTINATIONS_BLOCKED-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "ticket_note_conflict"
+        ],
+        "scenario_family": "S16_ALL_DESTINATIONS_BLOCKED",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED",
+        "sha256": "4609dd8a6e6aa539789589b4e989f24393b67503aa40e9100ddf68158f27043d",
+        "source_case_id": "S16_ALL_DESTINATIONS_BLOCKED",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Todos os destinos tecnicos estao indisponiveis.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-01",
+            "resource_type": "covered_hopper",
+            "status": "blocked",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 0,
+            "exposure": "covered",
+            "resource_id": "DST-BLOCK-02",
+            "resource_type": "covered_hopper",
+            "status": "down",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_094_S16_ALL_DESTINATIONS_BLOCKED"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S17_OVERRIDE_INELIGIBLE_PAIR: Operator override cannot select an ineligible pair blocked by hard constraints.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S17_OVERRIDE_INELIGIBLE_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "unknown_destination"
+        ],
+        "scenario_family": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "sha256": "ebe55a2206a20d777bfa1763294538c915190e34e4f357cb7b766a837c943b2d",
+        "source_case_id": "S17_OVERRIDE_INELIGIBLE_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operador tenta selecionar destino aberto sob chuva; override deve falhar fechado.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 80,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_095_S17_OVERRIDE_INELIGIBLE_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR: Operator override may choose an eligible non-top pair with an explicit reason.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "blocked_resource"
+        ],
+        "scenario_family": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "sha256": "68e7a836c2adbbb66c7531ddea340c2cf2356c3fd36a8960d8c747d21a155363",
+        "source_case_id": "S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Supervisor pode escolher um par elegivel nao-top desde que registre motivo.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-02",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_096_S18_OVERRIDE_ELIGIBLE_NON_TOP_PAIR"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S19_TIE_BREAK_EQUAL_SCORE: Equal score for two destinations must resolve through deterministic lexicographic destination tie-break.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S19_TIE_BREAK_EQUAL_SCORE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "weather_load_conflict"
+        ],
+        "scenario_family": "S19_TIE_BREAK_EQUAL_SCORE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE",
+        "sha256": "7c674e3307cec26bb929345f91e33213d447ad4b049bce0248a7dec9b7730db1",
+        "source_case_id": "S19_TIE_BREAK_EQUAL_SCORE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Dois destinos equivalentes; aplicar desempate deterministico.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-A-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-B-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_097_S19_TIE_BREAK_EQUAL_SCORE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S20_LARGE_QUEUE_100_TRUCKS: Stress fixture with 100 waiting trucks and deterministic FIFO-preserving recommendation.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S20_LARGE_QUEUE_100_TRUCKS-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_90"
+        ],
+        "scenario_family": "S20_LARGE_QUEUE_100_TRUCKS",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS",
+        "sha256": "9c4e9551cb95746d4f2913a0a7bb526c871bf0f7119616c1378f1b6b187a1f0e",
+        "source_case_id": "S20_LARGE_QUEUE_100_TRUCKS",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Fila grande sintetica para testar estabilidade do ranking e da validacao.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/queue.csv",
+        "received_at": "2026-04-04T11:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T11:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_098_S20_LARGE_QUEUE_100_TRUCKS"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S01_BASELINE: Nominal yard state; FIFO should be preserved.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S01_BASELINE-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "rotation_minus_90"
+        ],
+        "scenario_family": "S01_BASELINE",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE",
+        "sha256": "fbac97bf866387c780ea5e84ecd185b67db9324512051911d990cdba606733e4",
+        "source_case_id": "S01_BASELINE",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Operacao nominal. Sem excecoes reportadas.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/queue.csv",
+        "received_at": "2026-04-04T10:00:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 90,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "none",
+          "severity": "none",
+          "timestamp": "2026-04-04T10:00:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_099_S01_BASELINE"
+    },
+    {
+      "description": "B1 public_test_frozen case derived from S02_RAIN_OPEN: Rain blocks open destination; next compatible covered pair should be selected.",
+      "files": {
+        "expected_decision": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/expected_decision.json",
+        "metadata": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/metadata.json",
+        "operator_note": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/operator_note.txt",
+        "queue": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/queue.csv",
+        "resource_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/resource_state.json",
+        "ticket": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/ticket.txt",
+        "weather_state": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/weather_state.json"
+      },
+      "metadata": {
+        "created_by": "generator",
+        "cycle": 5,
+        "document_template_id": "S02_RAIN_OPEN-template",
+        "label_quality": "reviewed",
+        "modality": "txt",
+        "perturbation_recipe": [
+          "light_skew"
+        ],
+        "scenario_family": "S02_RAIN_OPEN",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN",
+        "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+        "source_case_id": "S02_RAIN_OPEN",
+        "split": "public_test_frozen"
+      },
+      "request": {
+        "operator_note": "Comecou chuva. Moega aberta nao deve receber carga agora.",
+        "policy_profile_version": "v1-demo",
+        "queue_csv_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/queue.csv",
+        "received_at": "2026-04-04T10:05:00+00:00",
+        "request_id": "REQ-B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN",
+        "resource_state": [
+          {
+            "allowed_vehicle_types": [
+              "truck",
+              "bitrem"
+            ],
+            "capacity_pct": 85,
+            "exposure": "open",
+            "resource_id": "DST-OPEN-01",
+            "resource_type": "open_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          },
+          {
+            "allowed_vehicle_types": [
+              "truck"
+            ],
+            "capacity_pct": 85,
+            "exposure": "covered",
+            "resource_id": "DST-COV-01",
+            "resource_type": "covered_hopper",
+            "status": "available",
+            "supported_load_conditions": [
+              "dry"
+            ]
+          }
+        ],
+        "run_mode": "benchmark",
+        "scenario_id": "B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN",
+        "ticket_content_type": "text/plain",
+        "ticket_ref": "scenarios/extended/public_test_frozen/B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN/ticket.txt",
+        "variant": "full",
+        "weather_state": {
+          "precipitation": "rain",
+          "severity": "medium",
+          "timestamp": "2026-04-04T10:05:00+00:00"
+        }
+      },
+      "scenario_id": "B1_PUBLIC_TEST_FROZEN_100_S02_RAIN_OPEN"
     }
   ],
   "destinations_ref": "scenarios/common/destinations.json",
   "leakage_policy": "expected_ticket.json allowed only in public_train; forbidden for multimodal public_dev, public_test_frozen and private_holdout evaluation cases",
   "policy_profile_ref": "scenarios/common/policy_profile.json",
-  "scenario_count": 60,
+  "scenario_count": 100,
   "source_manifest": "scenarios/manifest.json",
   "split": "public_test_frozen",
   "version": "B1-emergency-0.1"

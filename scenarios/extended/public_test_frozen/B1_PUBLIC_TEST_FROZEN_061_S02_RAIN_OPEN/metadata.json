@@ -1,0 +1,15 @@
+{
+  "created_by": "generator",
+  "cycle": 4,
+  "document_template_id": "S02_RAIN_OPEN-template",
+  "label_quality": "reviewed",
+  "modality": "txt",
+  "perturbation_recipe": [
+    "light_skew"
+  ],
+  "scenario_family": "S02_RAIN_OPEN",
+  "scenario_id": "B1_PUBLIC_TEST_FROZEN_061_S02_RAIN_OPEN",
+  "sha256": "5eda702bc93ad1ee74bff5e264bc01afd7335a6e4e02a679dc42f58fb280017e",
+  "source_case_id": "S02_RAIN_OPEN",
+  "split": "public_test_frozen"
+}

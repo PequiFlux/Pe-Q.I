@@ -11,7 +11,7 @@ from typing import Any
 SPLIT_SIZES = {
     "public_train": 180,
     "public_dev": 60,
-    "public_test_frozen": 60,
+    "public_test_frozen": 100,
     "private_holdout": 60,
 }
 EVALUATION_SPLITS = {"public_dev", "public_test_frozen", "private_holdout"}

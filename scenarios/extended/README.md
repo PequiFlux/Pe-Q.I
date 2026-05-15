@@ -11,7 +11,7 @@ Suggested layout:
 - `failure/`: malformed inputs, missing dependencies, invalid documents, and fail-closed cases.
 - `public_train/`: B1 training split with 180 generated cases.
 - `public_dev/`: B1 development split with 60 generated cases.
-- `public_test_frozen/`: B1 public frozen test split with 60 generated cases.
+- `public_test_frozen/`: B1 public frozen test split with 100 generated cases.
 - `private_holdout/`: B1 internal holdout split with 60 generated cases.
 
 Rules:
