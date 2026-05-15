@@ -18,7 +18,13 @@ from app.ui.components.audit_panel import (
     render_status_bar,
     tool_badges_card,
 )
-from app.ui.components.common import escape, runtime_label, runtime_mode
+from app.ui.components.common import (
+    display_status,
+    escape,
+    reason_detail_label,
+    runtime_label,
+    runtime_mode,
+)
 from app.ui.components.decision_card import (
     blocked_constraints_card,
     gemma_extraction_card,
@@ -581,7 +587,7 @@ def _render_input_actions(example_case: dict[str, Any], lang: Language) -> None:
           <div class="yc-fixture-id">{escape(example_case["scenario_id"])}</div>
           <div class="yc-fixture-desc">{escape(str(example_case.get("description") or t("prep.no_description", lang)))}</div>
           <div class="yc-fixture-meta">
-            <span class="yc-badge yc-badge-gray">Fixture · {escape(ticket_kind)}</span>
+            <span class="yc-badge yc-badge-gray">{escape(t("case.fixture.badge", lang, kind=ticket_kind))}</span>
           </div>
         </div>
         <div class="yc-action-row">
@@ -788,6 +794,7 @@ def _render_outputs(
     )
 
     _render_result_navigation(lang)
+    st.markdown(_demo_outcome_banner(payload, lang), unsafe_allow_html=True)
     st.markdown(_gemma_proof_card(payload, lang), unsafe_allow_html=True)
     render_status_bar(payload, lang=lang)
     st.markdown(recommended_decision_card(payload, lang=lang), unsafe_allow_html=True)
@@ -813,6 +820,40 @@ def _render_result_navigation(lang: Language) -> None:
         if st.button(t("button.new_analysis", lang), width="stretch"):
             clear_input_state(INPUT_KEYS)
             st.rerun()
+
+
+def _demo_outcome_banner(payload: FrontEndPayload, lang: Language) -> str:
+    truck = payload.recommended_truck.truck_id if payload.recommended_truck else "-"
+    destination = (
+        payload.recommended_destination.destination_id if payload.recommended_destination else "-"
+    )
+    has_pair = payload.recommended_truck is not None and payload.recommended_destination is not None
+    title = (
+        t("outcome.title", lang, truck=truck, destination=destination)
+        if has_pair
+        else t("outcome.title.blocked", lang)
+    )
+    reason = reason_detail_label(payload.reason_summary, lang=lang)
+    rejected = len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
+    latency = sum(payload.latency_ms.values())
+    return f"""
+    <section class="demo-outcome">
+      <div class="outcome-main">
+        <span>{escape(t("outcome.kicker", lang))}</span>
+        <h2>{escape(title)}</h2>
+        <p>{escape(t("outcome.copy", lang, reason=reason))}</p>
+      </div>
+      <div class="outcome-metrics">
+        <div><span>{escape(t("outcome.status", lang))}</span><strong>{escape(display_status(str(payload.decision_status), lang=lang))}</strong></div>
+        <div><span>{escape(t("outcome.rejections", lang))}</span><strong>{escape(str(rejected))}</strong></div>
+        <div><span>{escape(t("outcome.latency", lang))}</span><strong>{escape(str(latency))} ms</strong></div>
+      </div>
+      <div class="outcome-action">
+        <strong>{escape(t("outcome.operator", lang))}</strong>
+        <p>{escape(t("outcome.operator.copy", lang))}</p>
+      </div>
+    </section>
+    """
 
 
 def _gemma_proof_card(payload: FrontEndPayload, lang: Language) -> str:

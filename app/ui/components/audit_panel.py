@@ -55,7 +55,11 @@ def render_status_bar(payload: FrontEndPayload, lang: Language = "pt") -> None:
     rejected = len(payload.audit_record.rejected_candidates) if payload.audit_record else 0
     latency = sum(payload.latency_ms.values())
     cards = [
-        ("Status", display_status(str(payload.decision_status)), t("status.note.status", lang)),
+        (
+            t("decision.tile.status", lang),
+            display_status(str(payload.decision_status), lang=lang),
+            t("status.note.status", lang),
+        ),
         (t("status.truck", lang), truck, t("status.note.truck", lang)),
         (t("status.destination", lang), destination, t("status.note.destination", lang)),
         (t("status.rejections", lang), str(rejected), t("status.note.rejections", lang)),
@@ -93,10 +97,10 @@ def render_gemma_context(
           </div>
           <div class="field-cloud">{fields}</div>
           <div class="mini-metrics">
-            {mini_metric("Runtime", runtime_label())}
+            {mini_metric(t("proof.runtime", lang), runtime_label())}
             {mini_metric(t("audit.step", lang), "parse_ticket_document")}
             {mini_metric(t("audit.file_type", lang), request.ticket_content_type)}
-            {mini_metric("Status", audit_status_label(parse_status))}
+            {mini_metric(t("decision.tile.status", lang), audit_status_label(parse_status, lang=lang))}
             {mini_metric(t("audit.confidence", lang), confidence_value(payload))}
           </div>
           <pre class="json-preview">{escape(preview)}</pre>
@@ -337,12 +341,12 @@ def copilot_timeline_card(
             ),
         ),
     ]
-    items = "".join(timeline_item(*step) for step in steps)
+    items = "".join(timeline_item(*step, lang=lang) for step in steps)
     return f"""
     <article class="card copilot-timeline">
       <div class="card-head">
         <div><h3>{escape(t("timeline.title", lang))}</h3><p>{escape(t("timeline.copy", lang))}</p></div>
-        {chip(display_status(str(payload.decision_status)), "blue")}
+        {chip(display_status(str(payload.decision_status), lang=lang), "blue")}
       </div>
       <div class="timeline">{items}</div>
     </article>
@@ -370,10 +374,10 @@ def tool_badges_card(payload: FrontEndPayload, lang: Language = "pt") -> str:
         ),
     ]
     items = "".join(
-        f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status_label(status))}</span></div>'
+        f'<div class="tool-badge {status}" title="{escape(technical)}"><strong>{escape(name)}</strong><span>{escape(status_label(status, lang=lang))}</span></div>'
         for name, technical, status in badges
     )
-    tool_call_items = _gemma_tool_call_items(payload)
+    tool_call_items = _gemma_tool_call_items(payload, lang=lang)
     return f"""
     <article class="card tools-card">
       <div class="card-head">
@@ -386,14 +390,22 @@ def tool_badges_card(payload: FrontEndPayload, lang: Language = "pt") -> str:
     """
 
 
-def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
+def _gemma_tool_call_items(payload: FrontEndPayload, lang: Language = "pt") -> str:
     if not payload.audit_record or not payload.audit_record.tool_calls:
         return ""
-    labels = {
-        "requested": "solicitado",
-        "executed": "executado",
-        "error": "erro",
-    }
+    labels = (
+        {
+            "requested": "requested",
+            "executed": "executed",
+            "error": "error",
+        }
+        if lang == "en"
+        else {
+            "requested": "solicitado",
+            "executed": "executado",
+            "error": "erro",
+        }
+    )
     ordered_tools = [
         "validate_hard_constraints",
         "rank_candidates",
@@ -406,21 +418,25 @@ def _gemma_tool_call_items(payload: FrontEndPayload) -> str:
     tool_names.extend(tool_name for tool_name in grouped if tool_name not in ordered_tools)
 
     items = "".join(
-        _tool_call_audit_item(tool_name, grouped[tool_name], labels) for tool_name in tool_names
+        _tool_call_audit_item(tool_name, grouped[tool_name], labels, lang=lang)
+        for tool_name in tool_names
     )
     if not items:
         return ""
     return f"""
       <div class="tool-call-summary">
         <h4>Gemma Tool Planner</h4>
-        <p>FlowState → tool → status executado sob whitelist.</p>
+        <p>{escape(t("tool.call.copy", lang))}</p>
         <ol class="tool-call-list">{items}</ol>
       </div>
     """
 
 
-def _tool_call_audit_item(tool_name: str, records: list[Any], labels: dict[str, str]) -> str:
-    status_flow = " → ".join(
+def _tool_call_audit_item(
+    tool_name: str, records: list[Any], labels: dict[str, str], lang: Language = "pt"
+) -> str:
+    arrow = "→"
+    status_flow = f" {arrow} ".join(
         labels.get(status, status)
         for status in _unique_in_order(record.status for record in records)
     )
@@ -430,17 +446,20 @@ def _tool_call_audit_item(tool_name: str, records: list[Any], labels: dict[str, 
     error_code = next((record.error_code for record in reversed(records) if record.error_code), "")
     status_class = "error" if error_code else latest.status
     error_html = (
-        f'<span class="tool-call-error">Erro: {escape(error_code)}</span>' if error_code else ""
+        f'<span class="tool-call-error">{escape(t("tool.call.error", lang))}: {escape(error_code)}</span>'
+        if error_code
+        else ""
     )
+    missing = t("tool.call.missing", lang)
     return f"""
           <li class="tool-call-item {escape(status_class)}">
             <div class="tool-call-flow">
-              <span class="tool-call-name">{escape(state)} → {escape(tool_name)}</span>
+              <span class="tool-call-name">{escape(state)} {arrow} {escape(tool_name)}</span>
               <strong>{escape(status_flow)}</strong>
             </div>
             <div class="tool-call-meta">
-              <span>Motivo: {escape(purpose or "não informado")}</span>
-              <span>Estado: {escape(state)}</span>
+              <span>{escape(t("tool.call.purpose", lang))}: {escape(purpose or missing)}</span>
+              <span>{escape(t("tool.call.state", lang))}: {escape(state)}</span>
               {error_html}
             </div>
           </li>

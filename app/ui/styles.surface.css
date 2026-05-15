@@ -143,6 +143,8 @@ tr.selected { background: linear-gradient(90deg, rgba(34, 201, 139, 0.12), rgba(
   .package-grid,
   .tool-grid,
   .readiness-grid,
+  .demo-outcome,
+  .outcome-metrics,
   .mini-metrics { grid-template-columns: 1fr; }
   .run-strip,
   .section-title,
@@ -153,5 +155,7 @@ tr.selected { background: linear-gradient(90deg, rgba(34, 201, 139, 0.12), rgba(
   .queue-state,
   .queue-after { grid-column: 2; justify-self: start; }
   .timeline-item .chip { grid-column: 2; width: fit-content; }
+  .outcome-main,
+  .outcome-action { grid-column: auto; grid-row: auto; }
   .hero h1 { font-size: 30px; }
 }

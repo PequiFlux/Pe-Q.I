@@ -63,10 +63,10 @@ def document_interpreter_title(lang: str = "pt") -> str:
     )
 
 
-def document_interpreter_badge() -> str:
+def document_interpreter_badge(lang: str = "pt") -> str:
     if runtime_mode() == "ollama":
         return "Gemma 4"
-    return "modo teste"
+    return "test mode" if lang == "en" else "modo teste"
 
 
 def document_interpreter_detail(lang: str = "pt") -> str:
@@ -83,26 +83,43 @@ def document_interpreter_detail(lang: str = "pt") -> str:
     )
 
 
-def status_label(status: str) -> str:
-    labels = {
-        "ok": "OK",
-        "ready": "pronto",
-        "pending": "pendente",
-        "review": "revisão",
-        "blocked": "bloqueado",
-        "skipped": "ignorado",
-        "PREVIEW_READY": "prévia pronta",
-        "REVIEW_REQUIRED": "revisão obrigatória",
-        "BLOCKED": "bloqueado",
-        "APPROVED": "aprovado",
-        "REJECTED": "bloqueado pelo operador",
-        "OVERRIDDEN": "sobrescrito",
-    }
+def status_label(status: str, lang: str = "pt") -> str:
+    labels = (
+        {
+            "ok": "OK",
+            "ready": "ready",
+            "pending": "pending",
+            "review": "review",
+            "blocked": "blocked",
+            "skipped": "skipped",
+            "PREVIEW_READY": "preview ready",
+            "REVIEW_REQUIRED": "human review required",
+            "BLOCKED": "blocked",
+            "APPROVED": "approved",
+            "REJECTED": "blocked by operator",
+            "OVERRIDDEN": "overridden",
+        }
+        if lang == "en"
+        else {
+            "ok": "OK",
+            "ready": "pronto",
+            "pending": "pendente",
+            "review": "revisão",
+            "blocked": "bloqueado",
+            "skipped": "ignorado",
+            "PREVIEW_READY": "prévia pronta",
+            "REVIEW_REQUIRED": "revisão obrigatória",
+            "BLOCKED": "bloqueado",
+            "APPROVED": "aprovado",
+            "REJECTED": "bloqueado pelo operador",
+            "OVERRIDDEN": "sobrescrito",
+        }
+    )
     return labels.get(status, status.replace("_", " ").lower())
 
 
-def audit_status_label(status: str) -> str:
-    label = status_label(status)
+def audit_status_label(status: str, lang: str = "pt") -> str:
+    label = status_label(status, lang=lang)
     return label.upper() if status in {"ok", "blocked", "skipped"} else label
 
 
@@ -120,8 +137,10 @@ def constraints_summary(payload: FrontEndPayload, lang: str = "pt") -> str:
     return f"{checked} pares avaliados; {rejected} rejeitados por restrição dura."
 
 
-def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]]:
+def constraint_failure_summary(payload: FrontEndPayload, lang: str = "pt") -> list[tuple[str, str]]:
     if payload.audit_record is None:
+        if lang == "en":
+            return [("audit", "Flow closed before the constraint matrix.")]
         return [("auditoria", "Fluxo fechou antes da matriz de restrições.")]
     failures: dict[str, str] = {}
     for rejected in payload.audit_record.rejected_candidates:
@@ -131,6 +150,8 @@ def constraint_failure_summary(payload: FrontEndPayload) -> list[tuple[str, str]
                 failure.get("detail", "Par bloqueado por regra operacional."),
             )
     if not failures:
+        if lang == "en":
+            return [("none", "No alternative was blocked by hard constraint.")]
         return [("nenhuma", "Nenhuma alternativa foi bloqueada por restrição dura.")]
     return list(failures.items())
 
@@ -223,7 +244,17 @@ def operator_action_label(action: str, lang: str = "pt") -> str:
     return labels.get(action, action)
 
 
-def reason_detail_label(text: str) -> str:
+def reason_detail_label(text: str, lang: str = "pt") -> str:
+    if lang == "en":
+        translations = {
+            "blocked_by_hard_constraint": "blocked by hard constraint",
+            "fifo_break_kept_waiting_ahead_of_called_truck": (
+                "kept waiting because the FIFO break is justified"
+            ),
+            "shifted_after_called_truck_left_queue": "advanced after called truck left the queue",
+            "no_dispatch_kept_queue_position": "position preserved without automatic dispatch",
+        }
+        return translations.get(text, text)
     translations = {
         "FIFO ordering preserved when possible.": "Ordem de chegada preservada quando possível.",
         "Long wait time increased ranking priority.": "Tempo de espera elevou a prioridade na fila.",
@@ -264,7 +295,7 @@ def story_tile(label: str, value: str, detail: str, kind: str = "muted") -> str:
     """
 
 
-def timeline_item(label: str, status: str, detail: str) -> str:
+def timeline_item(label: str, status: str, detail: str, lang: str = "pt") -> str:
     return f"""
     <div class="timeline-item {status}">
       <div class="timeline-dot"></div>
@@ -272,7 +303,7 @@ def timeline_item(label: str, status: str, detail: str) -> str:
         <strong>{escape(label)}</strong>
         <p>{escape(detail)}</p>
       </div>
-      {chip(status_label(status), _status_color(status))}
+      {chip(status_label(status, lang=lang), _status_color(status))}
     </div>
     """
 
@@ -300,8 +331,8 @@ def _status_color(status: str) -> str:
     return "blue"
 
 
-def display_status(status: str) -> str:
-    return status_label(status)
+def display_status(status: str, lang: str = "pt") -> str:
+    return status_label(status, lang=lang)
 
 
 def status_card(label: str, value: str, note: str) -> str:

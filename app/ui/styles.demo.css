@@ -52,11 +52,19 @@ div[data-testid="stButton"] button p {
   .readiness-grid,
   .status-grid,
   .story-grid,
+  .demo-outcome,
+  .outcome-metrics,
   .demo-proof,
   .demo-proof-grid,
   .decision-story,
   .decision-story.single {
     grid-template-columns: 1fr;
+  }
+
+  .outcome-main,
+  .outcome-action {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .run-strip,

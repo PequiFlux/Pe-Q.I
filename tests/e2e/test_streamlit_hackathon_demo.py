@@ -11,8 +11,8 @@ TRK-UP-01,2026-05-14T08:00:00Z,waiting,truck,false
 TICKET_TXT = b"Ticket TCK-UP-01: truck TRK-UP-01 load dry destination DST-COV-01."
 
 
-def _app(monkeypatch, tmp_path) -> AppTest:
-    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", "text")
+def _app(monkeypatch, tmp_path, runtime: str = "text") -> AppTest:
+    monkeypatch.setenv("PEQUIFLUX_GEMMA_RUNTIME", runtime)
     monkeypatch.delenv("PEQUIFLUX_UI_AUTORUN", raising=False)
     monkeypatch.setenv("PEQUIFLUX_JSONL_LOG_PATH", str(tmp_path / "logs" / "events.jsonl"))
     monkeypatch.setenv("PEQUIFLUX_SQLITE_PATH", str(tmp_path / "var" / "pequiflux.db"))
@@ -57,6 +57,13 @@ def _scenario_selectbox(at: AppTest):
         if selectbox.label in {"Exemplo versionado", "Versioned example"}:
             return selectbox
     raise AssertionError([(selectbox.label, len(selectbox.options)) for selectbox in at.selectbox])
+
+
+def _radio_options(at: AppTest, label: str) -> list[str]:
+    for radio in at.radio:
+        if radio.label == label:
+            return list(radio.options)
+    raise AssertionError([(radio.label, radio.options) for radio in at.radio])
 
 
 def _assert_all_resource_inputs_disabled(at: AppTest) -> None:
@@ -113,12 +120,30 @@ def test_hackathon_demo_ui_navigation_and_options(monkeypatch, tmp_path) -> None
     at.text_input[0].set_value("DST-COV-01").run()
     at.text_input[2].set_value("DST-COV-01").run()
     at = _app(monkeypatch, tmp_path).run()
+    s10_label = next(
+        option
+        for option in _scenario_selectbox(at).options
+        if option.startswith("S10_FIFO_BREAK_JUSTIFIED")
+    )
+    at = _scenario_selectbox(at).set_value(s10_label).run()
     at = _click_button(at, "Carregar e analisar exemplo")
     body = _markdown_body(at)
     assert "Resultado da análise" in body
+    assert "Momento da decisão" in body
+    assert "Chamar TRK-" in body
+    assert "para DST-COV-01" in body
+    assert "Decisão auditável gerada para ação humana" in body
     assert "Modo teste ativo" in body
     assert "TRK-005" in body
     assert "DST-COV-01" in body
+    assert "Mensagem ao motorista" in body
+    assert "Ação do operador" in body
+    assert any(expander.label == "Ver auditoria técnica" for expander in at.expander)
+    assert "Prova Gemma 4 para a banca" in body
+    assert "PREVIEW_READY" not in body
+    assert _radio_options(at, "Ação") == ["aprovar", "bloquear", "sobrescrever"]
+    assert any(text_input.label == "Motivo obrigatório" for text_input in at.text_input)
+    assert "Registrar ação" in _button_labels(at)
     assert "Nova análise" in _button_labels(at)
 
     _radio_by_label(at, {"Idioma", "Language"}).set_value("en").run()
@@ -131,3 +156,13 @@ def test_hackathon_demo_ui_navigation_and_options(monkeypatch, tmp_path) -> None
     assert "Preencha os campos" in body
     assert "Resultado da análise" not in body
     _assert_all_resource_inputs_disabled(at)
+
+
+def test_hackathon_demo_gemma_runtime_surface_without_calling_model(monkeypatch, tmp_path) -> None:
+    at = _app(monkeypatch, tmp_path, runtime="ollama").run()
+    body = _markdown_body(at)
+
+    assert "Analisar com Gemma 4" in _button_labels(at)
+    assert "Analisar em modo teste" not in _button_labels(at)
+    assert "Gemma 4 ativo via Ollama." in body
+    assert "Sem fallback operacional" in body

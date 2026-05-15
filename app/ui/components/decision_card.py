@@ -37,7 +37,8 @@ def recommended_decision_card(payload: FrontEndPayload, lang: Language = "pt") -
         title = t("decision.ready.title", lang, truck=recommended_truck, destination=destination)
         summary = t("decision.ready.summary", lang)
     reason_items = "".join(
-        f"<li>{escape(reason_detail_label(item))}</li>" for item in payload.reason_details[:3]
+        f"<li>{escape(reason_detail_label(item, lang=lang))}</li>"
+        for item in payload.reason_details[:3]
     )
     return f"""
     <section class="decision-story single">
@@ -48,9 +49,9 @@ def recommended_decision_card(payload: FrontEndPayload, lang: Language = "pt") -
         <ul>{reason_items}</ul>
       </div>
       <div class="story-grid compact">
-        {story_tile(t("decision.tile.status", lang), display_status(status), t("decision.tile.status.detail", lang))}
+        {story_tile(t("decision.tile.status", lang), display_status(status, lang=lang), t("decision.tile.status.detail", lang))}
         {story_tile(t("decision.tile.truck", lang), recommended_truck, t("decision.tile.destination", lang, destination=destination), "action")}
-        {story_tile(t("decision.tile.reason", lang), t("decision.tile.reason.value", lang), reason_detail_label(payload.reason_summary), "proof")}
+        {story_tile(t("decision.tile.reason", lang), t("decision.tile.reason.value", lang), reason_detail_label(payload.reason_summary, lang=lang), "proof")}
       </div>
     </section>
     """
@@ -134,7 +135,9 @@ def _queue_stack_state(
         return "promoted", t("queue.called", lang), t("queue.called.detail", lang, before=before)
     if diff_entry and diff_entry.decision == "blocked":
         rules = truck_failure_rules(payload, truck_id)
-        detail = ", ".join(rules[:3]) if rules else reason_detail_label(diff_entry.reason)
+        detail = (
+            ", ".join(rules[:3]) if rules else reason_detail_label(diff_entry.reason, lang=lang)
+        )
         return "blocked", t("queue.blocked", lang), detail
     if truck_id == first_id and truck_id != recommended_id:
         rules = truck_failure_rules(payload, truck_id)
@@ -142,9 +145,17 @@ def _queue_stack_state(
             return "blocked", t("queue.blocked", lang), ", ".join(rules[:3])
         return "waiting", t("queue.waiting", lang), t("queue.waiting.detail", lang)
     if diff_entry and diff_entry.decision == "unchanged":
-        return "waiting", t("queue.waiting", lang), reason_detail_label(diff_entry.reason)
+        return (
+            "waiting",
+            t("queue.waiting", lang),
+            reason_detail_label(diff_entry.reason, lang=lang),
+        )
     if diff_entry and diff_entry.decision == "shifted":
-        return "neutral", t("queue.shifted", lang), reason_detail_label(diff_entry.reason)
+        return (
+            "neutral",
+            t("queue.shifted", lang),
+            reason_detail_label(diff_entry.reason, lang=lang),
+        )
     return "neutral", t("queue.unchanged", lang), t("queue.unchanged.detail", lang)
 
 
@@ -160,7 +171,10 @@ def gemma_extraction_card(
     fields = [
         ("Ticket", parsed.get("ticket_id") or Path(request.ticket_ref).name),
         (t("extract.truck", lang), parsed.get("truck_id") or t("extract.unknown", lang)),
-        (t("extract.load", lang), parsed.get("load_condition") or "unknown"),
+        (
+            t("extract.load", lang),
+            _load_condition_label(str(parsed.get("load_condition") or "unknown"), lang),
+        ),
         (
             t("extract.destination", lang),
             ", ".join(parsed.get("destination_constraints") or []) or t("extract.unknown", lang),
@@ -175,8 +189,8 @@ def gemma_extraction_card(
     return f"""
     <article class="card narrative-card">
       <div class="card-head">
-        <div><h3>{escape(document_interpreter_title())}</h3><p>{escape(t("extract.copy", lang))}</p></div>
-        {chip(document_interpreter_badge(), "purple")}
+        <div><h3>{escape(document_interpreter_title(lang))}</h3><p>{escape(t("extract.copy", lang))}</p></div>
+        {chip(document_interpreter_badge(lang), "purple")}
       </div>
       <div class="package-grid">{items}</div>
     </article>
@@ -184,7 +198,7 @@ def gemma_extraction_card(
 
 
 def blocked_constraints_card(payload: FrontEndPayload, lang: Language = "pt") -> str:
-    failures = constraint_failure_summary(payload)
+    failures = constraint_failure_summary(payload, lang=lang)
     items = "".join(
         f"<li><strong>{escape(constraint)}</strong><span>{escape(detail)}</span></li>"
         for constraint, detail in failures[:4]
@@ -199,3 +213,20 @@ def blocked_constraints_card(payload: FrontEndPayload, lang: Language = "pt") ->
       <ul class="constraint-list">{items}</ul>
     </article>
     """
+
+
+def _load_condition_label(value: str, lang: Language) -> str:
+    labels = (
+        {
+            "dry": "dry",
+            "wet": "wet",
+            "unknown": "not provided",
+        }
+        if lang == "en"
+        else {
+            "dry": "seca",
+            "wet": "úmida",
+            "unknown": "não informada",
+        }
+    )
+    return labels.get(value, value)

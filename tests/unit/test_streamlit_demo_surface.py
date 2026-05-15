@@ -151,6 +151,8 @@ def test_demo_script_button_labels_match_streamlit_surface(monkeypatch) -> None:
         "Limpar campos",
         "Nova análise",
         "Ver auditoria técnica",
+        "Momento da decisão",
+        "Ação humana",
         "Prova Gemma 4",
         "Gemma 4 executando no fluxo real",
         "Tools executadas",
@@ -213,6 +215,40 @@ def test_primary_result_and_technical_cards_hide_raw_internal_status_labels() ->
     assert ">ready<" not in timeline_html
     assert "ignorado" in tools_html
     assert ">skipped<" not in tools_html
+
+
+def test_demo_outcome_banner_prioritizes_recommendation_and_operator_action() -> None:
+    html = streamlit_app._demo_outcome_banner(_preview_payload(), "pt")
+
+    assert "Momento da decisão" in html
+    assert "Chamar TRK-010 para DST-COV-01" in html
+    assert "Decisão auditável gerada para ação humana" in html
+    assert "Quebra de FIFO justificada" in html
+    assert "Ação humana" in html
+    assert "prévia pronta" in html
+    assert "PREVIEW_READY" not in html
+    assert "Long wait time" not in html
+
+
+def test_english_result_surface_does_not_leak_portuguese_status_or_tool_labels() -> None:
+    payload = _preview_payload()
+
+    decision_html = recommended_decision_card(payload, lang="en")
+    timeline_html = copilot_timeline_card(payload, object(), lang="en")
+    tools_html = tool_badges_card(payload, lang="en")
+    outcome_html = streamlit_app._demo_outcome_banner(payload, "en")
+
+    assert "preview ready" in decision_html
+    assert "Long wait time increased ranking priority" in decision_html
+    assert "ready" in timeline_html
+    assert "executed" in tools_html
+    assert "FlowState → tool → executed status under whitelist." in tools_html
+    assert "Call TRK-010 to DST-COV-01" in outcome_html
+
+    joined = decision_html + timeline_html + tools_html + outcome_html
+    assert "prévia pronta" not in joined
+    assert "executado" not in joined
+    assert "Motivo:" not in joined
 
 
 def test_gemma_proof_card_surfaces_real_runtime_evidence(monkeypatch) -> None:
