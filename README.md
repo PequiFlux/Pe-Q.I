@@ -25,21 +25,23 @@ O uso de Gemma 4 é deliberadamente limitado e auditável:
 
 O resultado esperado para a banca é simples: abrir a UI, carregar um exemplo, analisar com Gemma 4 ou modo teste reproduzível, ver caminhão/destino recomendados, entender o motivo operacional e conferir a trilha técnica em auditoria.
 
-![PequiFlux Yard Copilot UI](assets/screenshots/pequiflux-ui.png)
+![PequiFlux Yard Copilot UI com decisão auditável, Gemma 4 via Ollama e recomendação TRK-005 para DST-COV-01](assets/screenshots/pequiflux-ui.png)
+
+Decisão auditável pronta: Pe-Q.I recomenda o caminhão elegível, explica por que FIFO falharia e deixa a ação final com o operador.
 
 ## Prints da UI
 
 | Nova decisão | Exemplo carregado |
 |---|---|
-| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Tela inicial da UI operacional" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-example-loaded.png" alt="UI com exemplo carregado" width="420"> |
+| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Tela inicial da UI operacional com seletor de exemplo, upload de fila e upload de ticket" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="UI com o exemplo S10 carregado e runtime Ollama gemma4:e2b ativo" width="420"> |
 
-| Resultado da análise | Auditoria técnica |
+| Resultado da análise | Evidências e ação humana |
 |---|---|
-| <img src="assets/screenshots/pequiflux-ui-03-result.png" alt="Resultado da análise com decisão PREVIEW_READY" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-audit-expanded.png" alt="Painel de auditoria técnica aberto" width="420"> |
+| <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="Banner de decisão recomendando chamar TRK-005 para DST-COV-01 com prova Gemma 4 em execução" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="Documento interpretado pelo Gemma 4, restrições críticas, mensagem ao motorista e ação do operador" width="420"> |
 
 | Trilha de tools solicitadas pelo Gemma |
 |---|
-| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Painel avançado com tools solicitadas pelo Gemma, status, motivo e estado" width="860"> |
+| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Painel avançado com tools solicitadas pelo Gemma, status, motivo e estado" width="360"> |
 
 ## Para avaliadores
 
@@ -702,7 +704,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Evidência | Caminho |
 |---|---|
 | Screenshot final da interface | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
-| Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-example-loaded.png`](assets/screenshots/pequiflux-ui-02-example-loaded.png), [`assets/screenshots/pequiflux-ui-03-result.png`](assets/screenshots/pequiflux-ui-03-result.png), [`assets/screenshots/pequiflux-ui-04-audit-expanded.png`](assets/screenshots/pequiflux-ui-04-audit-expanded.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
+| Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-inputs-loaded.png`](assets/screenshots/pequiflux-ui-02-inputs-loaded.png), [`assets/screenshots/pequiflux-ui-03-decision-result.png`](assets/screenshots/pequiflux-ui-03-decision-result.png), [`assets/screenshots/pequiflux-ui-04-evidence-and-operator.png`](assets/screenshots/pequiflux-ui-04-evidence-and-operator.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
 | Relatórios extended internos | `bench/reports/extended/<run_id>/` |
 | Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |

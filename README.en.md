@@ -25,21 +25,23 @@ Gemma 4 is used deliberately and audibly:
 
 The expected evaluator flow is simple: open the UI, load an example, analyze it with Gemma 4 or the reproducible text mode, see the recommended truck and destination, understand the operational reason, and inspect the technical audit trail.
 
-![PequiFlux Yard Copilot UI](assets/screenshots/pequiflux-ui.png)
+![PequiFlux Yard Copilot UI with an audit-ready decision, Gemma 4 via Ollama, and TRK-005 recommended for DST-COV-01](assets/screenshots/pequiflux-ui.png)
+
+Audit-ready decision: Pe-Q.I recommends the eligible truck, explains why FIFO would fail, and leaves final authority to the operator.
 
 ## UI Screenshots
 
 | New decision | Loaded example |
 |---|---|
-| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Initial operational UI screen" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-example-loaded.png" alt="UI with an example loaded" width="420"> |
+| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Initial operational UI screen with example selector, queue upload, and ticket upload" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="UI with the S10 example loaded and the Ollama gemma4:e2b runtime active" width="420"> |
 
-| Analysis result | Technical audit |
+| Analysis result | Evidence and human action |
 |---|---|
-| <img src="assets/screenshots/pequiflux-ui-03-result.png" alt="Analysis result with PREVIEW_READY decision" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-audit-expanded.png" alt="Expanded technical audit panel" width="420"> |
+| <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="Decision banner recommending TRK-005 for DST-COV-01 with Gemma 4 runtime proof" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="Document interpreted by Gemma 4, critical constraints, driver message, and operator action" width="420"> |
 
 | Tool trail requested by Gemma |
 |---|
-| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Advanced panel with tools requested by Gemma, status, purpose, and state" width="860"> |
+| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Advanced panel with tools requested by Gemma, status, purpose, and state" width="360"> |
 
 ## For Evaluators
 
@@ -49,8 +51,8 @@ The expected evaluator flow is simple: open the UI, load an example, analyze it 
 | Runnable demo | `make ui-text`/`make demo-text` without GPU; `make ui`/`make demo` for full Gemma/Ollama |
 | Benchmark | `make bench` writes internal reports under `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) remains the frozen public snapshot |
 | Visual evidence | [`assets/screenshots/`](assets/screenshots/) and the screenshots above |
-| Presentation script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
-| Criteria and limits | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) and [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) |
+| Presentation script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) - Portuguese |
+| Criteria and limits | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) and [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) - Portuguese |
 
 Main shortcuts:
 
@@ -170,7 +172,7 @@ make ui-text
 
 Open [http://localhost:8501](http://localhost:8501).
 
-For the full UI with Ollama/Gemma, run `make ui`; Compose starts `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:latest}`, and then starts the UI.
+For the full UI with Ollama/Gemma, run `make ui`; Compose starts `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:e2b}`, and then starts the UI.
 
 ### Full Benchmark with Gemma/Ollama
 
@@ -596,7 +598,7 @@ Secret-free example: [`config/env.example`](config/env.example). The repository 
 |----------|---------|---------|
 | `PEQUIFLUX_GEMMA_RUNTIME` | `ollama` in code; `text` in the standalone Docker image | Gemma backend: `ollama`, `text`, or `none` |
 | `GEMMA_BASE_URL` | `http://gemma:11434` | Ollama API endpoint |
-| `GEMMA_MODEL` | `gemma4:latest` | Model identifier in Ollama |
+| `GEMMA_MODEL` | `gemma4:e2b` | Default Gemma 4 model identifier in Ollama; switch to `gemma4:e4b` if the hardware supports it |
 | `GEMMA_TIMEOUT_SECONDS` | `45` | Timeout for Gemma calls |
 | `OLLAMA_IMAGE` | `ollama/ollama:latest` | Ollama Docker image; GPU variant for acceleration |
 | `OLLAMA_KEEP_ALIVE` | `24h` | Model keep-alive in Ollama |
@@ -693,9 +695,9 @@ The `docs/` directory contains modular implementation documentation. In case of 
 | [`docs/scenario-pack.md`](docs/scenario-pack.md) | Scenario structure, benchmark, reports |
 | [`docs/docker.md`](docs/docker.md) | Docker/Compose use, variables, GPU |
 | [`docs/public-repo.md`](docs/public-repo.md) | Sanitization and publication checklist |
-| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Three-minute video/demo script |
-| [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) | Hackathon criteria mapped to repo evidence |
-| [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) | Explicit prototype limits |
+| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Three-minute video/demo script, in Portuguese |
+| [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) | Hackathon criteria mapped to repo evidence, in Portuguese |
+| [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) | Explicit prototype limits, in Portuguese |
 | [`docs/UI_DECISIONS.md`](docs/UI_DECISIONS.md) | Interface decisions for operator, FIFO, and audit |
 | [`docs/CODEMAP.md`](docs/CODEMAP.md) | Live module map |
 | [`docs/SURFACE_MAP.md`](docs/SURFACE_MAP.md) | Public/exported contracts |
@@ -711,11 +713,11 @@ The `docs/` directory contains modular implementation documentation. In case of 
 | Evidence | Path |
 |---|---|
 | Final interface screenshot | [`assets/screenshots/pequiflux-ui.png`](assets/screenshots/pequiflux-ui.png) |
-| UI visual flow | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-example-loaded.png`](assets/screenshots/pequiflux-ui-02-example-loaded.png), [`assets/screenshots/pequiflux-ui-03-result.png`](assets/screenshots/pequiflux-ui-03-result.png), [`assets/screenshots/pequiflux-ui-04-audit-expanded.png`](assets/screenshots/pequiflux-ui-04-audit-expanded.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
+| UI visual flow | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-inputs-loaded.png`](assets/screenshots/pequiflux-ui-02-inputs-loaded.png), [`assets/screenshots/pequiflux-ui-03-decision-result.png`](assets/screenshots/pequiflux-ui-03-decision-result.png), [`assets/screenshots/pequiflux-ui-04-evidence-and-operator.png`](assets/screenshots/pequiflux-ui-04-evidence-and-operator.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
 | Benchmark sample report | [`bench/reports/sample/`](bench/reports/sample/) |
 | Internal extended reports | `bench/reports/extended/<run_id>/` |
-| Demo script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
-| Submission map | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
+| Demo script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) - Portuguese |
+| Submission map | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) - Portuguese |
 
 ---
 

@@ -423,13 +423,13 @@ def _gemma_tool_call_items(payload: FrontEndPayload, lang: Language = "pt") -> s
     )
     if not items:
         return ""
-    return f"""
-      <div class="tool-call-summary">
-        <h4>Gemma Tool Planner</h4>
-        <p>{escape(t("tool.call.copy", lang))}</p>
-        <ol class="tool-call-list">{items}</ol>
-      </div>
-    """
+    return (
+        '<div class="tool-call-summary">'
+        "<h4>Gemma Tool Planner</h4>"
+        f'<p>{escape(t("tool.call.copy", lang))}</p>'
+        f'<div class="tool-call-list">{items}</div>'
+        "</div>"
+    )
 
 
 def _tool_call_audit_item(
@@ -451,19 +451,19 @@ def _tool_call_audit_item(
         else ""
     )
     missing = t("tool.call.missing", lang)
-    return f"""
-          <li class="tool-call-item {escape(status_class)}">
-            <div class="tool-call-flow">
-              <span class="tool-call-name">{escape(state)} {arrow} {escape(tool_name)}</span>
-              <strong>{escape(status_flow)}</strong>
-            </div>
-            <div class="tool-call-meta">
-              <span>{escape(t("tool.call.purpose", lang))}: {escape(purpose or missing)}</span>
-              <span>{escape(t("tool.call.state", lang))}: {escape(state)}</span>
-              {error_html}
-            </div>
-          </li>
-    """
+    return (
+        f'<div class="tool-call-item {escape(status_class)}">'
+        '<span class="tool-call-flow">'
+        f'<span class="tool-call-name">{escape(state)} {arrow} {escape(tool_name)}</span>'
+        f"<strong>{escape(status_flow)}</strong>"
+        "</span>"
+        '<span class="tool-call-meta">'
+        f'<span>{escape(t("tool.call.purpose", lang))}: {escape(purpose or missing)}</span>'
+        f'<span>{escape(t("tool.call.state", lang))}: {escape(state)}</span>'
+        f"{error_html}"
+        "</span>"
+        "</div>"
+    )
 
 
 def _unique_in_order(values) -> list[str]:

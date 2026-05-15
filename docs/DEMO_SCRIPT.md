@@ -28,7 +28,7 @@ Fala:
 Mostrar status, caminhão recomendado, destino recomendado, motivo operacional, documento interpretado e restrições críticas.
 
 Fala:
-> O operador vê o status da decisão, o caminhão recomendado, o destino, o motivo operacional e os campos extraídos do documento. As restrições bloqueantes aparecem como regras duras, não como sugestão do modelo.
+> O momento da decisão fica explícito: chamar TRK-005 para DST-COV-01. Logo abaixo, a UI mostra que Gemma 4 está executando via Ollama, quais tools foram executadas, o status da decisão, o caminhão, o destino e o motivo operacional. As restrições bloqueantes aparecem como regras duras, não como sugestão do modelo.
 
 ## 1:50-2:20 — Fila e Mensagem
 
@@ -49,4 +49,4 @@ Fala:
 Abrir `Ver auditoria técnica`.
 
 Fala:
-> A auditoria técnica fica colapsada: matriz de validação, regras disparadas, hashes, latências e JSON completo continuam disponíveis para reconstrução da decisão.
+> A auditoria técnica fica colapsada: matriz de validação, prova do Gemma Tool Planner, regras disparadas, hashes, latências e JSON completo continuam disponíveis para reconstrução da decisão.

@@ -39,6 +39,7 @@ RUN python -m pip install --no-index --find-links=/wheels -r requirements-all.tx
     rm -rf /wheels
 
 COPY --chown=pequiflux:pequiflux app app
+COPY --chown=pequiflux:pequiflux assets assets
 COPY --chown=pequiflux:pequiflux bench bench
 COPY --chown=pequiflux:pequiflux data data
 COPY --chown=pequiflux:pequiflux docs docs

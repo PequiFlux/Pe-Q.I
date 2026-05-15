@@ -12,15 +12,16 @@ from app.ui.i18n import Language, t
 def render_validation_matrix(payload: FrontEndPayload, lang: Language = "pt") -> None:
     heatmap = _validation_heatmap(payload, lang=lang)
     st.markdown(
-        f"""
-        <article class="card">
-          <div class="card-head">
-            <div><h3>{escape(t("heatmap.title", lang))}</h3><p>{escape(t("heatmap.copy", lang))}</p></div>
-            {chip("HC-01..HC-07", "green")}
-          </div>
-          {heatmap}
-        </article>
-        """,
+        (
+            '<article class="card">'
+            '<div class="card-head">'
+            f'<div><h3>{escape(t("heatmap.title", lang))}</h3>'
+            f'<p>{escape(t("heatmap.copy", lang))}</p></div>'
+            f'{chip("HC-01..HC-07", "green")}'
+            "</div>"
+            f"{heatmap}"
+            "</article>"
+        ),
         unsafe_allow_html=True,
     )
 
@@ -48,15 +49,15 @@ def _validation_heatmap(payload: FrontEndPayload, lang: Language = "pt") -> str:
     rows = "".join(
         _heatmap_row(truck, destinations, by_pair, selected_pair, lang=lang) for truck in trucks
     )
-    return f"""
-    <div class="heatmap-wrap">
-      <div class="heatmap-grid" style="grid-template-columns: 112px repeat({len(destinations)}, minmax(118px, 1fr));">
-        <div class="heatmap-corner">{escape(t("heatmap.queue", lang))}</div>
-        {header}
-        {rows}
-      </div>
-    </div>
-    """
+    return (
+        '<div class="heatmap-wrap">'
+        '<div class="heatmap-grid" '
+        f'style="grid-template-columns: 112px repeat({len(destinations)}, minmax(118px, 1fr));">'
+        f'<div class="heatmap-corner">{escape(t("heatmap.queue", lang))}</div>'
+        f"{header}{rows}"
+        "</div>"
+        "</div>"
+    )
 
 
 def _heatmap_row(
@@ -86,7 +87,4 @@ def _heatmap_row(
             state = "blocked"
             label = ", ".join(failures) or t("heatmap.blocked", lang)
         cells.append(f'<div class="heat-cell {state}">{escape(label)}</div>')
-    return f"""
-    <div class="heatmap-truck">{escape(truck)}</div>
-    {''.join(cells)}
-    """
+    return f'<div class="heatmap-truck">{escape(truck)}</div>{"".join(cells)}'
