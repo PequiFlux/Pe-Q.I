@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from bench.gates import evaluate_submission_gates
+from bench.provenance import normalize_provenance_fields
 
 SUMMARY_CSV_FIELDS = [
     "scenario_id",
@@ -86,9 +87,25 @@ def normalize_benchmark_artifact(
             "commit": artifact.get("commit", "unknown"),
             "timestamp_utc": artifact.get("timestamp_utc", "unknown"),
             "runtime": run_metadata.get("runtime", "unknown"),
+            "model": run_metadata.get("model", artifact.get("model", "unknown")),
+            "branch": run_metadata.get("branch", artifact.get("branch", "unknown")),
+            "seed": run_metadata.get("seed", artifact.get("seed", 42)),
+            "command": run_metadata.get("command", artifact.get("command", "")),
+            "delegated_command": run_metadata.get(
+                "delegated_command",
+                artifact.get("delegated_command", ""),
+            ),
+            "hardware": run_metadata.get("hardware", artifact.get("hardware", {})),
+            "logs": run_metadata.get("logs", artifact.get("logs", {})),
+            "github_actions": run_metadata.get(
+                "github_actions",
+                artifact.get("github_actions", {}),
+            ),
+            "git_dirty": run_metadata.get("git_dirty", artifact.get("git_dirty", False)),
             "scenario_count": artifact.get("scenario_count", 0),
             "metrics": dict(artifact.get("variant_metrics", {}).get("full", {})),
         }
+    normalized = normalize_provenance_fields(normalized)
     normalized["metrics"].setdefault("no_expected_ticket_leakage", True)
     return normalized
 
@@ -281,6 +298,11 @@ def _render_report_markdown(
         f"# {benchmark.get('benchmark_id', 'Benchmark report')}",
         "",
         f"- Runtime: `{benchmark.get('runtime', 'unknown')}`",
+        f"- Model: `{benchmark.get('model', 'unknown')}`",
+        f"- Commit: `{benchmark.get('commit', 'unknown')}`",
+        f"- Branch: `{benchmark.get('branch', 'unknown')}`",
+        f"- Timestamp UTC: `{benchmark.get('timestamp_utc', 'unknown')}`",
+        f"- Seed: `{benchmark.get('seed', 'unknown')}`",
         f"- Scenario count: `{benchmark.get('scenario_count', 0)}`",
         f"- Submission ready: `{str(gates.get('submission_ready', False)).lower()}`",
         f"- Failed gates: `{len(failed_gates)}`",
@@ -300,10 +322,33 @@ def _render_report_markdown(
             )
     else:
         lines.append("- All submission gates passed.")
+    lines.extend(["", "## Provenance"])
+    for label, value in _provenance_lines(benchmark):
+        lines.append(f"- {label}: `{value}`")
     lines.extend(
         ["", "## Statistics", "```json", json.dumps(stats, indent=2, sort_keys=True), "```"]
     )
     return "\n".join(lines) + "\n"
+
+
+def _provenance_lines(benchmark: dict[str, Any]) -> list[tuple[str, Any]]:
+    hardware = benchmark.get("hardware", {})
+    logs = benchmark.get("logs", {})
+    github_actions = benchmark.get("github_actions", {})
+    lines: list[tuple[str, Any]] = [
+        ("Command", benchmark.get("command", "")),
+        ("Delegated command", benchmark.get("delegated_command", "")),
+        ("Run log", logs.get("run_log", "")),
+        ("Hardware platform", hardware.get("platform", "")),
+        ("Hardware processor", hardware.get("processor", "")),
+        ("Hardware CPU count", hardware.get("cpu_count", "")),
+        ("Hardware memory GiB", hardware.get("memory_gib", "")),
+        ("GitHub Actions artifact", github_actions.get("artifact_name", "")),
+        ("GitHub Actions run URL", github_actions.get("run_url", "")),
+    ]
+    if hardware.get("gpu"):
+        lines.append(("Hardware GPU", hardware["gpu"]))
+    return lines
 
 
 if __name__ == "__main__":

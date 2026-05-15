@@ -141,9 +141,23 @@ def test_reporting_cli_writes_artifacts_from_input_files(
 def test_normalize_benchmark_artifact_accepts_run_benchmark_metrics() -> None:
     artifact = normalize_benchmark_artifact(
         {
+            "commit": "abc123",
+            "timestamp_utc": "2026-05-12T00:00:00Z",
             "scenario_count": 30,
             "run_metadata": {
                 "runtime": "text",
+                "model": "text-runtime",
+                "branch": "main",
+                "seed": 42,
+                "command": "python -m bench.clean_eval --runtime text",
+                "delegated_command": "python -m app.cli.run_benchmark",
+                "hardware": {"platform": "Linux", "cpu_count": 8},
+                "logs": {"run_log": "artifacts/latest/clean_public_test/run.log"},
+                "github_actions": {
+                    "available": True,
+                    "artifact_name": "clean-gemma-eval",
+                    "run_url": "https://github.com/PequiFlux/Pe-Q.I/actions/runs/1",
+                },
                 "generated_from_manifest": "scenarios/extended/public_test_frozen/manifest.json",
             },
             "variant_metrics": {
@@ -168,6 +182,14 @@ def test_normalize_benchmark_artifact_accepts_run_benchmark_metrics() -> None:
 
     assert artifact["benchmark_id"] == "B1_clean_public_test_frozen"
     assert artifact["runtime"] == "text"
+    assert artifact["model"] == "text-runtime"
+    assert artifact["commit"] == "abc123"
+    assert artifact["timestamp_utc"] == "2026-05-12T00:00:00Z"
+    assert artifact["branch"] == "main"
+    assert artifact["seed"] == 42
+    assert artifact["command"] == "python -m bench.clean_eval --runtime text"
+    assert artifact["logs"]["run_log"] == "artifacts/latest/clean_public_test/run.log"
+    assert artifact["github_actions"]["artifact_name"] == "clean-gemma-eval"
     assert artifact["scenario_count"] == 30
     assert artifact["metrics"]["no_expected_ticket_leakage"] is True
 

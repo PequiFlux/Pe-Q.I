@@ -17,9 +17,9 @@ def test_clean_multimodal_eval_split_delegates_after_leakage_preflight(
     manifest_path = scenario_dir / "manifest.json"
     calls: list[dict] = []
 
-    def fake_run(command, *, env, check):
+    def fake_run(command, *, env, check, **kwargs):
         calls.append({"command": command, "env": env, "check": check})
-        return subprocess.CompletedProcess(command, 0)
+        return subprocess.CompletedProcess(command, 0, stdout="ok\n", stderr="")
 
     monkeypatch.setattr("subprocess.run", fake_run)
     monkeypatch.setattr(
@@ -60,3 +60,9 @@ def test_clean_multimodal_eval_split_delegates_after_leakage_preflight(
     ]
     assert calls[0]["env"]["PEQUIFLUX_GEMMA_RUNTIME"] == "ollama"
     assert calls[0]["env"]["GEMMA_MODEL"] == "gemma4:e4b"
+    assert calls[0]["env"]["PEQUIFLUX_RUN_LOG_PATH"] == str(
+        tmp_path / "clean_public_test" / "run.log"
+    )
+    assert "bench.clean_eval" in calls[0]["env"]["PEQUIFLUX_EVAL_COMMAND"]
+    assert "app.cli.run_benchmark" in calls[0]["env"]["PEQUIFLUX_DELEGATED_COMMAND"]
+    assert (tmp_path / "clean_public_test" / "run.log").exists()

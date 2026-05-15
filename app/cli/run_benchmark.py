@@ -15,6 +15,7 @@ from app.services.structured_ticket_parser import (
     parse_structured_ticket_document,
 )
 from bench.metrics import compute_variant_metrics
+from bench.provenance import benchmark_provenance
 from bench.reporting import build_error_analysis_rows
 from bench.reporting import render_error_analysis_csv
 from bench.reporting import render_summary_csv
@@ -121,12 +122,28 @@ def main() -> None:
         rows = [item for item in per_scenario if item["variant"] == variant]
         variant_metrics[variant] = compute_variant_metrics(rows)
 
+    provenance = benchmark_provenance(
+        runtime=runtime,
+        argv=[sys.executable, "-m", "app.cli.run_benchmark", *sys.argv[1:]],
+        output_dir=output_dir,
+    )
     metrics = {
+        **provenance,
         "scenario_count": len(full_rows),
         "passed_count": sum(1 for item in full_rows if item["passed"]),
         "failed_count": sum(1 for item in full_rows if not item["passed"]),
         "run_metadata": {
             "runtime": runtime,
+            "model": provenance["model"],
+            "seed": provenance["seed"],
+            "commit": provenance["commit"],
+            "branch": provenance["branch"],
+            "timestamp_utc": provenance["timestamp_utc"],
+            "command": provenance["command"],
+            "delegated_command": provenance["delegated_command"],
+            "hardware": provenance["hardware"],
+            "logs": provenance["logs"],
+            "github_actions": provenance["github_actions"],
             "scenario_count": len(full_rows),
             "report_variants": list(report_variants),
             "generated_from_manifest": str(manifest_path),

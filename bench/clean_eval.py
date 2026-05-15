@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from bench.provenance import command_string
+
 
 EVALUATION_SPLIT_NAMES = {"public_dev", "public_test_frozen", "private_holdout"}
 MULTIMODAL_CONTENT_TYPES = {"application/pdf", "image/png", "image/jpeg", "image/jpg"}
@@ -36,6 +38,8 @@ def main() -> None:
             raise SystemExit(f"expected_ticket leakage detected: {joined}")
 
     env = _runtime_env(args.runtime)
+    output_dir = Path(args.output)
+    log_path = output_dir / "run.log"
     command = [
         sys.executable,
         "-m",
@@ -47,7 +51,42 @@ def main() -> None:
         "--output-dir",
         args.output,
     ]
-    raise SystemExit(subprocess.run(command, env=env, check=False).returncode)
+    env["PEQUIFLUX_EVAL_COMMAND"] = command_string(
+        [sys.executable, "-m", "bench.clean_eval", *sys.argv[1:]]
+    )
+    env["PEQUIFLUX_DELEGATED_COMMAND"] = command_string(command)
+    env["PEQUIFLUX_RUN_LOG_PATH"] = str(log_path)
+
+    completed = subprocess.run(
+        command,
+        env=env,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path.write_text(
+        "\n".join(
+            [
+                f"command={env['PEQUIFLUX_EVAL_COMMAND']}",
+                f"delegated_command={env['PEQUIFLUX_DELEGATED_COMMAND']}",
+                f"returncode={completed.returncode}",
+                "",
+                "stdout:",
+                completed.stdout or "",
+                "",
+                "stderr:",
+                completed.stderr or "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    if completed.stdout:
+        print(completed.stdout, end="")
+    if completed.stderr:
+        print(completed.stderr, end="", file=sys.stderr)
+    raise SystemExit(completed.returncode)
 
 
 def expected_ticket_leakage_violations(
