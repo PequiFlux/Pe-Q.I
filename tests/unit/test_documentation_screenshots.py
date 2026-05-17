@@ -40,7 +40,7 @@ def test_writeup_screenshot_matches_canonical_readme_asset() -> None:
 
 def test_judge_demo_video_capture_path_is_documented() -> None:
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-    demo_script = (ROOT / "docs/DEMO_SCRIPT.md").read_text(encoding="utf-8")
+    demo_overview = (ROOT / "docs/HACKATHON_OVERVIEW.md").read_text(encoding="utf-8")
     submission = (ROOT / "docs/HACKATHON_SUBMISSION.md").read_text(encoding="utf-8")
     capture_script = (ROOT / "scripts/capture_judge_demo_video.mjs").read_text(
         encoding="utf-8"
@@ -49,8 +49,9 @@ def test_judge_demo_video_capture_path_is_documented() -> None:
     assert "judge-demo-video" in makefile
     assert "PEQUIFLUX_JUDGE_VIDEO_PATH" in makefile
     assert "host.docker.internal:8501" in makefile
-    assert "make judge-demo-video" in demo_script
-    assert "artifacts/judge-demo/pequiflux-gemma-proof.webm" in demo_script
+    assert "make judge-demo-video" in demo_overview
+    assert "artifacts/judge-demo/pequiflux-gemma-proof.webm" in demo_overview
+    assert "artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm" in demo_overview
     assert "make judge-demo-video" in submission
     assert "Judge proof" in capture_script
     assert "Test mode is active" in capture_script

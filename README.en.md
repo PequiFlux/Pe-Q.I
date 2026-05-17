@@ -55,7 +55,7 @@ Audit-ready decision: Pe-Q.I recommends the eligible truck, explains why FIFO wo
 | Runnable demo | `make ui-text`/`make demo-text` without GPU; `make ui`/`make demo` for full Gemma/Ollama |
 | Benchmark | `make bench` writes internal reports under `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) remains the frozen public snapshot |
 | Visual evidence | [`assets/screenshots/`](assets/screenshots/) and the screenshots above |
-| Presentation script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) - Portuguese |
+| Demo explanation | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
 | Criteria and limits | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) and [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) - Portuguese |
 
 Main shortcuts:
@@ -699,7 +699,7 @@ The `docs/` directory contains modular implementation documentation. In case of 
 | [`docs/scenario-pack.md`](docs/scenario-pack.md) | Scenario structure, benchmark, reports |
 | [`docs/docker.md`](docs/docker.md) | Docker/Compose use, variables, GPU |
 | [`docs/public-repo.md`](docs/public-repo.md) | Sanitization and publication checklist |
-| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Three-minute video/demo script, in Portuguese |
+| [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) | Demo explanation, hackathon claim, and main evidence |
 | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) | Hackathon criteria mapped to repo evidence, in Portuguese |
 | [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) | Explicit prototype limits, in Portuguese |
 | [`docs/UI_DECISIONS.md`](docs/UI_DECISIONS.md) | Interface decisions for operator, FIFO, and audit |
@@ -720,7 +720,8 @@ The `docs/` directory contains modular implementation documentation. In case of 
 | UI visual flow | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-inputs-loaded.png`](assets/screenshots/pequiflux-ui-02-inputs-loaded.png), [`assets/screenshots/pequiflux-ui-03-decision-result.png`](assets/screenshots/pequiflux-ui-03-decision-result.png), [`assets/screenshots/pequiflux-ui-04-evidence-and-operator.png`](assets/screenshots/pequiflux-ui-04-evidence-and-operator.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
 | Benchmark sample report | [`bench/reports/sample/`](bench/reports/sample/) |
 | Internal extended reports | `bench/reports/extended/<run_id>/` |
-| Demo script | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) - Portuguese |
+| Preferred judge video | [`artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm`](artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm) |
+| Demo explanation | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
 | Submission map | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) - Portuguese |
 
 ---

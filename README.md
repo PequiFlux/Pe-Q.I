@@ -55,7 +55,7 @@ Decisão auditável pronta: Pe-Q.I recomenda o caminhão elegível, explica por 
 | Demo executável | `make ui-text`/`make demo-text` sem GPU; `make ui`/`make demo` para Gemma/Ollama completo; `docker compose -f compose.yaml -f compose.gpu.yaml ...` para aceleração NVIDIA opcional |
 | Benchmark | `make bench` gera relatório interno em `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) permanece como snapshot público congelado |
 | Evidência visual | [`assets/screenshots/`](assets/screenshots/) e prints acima |
-| Roteiro de apresentação | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
+| Explicacao da demo | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
 | Critérios e limites | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) e [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) |
 
 Atalhos principais:
@@ -692,7 +692,7 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | [`docs/scenario-pack.md`](docs/scenario-pack.md) | Estrutura dos cenários, benchmark e relatórios |
 | [`docs/docker.md`](docs/docker.md) | Uso Docker/Compose, variáveis, GPU |
 | [`docs/public-repo.md`](docs/public-repo.md) | Sanitização e checklist de publicação |
-| [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | Roteiro de vídeo/demo de 3 minutos |
+| [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) | Explicacao da demo, claim da hackathon e evidencias principais |
 | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) | Critérios da hackathon mapeados para evidências do repo |
 | [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) | Limites explícitos do protótipo |
 | [`docs/UI_DECISIONS.md`](docs/UI_DECISIONS.md) | Decisões de interface para operador, FIFO e auditoria |
@@ -713,7 +713,8 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 | Fluxo visual da UI | [`assets/screenshots/pequiflux-ui-01-initial.png`](assets/screenshots/pequiflux-ui-01-initial.png), [`assets/screenshots/pequiflux-ui-02-inputs-loaded.png`](assets/screenshots/pequiflux-ui-02-inputs-loaded.png), [`assets/screenshots/pequiflux-ui-03-decision-result.png`](assets/screenshots/pequiflux-ui-03-decision-result.png), [`assets/screenshots/pequiflux-ui-04-evidence-and-operator.png`](assets/screenshots/pequiflux-ui-04-evidence-and-operator.png), [`assets/screenshots/pequiflux-ui-05-tool-audit.png`](assets/screenshots/pequiflux-ui-05-tool-audit.png) |
 | Relatório sample do benchmark | [`bench/reports/sample/`](bench/reports/sample/) |
 | Relatórios extended internos | `bench/reports/extended/<run_id>/` |
-| Roteiro de demo | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) |
+| Vídeo preferido da banca | [`artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm`](artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm) |
+| Explicacao da demo | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
 | Mapa da submissão | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) |
 
 ---

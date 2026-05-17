@@ -11,7 +11,7 @@ Esta pasta converte o `technical_blueprint.md` em documentação operacional, mo
 - [`contracts.md`](./contracts.md): payloads e contratos centrais de função
 - [`scenario-pack.md`](./scenario-pack.md): cenários obrigatórios, benchmark e relatórios
 - [`public-repo.md`](./public-repo.md): sanitização, publicação e checklist de repositório público
-- [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md): roteiro de demo/vídeo de 3 minutos para banca
+- [`HACKATHON_OVERVIEW.md`](./HACKATHON_OVERVIEW.md): explicacao da demo, claim da hackathon e evidencias principais
 - [`HACKATHON_SUBMISSION.md`](./HACKATHON_SUBMISSION.md): critérios da hackathon mapeados para evidências versionadas
 - [`LIMITATIONS.md`](./LIMITATIONS.md): limites explícitos do protótipo e claims não permitidos
 - [`UI_DECISIONS.md`](./UI_DECISIONS.md): decisões de interface para operador, FIFO e auditoria
