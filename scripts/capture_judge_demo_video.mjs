@@ -23,13 +23,38 @@ async function waitForApp(page) {
   console.log("step=wait_for_app:start");
   await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
   await page.getByText("PequiFlux Yard Copilot").first().waitFor({ timeout: 120000 });
+  await page.getByText("Operational input").first().waitFor({ timeout: 120000 });
   await page.waitForTimeout(1200);
   console.log("step=wait_for_app:done");
 }
 
+async function assertEnglishInterface(page, marker = "initial") {
+  const portugueseMarkers = [
+    "Momento da decisão",
+    "Prova Gemma 4",
+    "Ver auditoria técnica",
+    "Modo teste ativo",
+    "Analisar com Gemma 4",
+    "Chamar TRK",
+    "Fila de caminhões",
+  ];
+
+  for (const text of portugueseMarkers) {
+    const locator = page.getByText(text, { exact: false });
+    const count = await locator.count();
+    for (let index = 0; index < count; index += 1) {
+      if (await locator.nth(index).isVisible()) {
+        throw new Error(
+          `Judge demo capture failed: Portuguese UI text "${text}" is visible at ${marker}.`,
+        );
+      }
+    }
+  }
+}
+
 async function ensureNotInTestMode(page) {
   console.log("step=ensure_runtime:start");
-  await page.getByText("Momento da decisão").first().waitFor({ timeout: 180000 });
+  await page.getByText("Decision moment").first().waitFor({ timeout: 180000 });
   const bodyText = await page.locator("body").innerText();
   const runtimeMatch = bodyText.match(/Ollama\s*[·•-]\s*(gemma4:(e4b|e2b))/);
 
@@ -37,10 +62,11 @@ async function ensureNotInTestMode(page) {
     throw new Error("Judge demo capture failed: runtime proof card did not show Ollama Gemma.");
   }
 
-  if (/Modo teste ativo|Não use modo teste para a gravação da banca\./.test(bodyText)) {
+  if (/Test mode is active|Do not use test mode for the judge recording\./.test(bodyText)) {
     throw new Error("Judge demo capture refused: UI is still showing test mode.");
   }
 
+  await assertEnglishInterface(page, "runtime proof");
   const runtimeLabel = `Ollama · ${runtimeMatch[1]}`;
   console.log(`step=ensure_runtime:done runtime=${runtimeLabel}`);
   return runtimeLabel;
@@ -48,37 +74,50 @@ async function ensureNotInTestMode(page) {
 
 async function clickAnalyze(page) {
   console.log("step=click_analyze:start");
-  const readyMarker = page.getByText("Momento da decisão").first();
+  const readyMarker = page.getByText("Decision moment").first();
   if ((await readyMarker.count()) > 0 && (await readyMarker.isVisible())) {
     console.log("step=click_analyze:already_ready");
     return;
   }
 
   await page
-    .getByRole("button", { name: /Carregar e analisar exemplo|Load and analyze example/ })
+    .getByRole("button", { name: /Load and analyze example/ })
     .first()
     .click();
   console.log("step=click_analyze:clicked");
 }
 
+async function showQueueOptimization(page) {
+  console.log("step=show_queue_optimization:start");
+  await page.getByText("Decision queue").first().waitFor({ timeout: 60000 });
+  await page.getByText("Decision queue").first().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(2200);
+  await page.getByText("called now").first().waitFor({ timeout: 30000 });
+  console.log("step=show_queue_optimization:done");
+}
+
 async function revealProofSequence(page) {
   console.log("step=reveal_proof:start");
-  await page.getByText("Momento da decisão").first().waitFor({ timeout: 180000 });
+  await page.getByText("Decision moment").first().waitFor({ timeout: 180000 });
   await page.waitForTimeout(1600);
 
-  const proofCard = page.getByText("Prova Gemma 4 para a banca").first();
+  const proofCard = page.getByText("Judge proof").first();
   await proofCard.scrollIntoViewIfNeeded();
   await page.waitForTimeout(1800);
 
-  const auditToggle = page.getByText("Ver auditoria técnica").first();
+  await showQueueOptimization(page);
+
+  const auditToggle = page.getByText("View technical audit").first();
   await auditToggle.scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);
   await auditToggle.click();
 
+  await page.getByText("Auditable trail").first().waitFor({ timeout: 30000 });
   const planner = page.getByText("Gemma Tool Planner").first();
   await planner.waitFor({ timeout: 30000 });
   await planner.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(2200);
+  await page.waitForTimeout(3200);
+  await assertEnglishInterface(page, "audit proof");
   console.log("step=reveal_proof:done");
 }
 
@@ -100,6 +139,7 @@ let runtimeLabel = "unknown";
 
 try {
   await waitForApp(page);
+  await assertEnglishInterface(page, "initial load");
   await clickAnalyze(page);
   runtimeLabel = await ensureNotInTestMode(page);
   await revealProofSequence(page);

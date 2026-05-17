@@ -16,6 +16,8 @@ logs/
 var/
 cache/
 artifacts/debug*/
+artifacts/eval/
+artifacts/latest/*/run.log
 artifacts/latest/text_contract/
 tmp/
 test-results/

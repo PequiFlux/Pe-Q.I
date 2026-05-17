@@ -34,6 +34,7 @@ services:
         condition: service_healthy
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
+      PEQUIFLUX_UI_DEFAULT_LANGUAGE: "${PEQUIFLUX_UI_DEFAULT_LANGUAGE:-en}"
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
@@ -105,6 +106,7 @@ services:
         condition: service_completed_successfully
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: ollama
+      PEQUIFLUX_UI_DEFAULT_LANGUAGE: "${PEQUIFLUX_UI_DEFAULT_LANGUAGE:-en}"
       GEMMA_BASE_URL: http://gemma:11434
       GEMMA_MODEL: "${GEMMA_MODEL:-gemma4:e2b}"
       GEMMA_TIMEOUT_SECONDS: "${GEMMA_TIMEOUT_SECONDS:-300}"
@@ -125,6 +127,7 @@ services:
       target: ui
     environment:
       PEQUIFLUX_GEMMA_RUNTIME: text
+      PEQUIFLUX_UI_DEFAULT_LANGUAGE: "${PEQUIFLUX_UI_DEFAULT_LANGUAGE:-en}"
     ports:
       - "8501:8501"
     healthcheck:

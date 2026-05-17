@@ -8,7 +8,7 @@ Idiomas: **Português** | [English](README.en.md)
 
 O PequiFlux Yard Copilot decide **qual caminhão chamar** e **para qual destino despachar** quando o FIFO puro já não é suficiente. É um **working proof-of-concept técnico** — reproduzível, auditável e benchmarkável — construído para a Gemma 4 Good Hackathon.
 
-Este repositório **não** deve ser apresentado como sistema pronto para produção, validado em campo ou integração operacional implantada. Os dados e cenários são sintéticos, e a proposta aqui é demonstrar um recorte técnico sério, auditável e reproduzível.
+Este repositório não deve ser apresentado como sistema pronto para produção, validado em campo ou integração operacional implantada. Os dados e cenários são sintéticos, e a proposta aqui é demonstrar um recorte técnico sério, auditável e reproduzível.
 
 **Princípio central:** Gemma interpreta; regras determinísticas decidem; o operador humano aprova, bloqueia ou faz override; tudo fica auditável.
 
@@ -63,7 +63,9 @@ Atalhos principais:
 ```bash
 make demo-text
 make ui-text
+make clean
 make quality
+make prepublish
 make test
 make bench
 make audit
@@ -733,7 +735,8 @@ A pasta `docs/` contém documentação modular de implementação. Em caso de co
 - Thresholds, pesos e cenários alinhados com assunções sanitizadas do blueprint.
 - Nenhum `.env`, `.env.*` ou `.venv/` no repositório.
 - Configuração via Docker, Compose, placeholders documentados ou inputs explícitos de runtime — nunca secrets comitados.
-- Script `scripts/prepublish_check.sh` verifica essas restrições antes de qualquer release.
+- `make clean` remove caches e logs locais gerados antes da revisão final.
+- `make prepublish` executa `scripts/prepublish_check.sh` antes de qualquer release.
 
 ---
 

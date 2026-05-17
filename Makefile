@@ -1,4 +1,4 @@
-.PHONY: help demo demo-gpu demo-text ui ui-gpu ui-text demo-ready judge-demo judge-demo-video test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prewarm prewarm-gpu
+.PHONY: help clean demo demo-gpu demo-text ui ui-gpu ui-text demo-ready judge-demo judge-demo-video test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prepublish prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
@@ -18,6 +18,7 @@ help:
 	@echo "  make judge-demo Run the canonical judge ritual: reset, pull/prewarm, start UI, run S10, print status"
 	@echo "  make judge-demo-video Run judge-demo and save a short proof video with runtime Ollama"
 	@echo "  make demo-ready Alias for make judge-demo"
+	@echo "  make clean      Remove local caches and generated run logs"
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
@@ -25,6 +26,12 @@ help:
 	@echo "  make leakage-guard  Run expected_ticket clean-eval leakage guard tests"
 	@echo "  make extended-pack-check  Validate B1 extended split manifests"
 	@echo "  make quality    Run Black, pytest, audit and validated text benchmark gates as CI"
+	@echo "  make prepublish Run the Docker pre-publication gate"
+
+clean:
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +
+	rm -rf .pytest_cache cache var/log/*
+	find artifacts/latest -type f -name run.log -delete
 
 demo:
 	docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
@@ -144,6 +151,9 @@ benchmark-validate-text:
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 
 quality: format-check test leakage-guard extended-pack-check audit benchmark-validate-text
+
+prepublish:
+	./scripts/prepublish_check.sh
 
 prewarm:
 	docker compose --profile gemma-setup run --rm gemma-init

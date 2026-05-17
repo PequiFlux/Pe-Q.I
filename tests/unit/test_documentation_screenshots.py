@@ -52,5 +52,5 @@ def test_judge_demo_video_capture_path_is_documented() -> None:
     assert "make judge-demo-video" in demo_script
     assert "artifacts/judge-demo/pequiflux-gemma-proof.webm" in demo_script
     assert "make judge-demo-video" in submission
-    assert "Prova Gemma 4 para a banca" in capture_script
-    assert "Modo teste ativo" in capture_script
+    assert "Judge proof" in capture_script
+    assert "Test mode is active" in capture_script

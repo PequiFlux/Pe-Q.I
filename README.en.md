@@ -8,7 +8,7 @@ Languages: [Português](README.md) | **English**
 
 PequiFlux Yard Copilot decides **which truck to call** and **which destination to dispatch it to** when pure FIFO is no longer enough. It is a **technical working proof of concept** - reproducible, auditable, and benchmarkable - built for the Gemma 4 Good Hackathon.
 
-This repository should **not** be presented as production-ready software, field-validated operations, or a deployed operational integration. The data and scenarios are synthetic, and the point here is a serious, auditable, reproducible technical slice.
+This repository should not be presented as production-ready software, field-validated operations, or a deployed operational integration. The data and scenarios are synthetic, and the point here is a serious, auditable, reproducible technical slice.
 
 **Core principle:** Gemma interprets; deterministic rules decide; the human operator approves, blocks, or overrides; every step remains auditable.
 

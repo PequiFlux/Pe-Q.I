@@ -26,20 +26,22 @@ else
 fi
 
 echo "==> expected_ticket leakage guard"
-if command -v pytest >/dev/null 2>&1; then
-  pytest -q tests/scenarios/test_no_expected_ticket_leakage.py
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker run --rm pequiflux-yard-copilot:test pytest -q tests/scenarios/test_no_expected_ticket_leakage.py
+elif command -v pytest >/dev/null 2>&1; then
+  echo "Docker indisponível; usando pytest local apenas como contingência."
+  pytest -q tests/scenarios/test_no_expected_ticket_leakage.py
 else
   echo "pytest e docker não encontrados. Não foi possível executar leakage guard." >&2
   exit 1
 fi
 
 echo "==> extended B1 pack schema"
-if command -v pytest >/dev/null 2>&1; then
-  pytest -q tests/scenarios/test_extended_pack_schema.py
-elif command -v docker >/dev/null 2>&1; then
+if command -v docker >/dev/null 2>&1; then
   docker run --rm pequiflux-yard-copilot:test pytest -q tests/scenarios/test_extended_pack_schema.py
+elif command -v pytest >/dev/null 2>&1; then
+  echo "Docker indisponível; usando pytest local apenas como contingência."
+  pytest -q tests/scenarios/test_extended_pack_schema.py
 else
   echo "pytest e docker não encontrados. Não foi possível validar o B1 extended pack." >&2
   exit 1

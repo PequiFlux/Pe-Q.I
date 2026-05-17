@@ -48,7 +48,7 @@ COPY --chown=pequiflux:pequiflux scenarios scenarios
 COPY --chown=pequiflux:pequiflux scripts scripts
 COPY --chown=pequiflux:pequiflux tests tests
 COPY --chown=pequiflux:pequiflux .github/workflows .github/workflows
-COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md README.md README.en.md Dockerfile compose.yaml ./
+COPY --chown=pequiflux:pequiflux pyproject.toml technical_blueprint.md README.md README.en.md Makefile LICENSE Dockerfile compose.yaml ./
 
 USER pequiflux
 

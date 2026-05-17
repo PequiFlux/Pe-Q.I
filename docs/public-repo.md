@@ -54,6 +54,8 @@ Não persistir:
 - `scripts/run_demo.sh`: fluxo de demo
 - `app.cli.run_benchmark`: execução das variantes
 - `scripts/prepublish_check.sh`: checagens antes da publicação
+- `make clean`: remoção de caches e logs locais gerados
+- `make prepublish`: atalho Docker para o gate pré-publicação
 
 ## Checklist pré-publicação
 

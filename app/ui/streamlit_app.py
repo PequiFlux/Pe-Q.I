@@ -936,7 +936,8 @@ def _render_technical_audit_expander(
             render_gemma_context(payload, request, lang=lang)
             st.markdown(tool_badges_card(payload, lang=lang), unsafe_allow_html=True)
         render_audit(payload, lang=lang)
-        st.json(payload.model_dump(mode="json"))
+        with st.expander(t("audit.raw_payload", lang), expanded=False):
+            st.json(payload.model_dump(mode="json"))
 
 
 def _render_error(error: str, lang: Language = "pt") -> None:
@@ -952,7 +953,9 @@ def _render_error(error: str, lang: Language = "pt") -> None:
 
 
 def _current_language() -> Language:
-    value = st.session_state.get(LANGUAGE_KEY, "pt")
+    default_language = os.getenv("PEQUIFLUX_UI_DEFAULT_LANGUAGE", "pt").strip().lower()
+    default_value = "en" if default_language in {"en", "english"} else "pt"
+    value = st.session_state.get(LANGUAGE_KEY, default_value)
     return "en" if value in {"en", "English"} else "pt"
 
 

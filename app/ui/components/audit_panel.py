@@ -198,19 +198,40 @@ def render_audit(payload: FrontEndPayload, lang: Language = "pt") -> None:
 
 
 def render_driver_message(payload: FrontEndPayload, lang: Language = "pt") -> None:
+    message = _localized_driver_message(payload, lang)
     st.markdown(
         f"""
         <article class="card phone-card">
           <div class="phone">
             <div class="phone-head"><strong>PequiFlux</strong><span>{escape(t("driver.title", lang))}</span></div>
             <div class="bubble">{escape(t("driver.processed", lang))}</div>
-            <div class="bubble me">{escape(payload.driver_message.message)}</div>
+            <div class="bubble me">{escape(message)}</div>
             <div class="phone-input">{escape(t("driver.input", lang))}</div>
           </div>
         </article>
         """,
         unsafe_allow_html=True,
     )
+
+
+def _localized_driver_message(payload: FrontEndPayload, lang: Language) -> str:
+    if lang == "pt":
+        return payload.driver_message.message
+    if (
+        payload.decision_status == "PREVIEW_READY"
+        and payload.recommended_truck
+        and payload.recommended_destination
+    ):
+        return t(
+            "driver.dispatch",
+            lang,
+            truck=payload.recommended_truck.truck_id,
+            destination=payload.recommended_destination.destination_id,
+            reason=payload.reason_summary,
+        )
+    if payload.decision_status == "BLOCKED":
+        return t("driver.blocked", lang)
+    return t("driver.review", lang)
 
 
 def _ui_sqlite_store() -> SQLiteStore:
