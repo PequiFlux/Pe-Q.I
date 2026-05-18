@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.venv/
+__pycache__/
+.git/
+*.lock
+*.min.js
+*.generated.*
+*.map
+tmp/
+.cache/
+.pytest_cache/
+.code-review-graph/
+data/
