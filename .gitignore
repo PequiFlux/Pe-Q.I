@@ -26,5 +26,11 @@ test-results/
 .env.*
 .gstack/
 .serena/
+.agents/
 .codex
 .codex/
+
+# Local agent/governance notes
+AGENTS.md
+goal.md
+.graphifyignore
