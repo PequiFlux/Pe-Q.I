@@ -4,7 +4,7 @@ __pycache__/
 .pytest_cache/
 .scannerwork/
 
-.code-review-graph/graph.db
+.code-review-graph/
 checker
 third_party/
 bench/reports/*
@@ -33,4 +33,18 @@ test-results/
 # Local agent/governance notes
 AGENTS.md
 goal.md
+GOAL.md
 .graphifyignore
+CLAUDE.md
+GEMINI.md
+QWEN.md
+CODEX.md
+.claude/
+.gemini/
+.qwen/
+.cursor/
+.cursorignore
+.windsurf/
+.continue/
+.aider*
+.roo/
