@@ -65,9 +65,7 @@ def execute_planned_tool(
             context_summary=context_summary,
         )
     except PequiFluxError as exc:
-        session.timers[f"choose_tool_{error_tool_name}"] = int(
-            (perf_counter() - choose_t0) * 1000
-        )
+        session.timers[f"choose_tool_{error_tool_name}"] = int((perf_counter() - choose_t0) * 1000)
         session.tool_records.append(
             {
                 "tool_name": error_tool_name,
@@ -148,6 +146,8 @@ def execute_planned_tool(
     )
     session.executed_tools.add(intent.tool_name)
     return ToolExecutionStep(tool_name=intent.tool_name, result=result)
+
+
 def run_validation_and_ranking_plan(
     *,
     session: ToolPlanSession,

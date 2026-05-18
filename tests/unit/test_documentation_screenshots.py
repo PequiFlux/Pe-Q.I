@@ -42,9 +42,7 @@ def test_judge_demo_video_capture_path_is_documented() -> None:
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     demo_overview = (ROOT / "docs/HACKATHON_OVERVIEW.md").read_text(encoding="utf-8")
     submission = (ROOT / "docs/HACKATHON_SUBMISSION.md").read_text(encoding="utf-8")
-    capture_script = (ROOT / "scripts/capture_judge_demo_video.mjs").read_text(
-        encoding="utf-8"
-    )
+    capture_script = (ROOT / "scripts/capture_judge_demo_video.mjs").read_text(encoding="utf-8")
 
     assert "judge-demo-video" in makefile
     assert "PEQUIFLUX_JUDGE_VIDEO_PATH" in makefile
