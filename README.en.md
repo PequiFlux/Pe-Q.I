@@ -29,30 +29,28 @@ The expected evaluator flow is simple: open the UI, load an example, analyze it 
 
 The intended claim is deliberately narrow: this is a local-first technical proof with a synthetic benchmark, not industrial validation or production readiness.
 
-![PequiFlux Yard Copilot UI with an audit-ready decision, Gemma 4 via Ollama, and TRK-005 recommended for DST-COV-01](assets/screenshots/pequiflux-ui.png)
+![PequiFlux Yard Copilot UI with an audit-ready decision, runtime proof, and TRK-005 recommended for DST-COV-01](assets/screenshots/pequiflux-ui.png)
 
 Audit-ready decision: Pe-Q.I recommends the eligible truck, explains why FIFO would fail, and leaves final authority to the operator.
 
 ## UI Screenshots
 
-| New decision | Loaded example |
-|---|---|
-| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Initial operational UI screen with example selector, queue upload, and ticket upload" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="UI with the S10 example loaded and the Ollama gemma4:e2b runtime active" width="420"> |
+The gallery is captured in English so the international README and submission assets use the same UI language. It follows the evaluator path end to end: prepare the case, load scenario S10, inspect the recommendation, review evidence, and open the technical audit. The runtime badge reflects the active capture mode; deterministic screenshots keep the README reproducible when local Gemma/Ollama is not available.
 
-| Analysis result | Evidence and human action |
-|---|---|
-| <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="Decision banner recommending TRK-005 for DST-COV-01 with Gemma 4 runtime proof" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="Document interpreted by Gemma 4, critical constraints, driver message, and operator action" width="420"> |
-
-| Tool trail requested by Gemma |
-|---|
-| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Advanced panel with tools requested by Gemma, status, purpose, and state" width="360"> |
+| Step | What to inspect | Screenshot |
+|---|---|---|
+| 1. Prepare a new decision | Empty operational workspace with language selector, example loader, queue input, ticket input, operator note, runtime selector, and required-input progress. | <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Initial English operational UI with example selector, queue upload, ticket upload, operator note, runtime selector, and readiness progress" width="390"> |
+| 2. Load S10 context | Scenario S10 loaded with rain set to high, resource state JSON visible, the covered destination available, and the operator note explaining why open hoppers are blocked. | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="English UI with S10 loaded, high rain, resource JSON, covered destination state, and operator note" width="390"> |
+| 3. Inspect the recommendation | Audit-ready result: call `TRK-005` to `DST-COV-01`, show `PREVIEW_READY`, blocked alternatives, local latency, runtime proof, executed tools, and fail-closed status. | <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="English decision result recommending TRK-005 for DST-COV-01 with runtime proof, rejected alternatives, executed tools, and fail-closed status" width="390"> |
+| 4. Review evidence and human action | Evidence section with interpreted document fields, constraints that rejected alternatives, queue impact, driver-facing message, and approve/block/override controls. | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="English evidence view with interpreted ticket fields, blocked constraints, driver message, and operator approve block override controls" width="390"> |
+| 5. Open the tool audit | Technical audit panel showing allowed internal steps plus the Gemma Tool Planner path: requested and executed tools, flow state, purpose, and status. | <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="English advanced audit panel with internal tool statuses and Gemma Tool Planner requested executed path" width="260"> |
 
 ## For Evaluators
 
 | In two minutes | Where to look |
 |---|---|
 | Thesis | Pe-Q.I recommends who to call, which hopper/destination to use, why pure FIFO would fail, and which rule supports the decision |
-| Runnable demo | `make ui-text`/`make demo-text` without GPU; `make ui`/`make demo` for full Gemma/Ollama |
+| Runnable demo | `make ui-text`/`make demo-text` without GPU; `make ui`/`make demo` for full Gemma/Ollama; `docker compose -f compose.yaml -f compose.gpu.yaml ...` for optional NVIDIA acceleration |
 | Benchmark | `make bench` writes internal reports under `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) remains the frozen public snapshot |
 | Visual evidence | [`assets/screenshots/`](assets/screenshots/) and the screenshots above |
 | Demo explanation | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
@@ -63,7 +61,9 @@ Main shortcuts:
 ```bash
 make demo-text
 make ui-text
+make clean
 make quality
+make prepublish
 make test
 make bench
 make audit

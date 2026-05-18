@@ -29,23 +29,21 @@ O resultado esperado para a banca é simples: abrir a UI, carregar um exemplo, a
 
 O claim correto da demo é deliberadamente estreito: trata-se de uma prova técnica local-first com benchmark sintético, não de validação industrial ou prontidão produtiva.
 
-![PequiFlux Yard Copilot UI com decisão auditável, Gemma 4 via Ollama e recomendação TRK-005 para DST-COV-01](assets/screenshots/pequiflux-ui.png)
+![PequiFlux Yard Copilot UI com decisão auditável, prova de runtime e recomendação TRK-005 para DST-COV-01](assets/screenshots/pequiflux-ui.png)
 
 Decisão auditável pronta: Pe-Q.I recomenda o caminhão elegível, explica por que FIFO falharia e deixa a ação final com o operador.
 
 ## Prints da UI
 
-| Nova decisão | Exemplo carregado |
-|---|---|
-| <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="Tela inicial da UI operacional com seletor de exemplo, upload de fila e upload de ticket" width="420"> | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="UI com o exemplo S10 carregado e runtime Ollama gemma4:e2b ativo" width="420"> |
+Os assets abaixo estão em inglês para manter a mesma galeria visual usada no `README.en.md` e na submissão internacional. A sequência mostra o fluxo da banca de ponta a ponta: preparar o caso, carregar o cenário S10, inspecionar a recomendação, revisar as evidências e abrir a auditoria técnica. O badge de runtime reflete o modo ativo na captura; os prints determinísticos mantêm o README reproduzível quando Gemma/Ollama local não está disponível.
 
-| Resultado da análise | Evidências e ação humana |
-|---|---|
-| <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="Banner de decisão recomendando chamar TRK-005 para DST-COV-01 com prova Gemma 4 em execução" width="420"> | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="Documento interpretado pelo Gemma 4, restrições críticas, mensagem ao motorista e ação do operador" width="420"> |
-
-| Trilha de tools solicitadas pelo Gemma |
-|---|
-| <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Painel avançado com tools solicitadas pelo Gemma, status, motivo e estado" width="360"> |
+| Etapa | O que inspecionar | Print |
+|---|---|---|
+| 1. Preparar nova decisão | Workspace operacional vazio com seletor de idioma, loader de exemplo, entrada da fila, ticket, nota do operador, seletor de runtime e progresso dos insumos obrigatórios. | <img src="assets/screenshots/pequiflux-ui-01-initial.png" alt="UI operacional inicial em inglês com seletor de exemplo, fila, ticket, nota do operador, runtime e progresso de prontidão" width="390"> |
+| 2. Carregar contexto S10 | Cenário S10 carregado com chuva alta, JSON de recursos visível, destino coberto disponível e nota do operador explicando por que moegas abertas estão bloqueadas. | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="UI em inglês com S10 carregado, chuva alta, JSON de recursos, destino coberto e nota do operador" width="390"> |
+| 3. Inspecionar recomendação | Resultado auditável: chamar `TRK-005` para `DST-COV-01`, exibir `PREVIEW_READY`, alternativas bloqueadas, latência local, prova de runtime, tools executadas e status fail-closed. | <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="Resultado em inglês recomendando TRK-005 para DST-COV-01 com prova de runtime, alternativas rejeitadas, tools executadas e fail-closed" width="390"> |
+| 4. Revisar evidências e ação humana | Seção de evidências com campos interpretados do documento, constraints que rejeitaram alternativas, impacto na fila, mensagem ao motorista e controles aprovar/bloquear/override. | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="Evidências em inglês com campos do ticket, constraints bloqueantes, mensagem ao motorista e controles de ação do operador" width="390"> |
+| 5. Abrir auditoria de tools | Painel técnico mostrando etapas internas permitidas e a trilha do Gemma Tool Planner: tools solicitadas e executadas, estado do fluxo, motivo e status. | <img src="assets/screenshots/pequiflux-ui-05-tool-audit.png" alt="Painel avançado em inglês com status das tools internas e trilha solicitada e executada do Gemma Tool Planner" width="260"> |
 
 ## Para avaliadores
 

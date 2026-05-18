@@ -3,6 +3,38 @@ const viewport = { width: 1440, height: 1200 };
 const playwrightModule = process.env.PLAYWRIGHT_MODULE || "playwright";
 const { chromium } = await import(playwrightModule);
 const captureMode = process.env.PEQUIFLUX_SCREENSHOT_MODE || "full";
+const language =
+  (process.env.PEQUIFLUX_SCREENSHOT_LANGUAGE ||
+    process.env.PEQUIFLUX_UI_DEFAULT_LANGUAGE ||
+    "en")
+    .trim()
+    .toLowerCase()
+    .startsWith("pt")
+    ? "pt"
+    : "en";
+
+const copy = {
+  en: {
+    languageOption: "English",
+    load: "Load example",
+    loadAnalyze: "Load and analyze example",
+    decisionMoment: "Decision moment",
+    analysisResult: "Analysis result",
+    driverMessage: "Message to driver",
+    audit: "View technical audit",
+    planner: "Gemma Tool Planner",
+  },
+  pt: {
+    languageOption: "Português",
+    load: "Carregar exemplo",
+    loadAnalyze: "Carregar e analisar exemplo",
+    decisionMoment: "Momento da decisão",
+    analysisResult: "Resultado da análise",
+    driverMessage: "Mensagem ao motorista",
+    audit: "Ver auditoria técnica",
+    planner: "Gemma Tool Planner",
+  },
+}[language];
 
 const shots = {
   initial: "assets/screenshots/pequiflux-ui-01-initial.png",
@@ -20,6 +52,15 @@ async function waitForApp(page) {
   await page.waitForTimeout(1200);
 }
 
+async function ensureLanguage(page) {
+  const option = page.getByLabel(copy.languageOption).first();
+  if ((await option.count()) > 0) {
+    await option.check({ force: true });
+    await page.waitForTimeout(1200);
+  }
+  await page.getByText(copy.load, { exact: true }).first().waitFor({ timeout: 30000 });
+}
+
 async function clickButton(page, label) {
   await page.getByRole("button", { name: label }).first().click();
   await page.waitForTimeout(1200);
@@ -33,31 +74,50 @@ async function screenshotElement(locator, path) {
   await locator.screenshot({ path });
 }
 
+async function scrollToText(page, text, top = 96) {
+  const locator = page.getByText(text).first();
+  await locator.waitFor({ timeout: 120000 });
+  await locator.evaluate((element, targetTop) => {
+    element.scrollIntoView({ block: "start", inline: "nearest" });
+    window.scrollBy(0, -targetTop);
+    let parent = element.parentElement;
+    while (parent) {
+      if (parent.scrollHeight > parent.clientHeight) {
+        parent.scrollTop = Math.max(0, parent.scrollTop - targetTop);
+      }
+      parent = parent.parentElement;
+    }
+  }, top);
+  await page.waitForTimeout(1100);
+}
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
 
 try {
   await waitForApp(page);
+  await ensureLanguage(page);
   if (captureMode === "full") {
     await screenshot(page, shots.initial);
 
-    await clickButton(page, "Carregar exemplo");
+    await clickButton(page, copy.load);
     await page.waitForTimeout(2000);
     await screenshot(page, shots.inputsLoaded);
 
-    await clickButton(page, "Carregar e analisar exemplo");
+    await clickButton(page, copy.loadAnalyze);
   }
-  await page.getByText("Momento da decisão").first().waitFor({ timeout: 180000 });
+  await page.getByText(copy.decisionMoment).first().waitFor({ timeout: 180000 });
+  await scrollToText(page, copy.analysisResult, 70);
   await screenshot(page, shots.canonical);
   await screenshot(page, shots.result);
   await screenshot(page, shots.writeup);
 
-  await page.getByText("Mensagem ao motorista").first().scrollIntoViewIfNeeded();
+  await scrollToText(page, copy.driverMessage, 120);
   await page.waitForTimeout(900);
   await screenshot(page, shots.evidence);
 
-  await page.getByText("Ver auditoria técnica").first().click();
-  const planner = page.getByText("Gemma Tool Planner").first();
+  await page.getByText(copy.audit).first().click();
+  const planner = page.getByText(copy.planner).first();
   await planner.waitFor({ timeout: 30000 });
   const toolsCard = page.locator(".tools-card").first();
   await toolsCard.waitFor({ timeout: 30000 });
