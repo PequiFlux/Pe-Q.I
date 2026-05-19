@@ -1,34 +1,40 @@
+# Python
 .venv/
 __pycache__/
 *.py[cod]
+*.pyo
 .pytest_cache/
-.scannerwork/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
 
+# Tooling / generated state
+.scannerwork/
 .code-review-graph/
 checker
 third_party/
+logs/
+var/
+cache/
+tmp/
+test-results/
+
+# Benchmark and runtime outputs
 bench/reports/*
 !bench/reports/sample/
 !bench/reports/sample/metrics.json
 !bench/reports/sample/per_scenario.json
 !bench/reports/sample/summary.csv
-logs/
-var/
-cache/
 artifacts/debug*/
 artifacts/eval/
-artifacts/latest/*/run.log
-artifacts/latest/text_contract/
-tmp/
-test-results/
+artifacts/latest/
 
+# Secrets and local environment
 .env
 .env.*
 .gstack/
-.serena/
-.agents/
-.codex
-.codex/
 
 # Local agent/governance notes
 AGENTS.md
@@ -39,6 +45,10 @@ CLAUDE.md
 GEMINI.md
 QWEN.md
 CODEX.md
+.serena/
+.agents/
+.codex
+.codex/
 .claude/
 .gemini/
 .qwen/

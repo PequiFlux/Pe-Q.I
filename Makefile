@@ -1,4 +1,6 @@
-.PHONY: help clean demo demo-gpu demo-text ui ui-gpu ui-text demo-ready judge-demo judge-demo-video test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prepublish prewarm prewarm-gpu
+SHELL := /usr/bin/env bash
+
+.PHONY: help doctor clean clean-artifacts clean-all ci demo demo-gpu demo-text ui ui-gpu ui-text demo-ready judge-demo judge-demo-video test bench bench-gpu audit format-check leakage-guard extended-pack-check benchmark-smoke benchmark-validate-text quality prepublish prewarm prewarm-gpu
 
 SCENARIO ?= S10_FIFO_BREAK_JUSTIFIED
 COMPOSE_GPU = docker compose -f compose.yaml -f compose.gpu.yaml
@@ -9,6 +11,7 @@ PLAYWRIGHT_CAPTURE_IMAGE ?= mcr.microsoft.com/playwright:v1.54.1-noble
 
 help:
 	@echo "Targets:"
+	@echo "  make doctor     Verify required local commands are available"
 	@echo "  make demo       Run the full Ollama/Gemma scenario demo via Docker Compose"
 	@echo "  make demo-gpu   Run the full Ollama/Gemma scenario demo with GPU access"
 	@echo "  make demo-text  Run the reproducible text-runtime scenario demo"
@@ -19,6 +22,8 @@ help:
 	@echo "  make judge-demo-video Run judge-demo and save a short proof video with runtime Ollama"
 	@echo "  make demo-ready Alias for make judge-demo"
 	@echo "  make clean      Remove local caches and generated run logs"
+	@echo "  make clean-artifacts Remove generated benchmark/eval artifacts"
+	@echo "  make clean-all  Run clean and clean-artifacts"
 	@echo "  make test       Build and run the Docker test target"
 	@echo "  make bench      Run the full Ollama/Gemma scenario benchmark"
 	@echo "  make bench-gpu  Run the full Ollama/Gemma scenario benchmark with GPU access"
@@ -26,12 +31,26 @@ help:
 	@echo "  make leakage-guard  Run expected_ticket clean-eval leakage guard tests"
 	@echo "  make extended-pack-check  Validate B1 extended split manifests"
 	@echo "  make quality    Run Black, pytest, audit and validated text benchmark gates as CI"
+	@echo "  make ci         Alias for make quality"
 	@echo "  make prepublish Run the Docker pre-publication gate"
+
+# Fast local preflight. It checks host tools only; project correctness lives in quality/prepublish.
+doctor:
+	@command -v docker >/dev/null 2>&1 || { echo "docker is required"; exit 1; }
+	@docker compose version >/dev/null 2>&1 || { echo "docker compose is required"; exit 1; }
+	@command -v curl >/dev/null 2>&1 || { echo "curl is required"; exit 1; }
+	@echo "Local tooling OK"
 
 clean:
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +
-	rm -rf .pytest_cache cache var/log/*
-	find artifacts/latest -type f -name run.log -delete
+	rm -rf .pytest_cache .ruff_cache .mypy_cache cache tmp test-results
+	find var/log -type f -delete 2>/dev/null || true
+	find artifacts/latest -type f -name run.log -delete 2>/dev/null || true
+
+clean-artifacts:
+	rm -rf artifacts/latest artifacts/eval artifacts/debug*
+
+clean-all: clean clean-artifacts
 
 demo:
 	docker compose run --rm demo python -m app.cli.run_scenario --scenario $(SCENARIO)
@@ -151,6 +170,8 @@ benchmark-validate-text:
 	docker run --rm -e PEQUIFLUX_GEMMA_RUNTIME=text pequiflux-yard-copilot:test python -m app.cli.run_benchmark --manifest scenarios/manifest.json --output-dir /tmp/pequiflux-benchmark-validate
 
 quality: format-check test leakage-guard extended-pack-check audit benchmark-validate-text
+
+ci: quality
 
 prepublish:
 	./scripts/prepublish_check.sh
