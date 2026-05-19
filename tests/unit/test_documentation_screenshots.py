@@ -47,9 +47,9 @@ def test_judge_demo_video_capture_path_is_documented() -> None:
     assert "judge-demo-video" in makefile
     assert "PEQUIFLUX_JUDGE_VIDEO_PATH" in makefile
     assert "host.docker.internal:8501" in makefile
-    assert "make judge-demo-video" in demo_overview
+    assert "make judge VIDEO=1" in demo_overview
     assert "artifacts/judge-demo/pequiflux-gemma-proof.webm" in demo_overview
     assert "artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm" in demo_overview
-    assert "make judge-demo-video" in submission
+    assert "make judge VIDEO=1" in submission
     assert "Judge proof" in capture_script
     assert "Test mode is active" in capture_script

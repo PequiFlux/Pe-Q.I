@@ -30,6 +30,14 @@ bench/reports/*
 artifacts/debug*/
 artifacts/eval/
 artifacts/latest/
+/artifacts/video/
+/artifacts/judge-demo/*.mp4
+/artifacts/judge-demo/*.webm
+/artifacts/judge-demo/*.mov
+/artifacts/judge-demo/*.mkv
+
+# Local video production workspace and generated media
+/video/
 
 # Secrets and local environment
 .env

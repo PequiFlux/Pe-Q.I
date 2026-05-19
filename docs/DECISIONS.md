@@ -158,7 +158,7 @@ Contexto:
 O repositório não tinha workflow GitHub Actions visível, então pushes públicos não retornavam status checks. A trilha completa com Gemma/Ollama exige serviço externo/modelo, mas a avaliação precisa de um caminho CI reprodutível. Depois que o Gemma Tool Planner virou claim central, o benchmark sem validação deixou de ser suficiente para o quality gate público.
 
 Decisão:
-Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check app bench tests scripts`, `pytest -q`, `python -m app.cli.blueprint_audit` e benchmark textual validado com `PEQUIFLUX_GEMMA_RUNTIME=text`, sem `--no-validate`. Fazer `make quality` incluir Black, testes, auditoria e o mesmo benchmark validado.
+Adicionar `.github/workflows/ci.yml` com Python 3.11, instalação de `requirements-all.txt`, `black --check app bench tests scripts`, `pytest -q`, `python -m app.cli.blueprint_audit` e benchmark textual validado com `PEQUIFLUX_GEMMA_RUNTIME=text`, sem `--no-validate`. Fazer `make check` incluir Black, testes, auditoria e o mesmo benchmark validado.
 
 Alternativas rejeitadas:
 Rodar `black --check .`, porque isso inclui documentação, assets e artefatos fora do escopo Python. Rodar benchmark via Ollama no CI, porque introduziria dependência de GPU/modelo.

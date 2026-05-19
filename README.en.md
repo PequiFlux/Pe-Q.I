@@ -50,8 +50,8 @@ The gallery is captured in English so the international README and submission as
 | In two minutes | Where to look |
 |---|---|
 | Thesis | Pe-Q.I recommends who to call, which hopper/destination to use, why pure FIFO would fail, and which rule supports the decision |
-| Runnable demo | `make ui-text`/`make demo-text` without GPU; `make ui`/`make demo` for full Gemma/Ollama; `docker compose -f compose.yaml -f compose.gpu.yaml ...` for optional NVIDIA acceleration |
-| Benchmark | `make bench` writes internal reports under `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) remains the frozen public snapshot |
+| Runnable demo | `make serve RUNTIME=text`/`make demo RUNTIME=text` without GPU; `make serve RUNTIME=gemma`/`make demo RUNTIME=gemma` for full Gemma/Ollama; use `ACCEL=gpu` for optional NVIDIA acceleration |
+| Benchmark | `make eval SUITE=extended RUNTIME=gemma` writes internal reports under `bench/reports/extended/<run_id>/`; [`bench/reports/sample/`](bench/reports/sample/) remains the frozen public snapshot |
 | Visual evidence | [`assets/screenshots/`](assets/screenshots/) and the screenshots above |
 | Demo explanation | [`docs/HACKATHON_OVERVIEW.md`](docs/HACKATHON_OVERVIEW.md) |
 | Criteria and limits | [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md) and [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) - Portuguese |
@@ -59,14 +59,12 @@ The gallery is captured in English so the international README and submission as
 Main shortcuts:
 
 ```bash
-make demo-text
-make ui-text
-make clean
-make quality
-make prepublish
-make test
-make bench
-make audit
+make doctor
+make serve RUNTIME=text
+make demo RUNTIME=text
+make check
+make eval SUITE=sample RUNTIME=text
+make release-check
 ```
 
 ---
@@ -113,6 +111,16 @@ The copilot receives five inputs - queue CSV, ticket/document, operator note, we
 | Driver message | 220 characters or fewer |
 | Available human action | `approve`, `block`, or `override` with a reason |
 
+Visual evidence for that contract:
+
+| Claim | Screenshot evidence |
+|---|---|
+| Five inputs: queue CSV, ticket/document, operator note, weather, and resource availability. | <img src="assets/screenshots/pequiflux-ui-02-inputs-loaded.png" alt="English UI showing loaded queue and ticket fixtures, operator note, high rain weather, and resource JSON availability" width="390"> |
+| Output: recommended truck-destination pair or explicit state, with blocked alternatives and fail-closed runtime proof. | <img src="assets/screenshots/pequiflux-ui-03-decision-result.png" alt="English UI showing PREVIEW_READY status, TRK-005 to DST-COV-01 recommendation, blocked alternatives, runtime proof, and fail-closed status" width="390"> |
+| Payload outcome: hard constraints, driver message, and required human action controls. | <img src="assets/screenshots/pequiflux-ui-04-evidence-and-operator.png" alt="English UI showing interpreted ticket fields, hard constraints HC-01 and HC-05, driver message, and approve block override controls" width="390"> |
+| Audit provenance: payload records the source fields used to reconstruct the decision. | <img src="assets/screenshots/pequiflux-ui-06-payload-provenance.png" alt="Raw payload screenshot showing provenance entries for queue snapshot, weather state, resource state, operator note, and ticket document" width="390"> |
+| Input hashes: payload records hashes for queue, ticket, operator note, weather state, and resource state. | <img src="assets/screenshots/pequiflux-ui-07-payload-source-hashes.png" alt="Raw payload screenshot showing source_hashes for queue_csv_ref, ticket_ref, operator_note, weather_state, and resource_state" width="390"> |
+
 What Gemma 4 proves in this submission - three places where a heuristic baseline performs poorly:
 
 1. **Multimodal ticket/document parsing** - extracts structured fields from PDF/image inputs with confidence.
@@ -142,7 +150,7 @@ This path uses `PEQUIFLUX_GEMMA_RUNTIME=text` inside the image and does not requ
 Shortcut:
 
 ```bash
-make demo-text
+make demo RUNTIME=text
 ```
 
 This runs scenario **S10_FIFO_BREAK_JUSTIFIED** with the deterministic text runtime.
@@ -171,12 +179,12 @@ docker compose --profile ui-text up ui-text
 Shortcut:
 
 ```bash
-make ui-text
+make serve RUNTIME=text
 ```
 
 Open [http://localhost:8501](http://localhost:8501).
 
-For the full UI with Ollama/Gemma, run `make ui`; Compose starts `gemma`, runs `gemma-init` to pull `${GEMMA_MODEL:-gemma4:e2b}`, and then starts the UI.
+For the full UI with Ollama/Gemma, run `make setup` once and then `make serve RUNTIME=gemma`; use `ACCEL=gpu` when NVIDIA is available in Docker.
 
 ### Full Benchmark with Gemma/Ollama
 
@@ -187,7 +195,7 @@ docker compose run --rm benchmark
 Shortcut:
 
 ```bash
-make bench
+make eval SUITE=extended RUNTIME=gemma
 ```
 
 Reports are written to `bench/reports/extended/` by default. The frozen public snapshot remains in `bench/reports/sample/`.
@@ -206,13 +214,13 @@ The default demo, scenario S10, demonstrates the core project argument: **breaki
 
 ```bash
 # Minimal reproducible path, no GPU/Ollama
-docker compose run --rm demo-text
+make demo RUNTIME=text
 
 # Specific scenario
-SCENARIO=S02_RAIN_OPEN make demo-text
+make demo RUNTIME=text SCENARIO=S02_RAIN_OPEN
 
 # Full mode with Gemma/Ollama
-docker compose run --rm demo
+make demo RUNTIME=gemma SCENARIO=S10_FIFO_BREAK_JUSTIFIED
 ```
 
 Expected output shape:
@@ -350,6 +358,14 @@ It is generated with deterministic text runtime/fixtures for CI and measures con
 
 The CLI refuses `bench/reports/sample/` as `--output-dir`; new tests should use `bench/reports/extended-sample/<run_id>` or a local temporary directory.
 
+Benchmark dashboard screenshots from the app:
+
+| Evidence | App screenshot |
+|---|---|
+| Scope and headline claim check: 20 scenarios, 4 variants, 80 comparative rows, raw FIFO top-1/violation rate, and full-variant headline metrics. | <img src="assets/screenshots/pequiflux-benchmark-dashboard-01-scope.png" alt="Benchmark dashboard showing 20 scenarios, 4 variants, 80 rows, raw FIFO top-1 0.25, raw FIFO violations 0.35, and full metrics" width="520"> |
+| Variant comparison: `raw_fifo`, `fifo_safe`, `heuristic`, and `full` evaluated on the same sample metrics. | <img src="assets/screenshots/pequiflux-benchmark-dashboard-02-variant-comparison.png" alt="Benchmark dashboard variant comparison table with decision match, constraint violations, exception F1, ticket accuracy, audit completeness, and tool success" width="520"> |
+| Scenario-level evidence from `summary.csv`: selected rows show raw FIFO violations, heuristic misses, and full-variant matches. | <img src="assets/screenshots/pequiflux-benchmark-dashboard-03-scenario-evidence.png" alt="Benchmark dashboard scenario evidence table from summary CSV with raw FIFO, heuristic, and full rows" width="520"> |
+
 - `full`: `20/20`, `decision_match_at_1 = 1.0`, `exception_f1 = 1.0`, `ticket_field_accuracy = 0.969`, `audit_completeness = 1.0`, `tool_call_success_rate = 0.95`, `avg_tool_call_count = 4.7`, `avg_planner_step_count = 2.35`, `tool_error_rate = 0.05`
 - `heuristic`: `decision_match_at_1 = 0.85`, `exception_f1 = 0.678`, `ticket_field_accuracy = 0.85`, `audit_completeness = 0.85`
 - `fifo_safe`: `decision_match_at_1 = 0.75`, `constraint_violation_rate = 0.0`
@@ -361,7 +377,7 @@ The CLI refuses `bench/reports/sample/` as `--output-dir`; new tests should use 
 Use the `extended` path to evolve the scenario pack, real latency, ablations, and larger comparisons without changing the public sample contract. Use `extended-sample` only when comparing a test snapshot against the frozen public evidence.
 
 ```bash
-make bench
+make eval RUNTIME=gemma SUITE=extended
 ```
 
 To force a specific destination:
@@ -416,14 +432,10 @@ make leakage-guard
 
 ### Gemma Setup
 
-Gemma setup is required for `make demo` and benchmarks with the Ollama runtime; `make ui` performs it automatically.
+Gemma setup is required for `make demo RUNTIME=gemma` and evaluation with the Ollama runtime; `make serve RUNTIME=gemma` performs it automatically through Compose.
 
 ```bash
-# Pull the model into the Ollama volume
-docker compose --profile gemma-setup run gemma-init
-
-# Warm up the model with the first inference
-docker compose --profile gemma-setup run gemma-prewarm
+make setup
 ```
 
 ---
@@ -609,7 +621,7 @@ Secret-free example: [`config/env.example`](config/env.example). The repository 
 | `PEQUIFLUX_IN_CONTAINER` | `0` | Set to `1` by the Dockerfile |
 | `PEQUIFLUX_SQLITE_PATH` | `var/db/pequiflux_ui.db` | SQLite database path |
 
-`make demo-text` and `make ui-text` do not start the `gemma` service and do not require GPU. For full mode, set `OLLAMA_IMAGE` to the desired variant and install the NVIDIA Container Toolkit if using GPU.
+`make demo RUNTIME=text` and `make serve RUNTIME=text` do not start the `gemma` service and do not require GPU. For full mode, set `OLLAMA_IMAGE` to the desired variant and use `ACCEL=gpu` when NVIDIA is available in Docker.
 
 ---
 

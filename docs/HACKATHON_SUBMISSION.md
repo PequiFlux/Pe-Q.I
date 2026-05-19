@@ -6,9 +6,9 @@ Mapa dos critérios esperados da submissão para evidências versionadas no repo
 |---|---|---|
 | Uso claro de Gemma | `app/gemma/`, `docs/gemma.md`, `docs/adr/ADR-0002-gemma-as-interpretation-layer.md` | Gemma interpreta documento; regras determinísticas decidem |
 | Problema real e delimitado | `README.md`, `docs/product.md`, `docs/LIMITATIONS.md` | Escopo: despacho de pátio sob exceção operacional |
-| Demo avaliável | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `assets/screenshots/pequiflux-ui-0*.png`, `docs/HACKATHON_OVERVIEW.md`, `scripts/capture_judge_demo_video.mjs`, `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm` | `make judge-demo` para o ritual canônico de banca com Gemma/Ollama; `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm` é o vídeo preferido de apresentação; `make judge-demo-video` salva a prova automatizada curta da UI real; `make ui` sobe só a UI real; `make ui-text` é apenas teste reproduzível sem modelo |
-| Benchmark comparativo | `app/cli/run_benchmark.py`, `bench/metrics.py`, `bench/reports/sample/`, `bench/reports/extended/` | `make bench` gera `metrics.json`, `summary.csv`, `per_scenario.json` em `extended`; o sample público fica congelado e não é saída viva |
-| Reprodutibilidade | `Dockerfile`, `compose.yaml`, `Makefile`, `config/env.example` | `make demo-text`, `make ui-text`, `make test`, `make audit` |
+| Demo avaliável | `app/ui/streamlit_app.py`, `assets/screenshots/pequiflux-ui.png`, `assets/screenshots/pequiflux-ui-0*.png`, `docs/HACKATHON_OVERVIEW.md`, `scripts/capture_judge_demo_video.mjs`, `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm` | `make judge` para o ritual canônico de banca com Gemma/Ollama; `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm` é o vídeo preferido de apresentação; `make judge VIDEO=1` salva a prova automatizada curta da UI real; `make serve RUNTIME=gemma` sobe a UI real; `make serve RUNTIME=text` é apenas teste reproduzível sem modelo |
+| Benchmark comparativo | `app/cli/run_benchmark.py`, `bench/metrics.py`, `bench/reports/sample/`, `bench/reports/extended/` | `make eval SUITE=extended RUNTIME=gemma` gera `metrics.json`, `summary.csv`, `per_scenario.json` em `extended`; o sample público fica congelado e não é saída viva |
+| Reprodutibilidade | `Dockerfile`, `compose.yaml`, `Makefile`, `config/env.example` | `make demo RUNTIME=text`, `make serve RUNTIME=text`, `make test`, `make audit` |
 | Auditoria e explicabilidade | `app/audit/`, `app/services/decision_builder.py`, schemas em `scenarios/schemas/` | Payload final inclui `AuditRecord`, regras disparadas e hashes |
 | Operador no controle | `app/services/operator_governance.py`, `docs/UI_DECISIONS.md` | UI mostra aprovar, bloquear ou sobrescrever com motivo |
 | Falha fechada | `app/gemma/fallback.py`, `tests/unit/test_no_fallbacks.py` | Ausência de dependência gera erro/revisão, nunca substituição silenciosa |
@@ -26,7 +26,7 @@ Esta submissão deve ser apresentada como **prova de conceito técnica**. O repo
 - UI final: `assets/screenshots/pequiflux-ui.png`
 - Fluxo visual da UI: `assets/screenshots/pequiflux-ui-01-initial.png`, `assets/screenshots/pequiflux-ui-02-inputs-loaded.png`, `assets/screenshots/pequiflux-ui-03-decision-result.png`, `assets/screenshots/pequiflux-ui-04-evidence-and-operator.png`, `assets/screenshots/pequiflux-ui-05-tool-audit.png`
 - Vídeo preferido da banca: `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm`
-- Vídeo curto automatizado: `artifacts/judge-demo/pequiflux-gemma-proof.webm` via `make judge-demo-video`
+- Vídeo curto automatizado: `artifacts/judge-demo/pequiflux-gemma-proof.webm` via `make judge VIDEO=1`
 - Asset de writeup sincronizado: `docs/writeup_assets/pequiflux-ui.png`
 - Benchmark sample público congelado: `bench/reports/sample/metrics.json`
 - Benchmark extended interno: `bench/reports/extended/<run_id>/metrics.json`

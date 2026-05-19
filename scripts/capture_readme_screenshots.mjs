@@ -23,6 +23,9 @@ const copy = {
     driverMessage: "Message to driver",
     audit: "View technical audit",
     planner: "Gemma Tool Planner",
+    rawPayload: "Raw payload",
+    provenance: "provenance",
+    sourceHashes: "source_hashes",
   },
   pt: {
     languageOption: "Português",
@@ -33,6 +36,9 @@ const copy = {
     driverMessage: "Mensagem ao motorista",
     audit: "Ver auditoria técnica",
     planner: "Gemma Tool Planner",
+    rawPayload: "Payload bruto",
+    provenance: "provenance",
+    sourceHashes: "source_hashes",
   },
 }[language];
 
@@ -43,6 +49,8 @@ const shots = {
   result: "assets/screenshots/pequiflux-ui-03-decision-result.png",
   evidence: "assets/screenshots/pequiflux-ui-04-evidence-and-operator.png",
   tools: "assets/screenshots/pequiflux-ui-05-tool-audit.png",
+  payloadProvenance: "assets/screenshots/pequiflux-ui-06-payload-provenance.png",
+  payloadHashes: "assets/screenshots/pequiflux-ui-07-payload-source-hashes.png",
   writeup: "docs/writeup_assets/pequiflux-ui.png",
 };
 
@@ -123,6 +131,12 @@ try {
   await toolsCard.waitFor({ timeout: 30000 });
   await page.waitForTimeout(900);
   await screenshotElement(toolsCard, shots.tools);
+
+  await page.getByText(copy.rawPayload).first().click();
+  await scrollToText(page, copy.provenance, 180);
+  await screenshot(page, shots.payloadProvenance);
+  await scrollToText(page, copy.sourceHashes, 180);
+  await screenshot(page, shots.payloadHashes);
 } finally {
   await browser.close();
 }

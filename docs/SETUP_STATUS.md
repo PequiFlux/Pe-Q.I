@@ -28,8 +28,8 @@ Atualizado em: 2026-05-09
 - `.codex/`, `.agents/` e `.serena/` existem como diretórios no workspace atual; a observação antiga sobre `.codex` como arquivo não se aplica mais.
 - Manter `SONAR_TOKEN` fora do repositório; gerar/exportar no ambiente antes de usar Sonar como gate adicional.
 - O gate mínimo de prontidão hoje é: build da imagem de teste, suíte Docker, blueprint audit e benchmark textual validado.
-- Os atalhos principais continuam coerentes com esse fluxo: `make demo-text`, `make ui-text`, `make test`, `make bench`, `make audit`, `make leakage-guard`, `make extended-pack-check` e `make quality`.
-- Quando houver GPU NVIDIA disponível no Docker, use os atalhos `make demo-gpu`, `make ui-gpu`, `make bench-gpu` e `make prewarm-gpu`.
+- A superfície principal continua coerente com esse fluxo: `make demo RUNTIME=text`, `make serve RUNTIME=text`, `make test`, `make eval SUITE=extended RUNTIME=gemma`, `make audit`, `make leakage-guard`, `make extended-pack-check` e `make check`.
+- Quando houver GPU NVIDIA disponível no Docker, use `ACCEL=gpu`, por exemplo `make demo RUNTIME=gemma ACCEL=gpu`, `make serve RUNTIME=gemma ACCEL=gpu`, `make eval RUNTIME=gemma ACCEL=gpu SUITE=extended` e `make setup ACCEL=gpu`.
 - O modo Gemma/Ollama agora é CPU-first por padrão em `compose.yaml`; use `compose.gpu.yaml` somente quando quiser aceleração NVIDIA.
 - O default de `GEMMA_MODEL` foi reduzido para `gemma4:e2b` para facilitar warmup local; `gemma4:e4b` continua opção explícita para demos em hardware mais forte.
 - O caminho completo com Gemma/Ollama já foi validado em Docker nesta data, incluindo `gemma`, `gemma-init`, `demo` e `ui`.

@@ -3,6 +3,8 @@
 .pytest_cache
 .ruff_cache
 .mypy_cache
+.coverage
+htmlcov/
 .scannerwork
 .code-review-graph
 .codex
@@ -22,6 +24,7 @@ __pycache__
 *.log
 .env
 .env.*
+.gstack/
 cache/
 var/
 tmp/

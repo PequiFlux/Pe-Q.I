@@ -24,6 +24,8 @@ const shots = {
   result: "assets/screenshots/pequiflux-ui-03-decision-result.png",
   evidence: "assets/screenshots/pequiflux-ui-04-evidence-and-operator.png",
   tools: "assets/screenshots/pequiflux-ui-05-tool-audit.png",
+  payloadProvenance: "assets/screenshots/pequiflux-ui-06-payload-provenance.png",
+  payloadHashes: "assets/screenshots/pequiflux-ui-07-payload-source-hashes.png",
   writeup: "docs/writeup_assets/pequiflux-ui.png",
 };
 
@@ -38,6 +40,9 @@ const labels = {
   driverMessage: "Message to driver",
   audit: "View technical audit",
   planner: "Gemma Tool Planner",
+  rawPayload: "Raw payload",
+  provenance: "provenance",
+  sourceHashes: "source_hashes",
 };
 
 class CdpClient {
@@ -420,6 +425,13 @@ async function main() {
       await clickText(client, labels.audit);
       await waitForText(client, labels.planner, 30000);
       await screenshotElement(client, ".tools-card", shots.tools);
+      await clickText(client, labels.rawPayload);
+      await waitForText(client, labels.provenance, 30000);
+      await scrollToText(client, labels.provenance, 180);
+      await screenshot(client, shots.payloadProvenance);
+      await waitForText(client, labels.sourceHashes, 30000);
+      await scrollToText(client, labels.sourceHashes, 180);
+      await screenshot(client, shots.payloadHashes);
       return;
     }
 
@@ -452,6 +464,13 @@ async function main() {
     await clickText(client, labels.audit);
     await waitForText(client, labels.planner, 30000);
     await screenshotElement(client, ".tools-card", shots.tools);
+    await clickText(client, labels.rawPayload);
+    await waitForText(client, labels.provenance, 30000);
+    await scrollToText(client, labels.provenance, 180);
+    await screenshot(client, shots.payloadProvenance);
+    await waitForText(client, labels.sourceHashes, 30000);
+    await scrollToText(client, labels.sourceHashes, 180);
+    await screenshot(client, shots.payloadHashes);
   } finally {
     if (client) {
       try {

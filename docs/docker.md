@@ -21,6 +21,8 @@ The image uses Python 3.11 slim, installs dependencies from `requirements-all.tx
 docker run --rm pequiflux-yard-copilot:local
 docker compose run --rm demo-text
 SCENARIO=S02_RAIN_OPEN docker compose run --rm demo-text
+make demo RUNTIME=text
+make demo RUNTIME=text SCENARIO=S02_RAIN_OPEN
 ```
 
 These commands use `PEQUIFLUX_GEMMA_RUNTIME=text` and do not require GPU, Ollama, or a `gemma` service.
@@ -30,6 +32,8 @@ With Gemma/Ollama:
 ```bash
 docker compose run --rm demo
 SCENARIO=S02_RAIN_OPEN docker compose run --rm demo
+make setup
+make demo RUNTIME=gemma SCENARIO=S02_RAIN_OPEN
 ```
 
 ## Run Tests
@@ -49,6 +53,7 @@ docker compose --profile ci run --rm test
 
 ```bash
 docker compose run --rm benchmark
+make eval SUITE=extended RUNTIME=gemma
 ```
 
 Reports are written to `bench/reports/extended/` by default. The public frozen sample remains in `bench/reports/sample/`, and the CLI refuses that directory as `--output-dir`. Use `bench/reports/extended-sample/<run_id>` or `/tmp` for temporary sample-like reports.
@@ -57,6 +62,7 @@ Reports are written to `bench/reports/extended/` by default. The public frozen s
 
 ```bash
 docker compose --profile ui-text up ui-text
+make serve RUNTIME=text
 ```
 
 Then open `http://localhost:8501`.
@@ -65,6 +71,8 @@ With Gemma/Ollama:
 
 ```bash
 docker compose --profile ui up ui
+make setup
+make serve RUNTIME=gemma
 ```
 
 Then open `http://localhost:8501`.
@@ -85,14 +93,16 @@ The default `compose.yaml` keeps the `gemma` service CPU-compatible, so the full
 ```bash
 docker compose -f compose.yaml -f compose.gpu.yaml run --rm demo
 docker compose -f compose.yaml -f compose.gpu.yaml --profile ui up ui
+make demo RUNTIME=gemma ACCEL=gpu
+make serve RUNTIME=gemma ACCEL=gpu
 ```
 
 To use another Ollama image, set `OLLAMA_IMAGE` explicitly.
 
-`make ui` uses that full path, so loading the UI also starts Ollama/Gemma and pulls the configured Gemma 4 tag when it is not already cached. To prewarm the model separately:
+`make serve RUNTIME=gemma` uses that full path, so loading the UI also starts Ollama/Gemma and pulls the configured Gemma 4 tag when it is not already cached. To prewarm the model separately:
 
 ```bash
-GEMMA_MODEL=gemma4:e2b docker compose --profile gemma-setup run --rm gemma-init
+GEMMA_MODEL=gemma4:e2b make setup
 ```
 
 Use the exact model tag available in your Ollama registry/cache. Tests intentionally set `PEQUIFLUX_GEMMA_RUNTIME=text` so CI remains deterministic and does not require model weights.

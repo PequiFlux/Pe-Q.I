@@ -23,16 +23,24 @@ This repository should keep source code, documentation, frozen public evidence, 
 Use the Makefile as the public command surface:
 
 ```bash
-make doctor          # verify host tooling
-make clean           # remove local caches and logs
-make clean-artifacts # remove generated benchmark/eval outputs
-make clean-all       # run clean + clean-artifacts
-make quality         # run the Docker quality gate
-make ci              # alias for quality
-make prepublish      # run the pre-publication gate
+make doctor                         # verify host tooling
+make setup                          # pull and prewarm the Gemma/Ollama model
+make serve RUNTIME=text             # start the deterministic text UI
+make serve RUNTIME=gemma ACCEL=gpu  # start the Gemma UI with NVIDIA acceleration
+make demo RUNTIME=text              # run the default scenario with the text runtime
+make eval SUITE=sample RUNTIME=text # run the cheap deterministic benchmark path
+make test                           # run the Docker test target
+make lint                           # run Black in check mode
+make format                         # format Python files with Black
+make check                          # run the Docker quality gate
+make ci                             # alias for check
+make release-check                  # run the pre-publication gate
+make clean                          # remove local caches and logs
+make clean-artifacts                # remove generated benchmark/eval outputs
+make clean-all                      # run clean + clean-artifacts
 ```
 
-Prefer adding new project tasks to `Makefile` instead of leaving ad hoc commands in local notes. Commands that depend on local-only agent tooling must remain outside the repository.
+Prefer variables such as `RUNTIME`, `ACCEL`, `SCENARIO`, `SUITE`, and `VALIDATE` over adding one target per variation. Backward-compatible aliases may remain temporarily, but new documentation should use the stable command surface above. Commands that depend on local-only agent tooling must remain outside the repository.
 
 ## Artifact policy
 

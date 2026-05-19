@@ -78,7 +78,7 @@ decisao deterministica, falha fechada, auditoria e evidencias reproduziveis.
 - Video preferido da banca:
   `artifacts/judge-demo/pequiflux-gemma-proof-fluid.webm`
 - Prova automatizada curta: `artifacts/judge-demo/pequiflux-gemma-proof.webm`
-  via `make judge-demo-video`
+  via `make judge VIDEO=1`
 - Mapa da submissao: `docs/HACKATHON_SUBMISSION.md`
 - Limites publicos: `docs/LIMITATIONS.md`
 - Benchmark sample publico: `bench/reports/sample/metrics.json`
